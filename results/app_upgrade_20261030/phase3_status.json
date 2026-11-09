@@ -1,0 +1,61 @@
+{
+  "phase": 3,
+  "status": "completed_pending_user_review",
+  "completed_utc": "2026-10-30T04:51:57.012800+00:00",
+  "features": [
+    "search_profile_catalog",
+    "appearance_sample_counts",
+    "rename_preserves_id_history",
+    "remove_appearance_after_backup",
+    "keep_last_appearance",
+    "three_reference_photo_import",
+    "new_person_or_existing_appearance",
+    "explicit_operator_confirmation",
+    "one_use_operation_token_120_seconds",
+    "no_partial_import",
+    "encoder_fingerprint_guard"
+  ],
+  "software_tests": {
+    "passed": 148,
+    "total": 148,
+    "seconds": 62.329,
+    "new_phase3_tests": 14,
+    "log": "results\\app_upgrade_20261030\\phase3_full_tests.log"
+  },
+  "gui_preview_checked": [
+    "catalog_no_default_selection",
+    "selected_profile_two_groups",
+    "existing_profile_import_form",
+    "new_person_import_form"
+  ],
+  "gui_import_commit_with_real_user_photos_performed": false,
+  "production_database_used": false,
+  "personal_photos_imported": false,
+  "camera_activated": false,
+  "real_model_integration": {
+    "passed": true,
+    "dataset": "LCC-FASD training fixtures",
+    "temporary_database": true,
+    "attempted_capture_groups": 7,
+    "rejected_groups_before_success": 6,
+    "profile_count": 1,
+    "sample_count": 6,
+    "appearance_count": 2,
+    "attendance_count": 0,
+    "second_group_uses_same_inputs": true,
+    "accuracy_benchmark": false,
+    "report": "results/app_upgrade_20261030/reference_import_integration.json"
+  },
+  "models_unchanged": {
+    "results/triplet/best_model.pt": "c94e9eaaf4b44424c1744e03aabf53e9da128861c0701948a649af0a1797a815",
+    "results/liveness_camera_matched/best_model.pt": "fdbb5efc65a1df89c984a49afbada3734945523a6f0ef0b233e9391cf024cd2d",
+    "results/emotion_fer/best_model.pt": "903664abcbcb5e4436ddcc5bc60f6a361256511f031661419e427417f84ef278"
+  },
+  "thresholds_unchanged": true,
+  "cnn_retrained": false,
+  "raw_photos_copied": false,
+  "word_report_updated": false,
+  "phase4_started": false,
+  "phase5_started": false,
+  "guide": "docs/profile_management.md"
+}

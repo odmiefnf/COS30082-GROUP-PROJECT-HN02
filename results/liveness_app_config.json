@@ -1,0 +1,9 @@
+{
+  "checkpoint": "liveness_camera_matched/best_model.pt",
+  "checkpoint_sha256": "fdbb5efc65a1df89c984a49afbada3734945523a6f0ef0b233e9391cf024cd2d",
+  "threshold_source": "validation",
+  "calibration": "liveness_camera_matched/calibration.json",
+  "selection_report": "liveness_camera_aug/experiment_status.json",
+  "baseline_preserved": "liveness_lcc/best_model.pt",
+  "scope": "Experimental classroom demo; no independent eyeglasses/attack validation."
+}

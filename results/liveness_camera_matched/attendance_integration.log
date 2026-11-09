@@ -1,0 +1,14 @@
+{
+  "camera_activated": false,
+  "production_store_used": false,
+  "fixture_registration": "Ground-truth dataset ID references, not a webcam enrollment test.",
+  "sample_source": "24 train-split photos; software integration only, not a held-out accuracy benchmark.",
+  "identity_checkpoint_sha256": "c94e9eaaf4b44424c1744e03aabf53e9da128861c0701948a649af0a1797a815",
+  "liveness_checkpoint_sha256": "fdbb5efc65a1df89c984a49afbada3734945523a6f0ef0b233e9391cf024cd2d",
+  "emotion_checkpoint_sha256": "903664abcbcb5e4436ddcc5bc60f6a361256511f031661419e427417f84ef278",
+  "trial_count": 24,
+  "live_gate_passed": 21,
+  "identity_and_expression_executed": 21,
+  "unregistered_probe_matched_gallery": 2,
+  "temporary_attendance_record_count": 1
+}

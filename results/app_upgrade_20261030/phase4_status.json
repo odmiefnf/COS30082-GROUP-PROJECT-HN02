@@ -1,0 +1,74 @@
+{
+  "phase": 4,
+  "status": "completed_pending_user_review",
+  "completed_utc": "2026-10-30T09:14:52.073496+00:00",
+  "features": [
+    "camera_index_selector_when_stopped",
+    "selected_camera_single_frame_probe",
+    "background_device_test",
+    "per_component_setup_status",
+    "actionable_setup_error_details",
+    "retry_model_setup_after_failure",
+    "quality_reason_guidance",
+    "not_checked_distinct_from_pad_failure",
+    "reserved_space_for_results_and_attendance"
+  ],
+  "software_tests": {
+    "passed": 159,
+    "total": 159,
+    "seconds": 57.702,
+    "new_phase4_tests": 11,
+    "log": "results\\app_upgrade_20261030\\phase4_full_tests.log"
+  },
+  "gui_checked": [
+    "main_results_and_attendance_visible",
+    "diagnostics_preview",
+    "real_model_setup_ready",
+    "camera_test_controls_lock_and_recover",
+    "real_missing_identity_checkpoint_error_in_temporary_configuration",
+    "retry_after_repair_all_components_ready"
+  ],
+  "real_camera_probe": {
+    "index": 0,
+    "width": 640,
+    "height": 480,
+    "success": true,
+    "device_released": true,
+    "frames_read": 1,
+    "cnn_called": false,
+    "images_saved": false,
+    "attendance_recorded": false
+  },
+  "real_model_retry_check": {
+    "temporary_configuration_and_database": true,
+    "failed_component": "Identity",
+    "database_created_before_identity_fix": false,
+    "all_components_ready_after_retry": true,
+    "final_temporary_profiles": 0,
+    "final_temporary_attendance": 0,
+    "camera_opened_in_retry_fixture": false
+  },
+  "production_database_opened_for_normal_app_startup": true,
+  "profile_or_attendance_mutations_performed": false,
+  "start_camera_clicked": false,
+  "continuous_camera_recognition_test_performed": false,
+  "second_physical_camera_tested": false,
+  "models_unchanged": {
+    "results/triplet/best_model.pt": "c94e9eaaf4b44424c1744e03aabf53e9da128861c0701948a649af0a1797a815",
+    "results/liveness_camera_matched/best_model.pt": "fdbb5efc65a1df89c984a49afbada3734945523a6f0ef0b233e9391cf024cd2d",
+    "results/emotion_fer/best_model.pt": "903664abcbcb5e4436ddcc5bc60f6a361256511f031661419e427417f84ef278"
+  },
+  "thresholds_unchanged": true,
+  "cnn_retrained": false,
+  "word_report_updated": false,
+  "phase5_started": false,
+  "guide": "docs/camera_diagnostics.md",
+  "limits": [
+    "Camera index is an OpenCV index, not a detected device name",
+    "OpenCV driver calls can block; no driver-level timeout guarantee",
+    "Single-frame probe is not an identity or PAD evaluation",
+    "Layout visually checked; final UI guidance reset syntax-checked after the full suite."
+  ],
+  "final_app_left_open": true,
+  "final_camera_state": "off"
+}

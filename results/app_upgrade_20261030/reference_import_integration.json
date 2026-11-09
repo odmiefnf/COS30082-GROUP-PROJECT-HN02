@@ -1,0 +1,166 @@
+{
+  "scope": "Software integration using LCC training fixtures; not an accuracy benchmark",
+  "production_database_used": false,
+  "attempts": [
+    {
+      "capture_group": "AA5742_id154_s0",
+      "valid": false,
+      "items": [
+        {
+          "file": "AA5742_id154_s0_112.png",
+          "passed": false,
+          "message": "The face is too blurry, dark or bright."
+        },
+        {
+          "file": "AA5742_id154_s0_137.png",
+          "passed": false,
+          "message": "The face is too blurry, dark or bright."
+        },
+        {
+          "file": "AA5742_id154_s0_15.png",
+          "passed": false,
+          "message": "The face is too blurry, dark or bright."
+        }
+      ],
+      "message": "No samples saved. Replace the rejected photos and check again."
+    },
+    {
+      "capture_group": "AAE5573GP98K_id159_s0",
+      "valid": false,
+      "items": [
+        {
+          "file": "AAE5573GP98K_id159_s0_118.png",
+          "passed": true,
+          "message": "Face, quality and PAD checks passed"
+        },
+        {
+          "file": "AAE5573GP98K_id159_s0_137.png",
+          "passed": false,
+          "message": "The face is too blurry, dark or bright."
+        },
+        {
+          "file": "AAE5573GP98K_id159_s0_97.png",
+          "passed": false,
+          "message": "The face is too blurry, dark or bright."
+        }
+      ],
+      "message": "No samples saved. Replace the rejected photos and check again."
+    },
+    {
+      "capture_group": "FT1080P_id165_s0",
+      "valid": false,
+      "items": [
+        {
+          "file": "FT1080P_id165_s0_105.png",
+          "passed": false,
+          "message": "The face is too blurry, dark or bright."
+        },
+        {
+          "file": "FT1080P_id165_s0_120.png",
+          "passed": false,
+          "message": "The face is too blurry, dark or bright."
+        },
+        {
+          "file": "FT1080P_id165_s0_135.png",
+          "passed": false,
+          "message": "The face is too blurry, dark or bright."
+        }
+      ],
+      "message": "No samples saved. Replace the rejected photos and check again."
+    },
+    {
+      "capture_group": "FT720P_id1_s0",
+      "valid": false,
+      "items": [
+        {
+          "file": "FT720P_id1_s0_105.png",
+          "passed": false,
+          "message": "PAD model check not passed. This does not establish live presence from a photo."
+        },
+        {
+          "file": "FT720P_id1_s0_120.png",
+          "passed": false,
+          "message": "PAD model check not passed. This does not establish live presence from a photo."
+        },
+        {
+          "file": "FT720P_id1_s0_135.png",
+          "passed": false,
+          "message": "PAD model check not passed. This does not establish live presence from a photo."
+        }
+      ],
+      "message": "No samples saved. Replace the rejected photos and check again."
+    },
+    {
+      "capture_group": "FT720P_id1_s1",
+      "valid": false,
+      "items": [
+        {
+          "file": "FT720P_id1_s1_113.png",
+          "passed": false,
+          "message": "PAD model check not passed. This does not establish live presence from a photo."
+        },
+        {
+          "file": "FT720P_id1_s1_174.png",
+          "passed": false,
+          "message": "PAD model check not passed. This does not establish live presence from a photo."
+        },
+        {
+          "file": "FT720P_id1_s1_213.png",
+          "passed": false,
+          "message": "PAD model check not passed. This does not establish live presence from a photo."
+        }
+      ],
+      "message": "No samples saved. Replace the rejected photos and check again."
+    },
+    {
+      "capture_group": "FT720P_id2_s0",
+      "valid": false,
+      "items": [
+        {
+          "file": "FT720P_id2_s0_105.png",
+          "passed": false,
+          "message": "PAD model check not passed. This does not establish live presence from a photo."
+        },
+        {
+          "file": "FT720P_id2_s0_120.png",
+          "passed": false,
+          "message": "PAD model check not passed. This does not establish live presence from a photo."
+        },
+        {
+          "file": "FT720P_id2_s0_135.png",
+          "passed": false,
+          "message": "PAD model check not passed. This does not establish live presence from a photo."
+        }
+      ],
+      "message": "No samples saved. Replace the rejected photos and check again."
+    },
+    {
+      "capture_group": "FT720P_id3_s0",
+      "valid": true,
+      "items": [
+        {
+          "file": "FT720P_id3_s0_105.png",
+          "passed": true,
+          "message": "Face, quality and PAD checks passed"
+        },
+        {
+          "file": "FT720P_id3_s0_120.png",
+          "passed": true,
+          "message": "Face, quality and PAD checks passed"
+        },
+        {
+          "file": "FT720P_id3_s0_135.png",
+          "passed": true,
+          "message": "Face, quality and PAD checks passed"
+        }
+      ],
+      "message": "All three photos passed. Review the selected person, then confirm import."
+    }
+  ],
+  "success": true,
+  "final_profile_count": 1,
+  "final_sample_count": 6,
+  "final_group_count": 2,
+  "attendance_count": 0,
+  "second_group_inputs": "Same three training photos; transaction check only"
+}

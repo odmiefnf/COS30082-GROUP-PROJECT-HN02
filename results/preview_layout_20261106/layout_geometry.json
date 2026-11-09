@@ -1,0 +1,48 @@
+{
+  "scope": "Real Tk layout without camera/models/gallery",
+  "windows": [
+    {
+      "window": "1200x790",
+      "canvas": {
+        "x": 12,
+        "y": 45,
+        "width": 723,
+        "height": 219
+      },
+      "statuses_cycled": 26,
+      "max_feedback_lines": 1,
+      "max_guidance_lines": 1,
+      "feedback_slot_lines": 2,
+      "guidance_slot_lines": 2
+    },
+    {
+      "window": "1100x700",
+      "canvas": {
+        "x": 12,
+        "y": 45,
+        "width": 654,
+        "height": 129
+      },
+      "statuses_cycled": 26,
+      "max_feedback_lines": 1,
+      "max_guidance_lines": 2,
+      "feedback_slot_lines": 2,
+      "guidance_slot_lines": 2
+    },
+    {
+      "window": "1400x900",
+      "canvas": {
+        "x": 12,
+        "y": 45,
+        "width": 863,
+        "height": 329
+      },
+      "statuses_cycled": 26,
+      "max_feedback_lines": 1,
+      "max_guidance_lines": 1,
+      "feedback_slot_lines": 2,
+      "guidance_slot_lines": 2
+    }
+  ],
+  "all_geometry_checks_passed": true
+}

@@ -1,0 +1,27 @@
+{
+  "status": "completed",
+  "checked_utc": "2026-11-08T10:42:20.696728+00:00",
+  "archive": "reports/COS30082_Submission_20261108.zip",
+  "archive_bytes": 27327368,
+  "archive_sha256": "b337439eea7ce206d77dd3d64788e56f1f005fd6ec40ccbfc2aa62836fbbd896",
+  "manifest_files": 237,
+  "all_CRC_and_file_hashes_verified": true,
+  "all_packaged_files_match_current_sources": true,
+  "personal_gallery_or_raw_datasets_included": false,
+  "extracted_source_and_model_startup": {
+    "copied_source_loaded": true,
+    "components": {
+      "Runtime": "Ready",
+      "Identity": "Ready",
+      "Liveness": "Ready",
+      "Expression": "Ready",
+      "Detector": "Ready",
+      "Profiles": "Ready"
+    },
+    "gallery_profiles": 0,
+    "camera_activated": false
+  },
+  "fresh_dependency_installation": false,
+  "human_webcam_trials_run": false,
+  "temporary_copy_removed": true
+}

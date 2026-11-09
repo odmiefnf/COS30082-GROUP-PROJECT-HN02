@@ -1,0 +1,38 @@
+{
+  "scope": "Real Tk geometry checks; no models, gallery or webcam",
+  "windows": [
+    {
+      "window": "1200x790",
+      "canvas": {
+        "x": 12,
+        "y": 41,
+        "width": 734,
+        "height": 290
+      },
+      "status_cases": 26,
+      "stable": true
+    },
+    {
+      "window": "1100x700",
+      "canvas": {
+        "x": 12,
+        "y": 41,
+        "width": 665,
+        "height": 200
+      },
+      "status_cases": 26,
+      "stable": true
+    },
+    {
+      "window": "1440x960",
+      "canvas": {
+        "x": 12,
+        "y": 41,
+        "width": 902,
+        "height": 441
+      },
+      "status_cases": 26,
+      "stable": true
+    }
+  ]
+}

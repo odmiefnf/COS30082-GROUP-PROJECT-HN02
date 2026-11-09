@@ -1,0 +1,28 @@
+{
+  "phase": 1,
+  "status": "completed_pending_user_review",
+  "completed_utc": "2026-10-30T01:38:36.764213+00:00",
+  "roadmap": "docs/app_upgrade_roadmap.md",
+  "tests": {
+    "passed": 126,
+    "total": 126,
+    "seconds": 65.221,
+    "log": "results/app_upgrade_20261030/full_tests.log"
+  },
+  "new_regressions": 8,
+  "gui_preview_visually_checked": true,
+  "appearance_expiry_visually_checked": true,
+  "camera_activated_in_this_phase": false,
+  "production_database_used_in_this_phase": false,
+  "reference_photos_imported": false,
+  "cnn_retrained_in_this_phase": false,
+  "model_hashes_unchanged": {
+    "results\\triplet\\best_model.pt": "c94e9eaaf4b44424c1744e03aabf53e9da128861c0701948a649af0a1797a815",
+    "results\\liveness_camera_matched\\best_model.pt": "fdbb5efc65a1df89c984a49afbada3734945523a6f0ef0b233e9391cf024cd2d",
+    "results\\emotion_fer\\best_model.pt": "903664abcbcb5e4436ddcc5bc60f6a361256511f031661419e427417f84ef278"
+  },
+  "physical_webcam_appearance_trial_completed": false,
+  "phase2_started": false,
+  "photo_import_planned_for_phase": 3,
+  "group_report_modified_in_this_phase": false
+}

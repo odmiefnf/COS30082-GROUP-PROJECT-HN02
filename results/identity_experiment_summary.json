@@ -1,0 +1,42 @@
+{
+  "models": [
+    {
+      "method": "classification",
+      "selected_epoch": 9,
+      "selection": "val_loss",
+      "epochs_completed": 10,
+      "cosine_auc": 0.8256012717846019,
+      "euclidean_auc": 0.8256012717846019,
+      "checkpoint_sha256": "7c01d8285cedeeafb80c7ffb19c3ba60a63d0d037eb543fb09546dc254c0a52e"
+    },
+    {
+      "method": "triplet",
+      "selected_epoch": 10,
+      "selection": "train_loss",
+      "epochs_completed": 10,
+      "cosine_auc": 0.8599687731459378,
+      "euclidean_auc": 0.8599687731459378,
+      "checkpoint_sha256": "c94e9eaaf4b44424c1744e03aabf53e9da128861c0701948a649af0a1797a815"
+    }
+  ],
+  "classification_test_accuracy": 0.394625,
+  "app": {
+    "checkpoint": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\triplet\\best_model.pt",
+    "checkpoint_sha256": "c94e9eaaf4b44424c1744e03aabf53e9da128861c0701948a649af0a1797a815",
+    "method": "triplet",
+    "image_size": 64,
+    "metric": "cosine",
+    "threshold": 0.8695402108345607,
+    "ambiguity_margin": 0.05,
+    "threshold_source": "verification_validation",
+    "max_validation_pair_fpr": 0.01,
+    "observed_validation_pair_fpr": 0.009799554565701559,
+    "observed_validation_pair_tpr": 0.09733487833140209,
+    "selected_model_validation_auc": 0.8599687731459378,
+    "pairs_file": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\face_recognition\\verification_pairs_val.txt",
+    "pairs_file_sha256": "55ecf1495188024f414e3b0faac2b7f4cc374000a809e3b98579ecd8f4f25fdd",
+    "pair_count": 8805,
+    "selection": "Highest original verification-validation cosine AUC; highest TPR with pair FPR <= target; strict threshold on ties.",
+    "scope": "In-sample validation operating point; 667 verification validation images match train pixels. Pair FPR is not a guarantee for 1:N gallery recognition. Classroom demo needs separate webcam calibration."
+  }
+}

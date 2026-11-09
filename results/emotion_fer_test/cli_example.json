@@ -1,0 +1,17 @@
+{
+  "label": "angry",
+  "label_vi": "Giận dữ",
+  "class_index": 0,
+  "confidence": 0.4483135099216982,
+  "scores": {
+    "angry": 0.4483135099216982,
+    "disgust": 0.10072110717507,
+    "fear": 0.16635198844850133,
+    "happy": 0.12209576787671403,
+    "sad": 0.11606845879736385,
+    "surprise": 0.016115695866802473,
+    "neutral": 0.030333471913850225
+  },
+  "meaning": "FER facial-expression category; not a measurement of internal emotional state",
+  "used_for_attendance_acceptance": false
+}

@@ -1,0 +1,18 @@
+{
+  "status": "completed",
+  "camera_activated": false,
+  "production_database_used": false,
+  "copied_runtime_ready": true,
+  "component_status": {
+    "Runtime": "Ready",
+    "Identity": "Ready",
+    "Liveness": "Ready",
+    "Expression": "Ready",
+    "Detector": "Ready",
+    "Profiles": "Ready"
+  },
+  "profiles": 0,
+  "production_database_sha256_before": "06f197ab5c31bb95333444cd259ba34e2d3b55ef5803f48118b46020503ec7d9",
+  "production_database_sha256_after": "06f197ab5c31bb95333444cd259ba34e2d3b55ef5803f48118b46020503ec7d9",
+  "fresh_dependency_installation": false
+}

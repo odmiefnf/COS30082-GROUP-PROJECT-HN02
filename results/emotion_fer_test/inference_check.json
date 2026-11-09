@@ -1,0 +1,171 @@
+{
+  "checkpoint_sha256": "903664abcbcb5e4436ddcc5bc60f6a361256511f031661419e427417f84ef278",
+  "device": "cpu",
+  "threads": 4,
+  "warmup_calls": 10,
+  "measured_calls": 100,
+  "median_ms": 1.1061500008509029,
+  "p95_ms": 1.37420000100974,
+  "mean_ms": 1.0915869998643757,
+  "crop_api_fps_equivalent": 916.0973885949953,
+  "scope": "One cached RGB face crop: Pillow grayscale/resize + CNN + softmax/JSON dictionary; excludes camera, localization, liveness, identity, GUI and disk I/O",
+  "physical_webcam_tested": false,
+  "batch_consistency_verified": true,
+  "example_selection": "First retained PrivateTest image per class, not chosen for prediction correctness",
+  "examples": [
+    {
+      "ground_truth": "angry",
+      "image_path": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\FER2013\\test\\angry\\PrivateTest_10131363.jpg",
+      "prediction": {
+        "label": "angry",
+        "label_vi": "Giận dữ",
+        "class_index": 0,
+        "confidence": 0.4483135099216982,
+        "scores": {
+          "angry": 0.4483135099216982,
+          "disgust": 0.10072110717507,
+          "fear": 0.16635198844850133,
+          "happy": 0.12209576787671403,
+          "sad": 0.11606845879736385,
+          "surprise": 0.016115695866802473,
+          "neutral": 0.030333471913850225
+        },
+        "meaning": "FER facial-expression category; not a measurement of internal emotional state",
+        "used_for_attendance_acceptance": false
+      },
+      "maximum_score_difference_from_batch": 2.335617432791537e-08
+    },
+    {
+      "ground_truth": "disgust",
+      "image_path": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\FER2013\\test\\disgust\\PrivateTest_11895083.jpg",
+      "prediction": {
+        "label": "surprise",
+        "label_vi": "Ngạc nhiên",
+        "class_index": 5,
+        "confidence": 0.5108322908960146,
+        "scores": {
+          "angry": 0.058375398783769766,
+          "disgust": 0.01383142616757125,
+          "fear": 0.38093845711629437,
+          "happy": 0.001946176201629524,
+          "sad": 0.020677693431374884,
+          "surprise": 0.5108322908960146,
+          "neutral": 0.01339855740334564
+        },
+        "meaning": "FER facial-expression category; not a measurement of internal emotional state",
+        "used_for_attendance_acceptance": false
+      },
+      "maximum_score_difference_from_batch": 3.122612957096038e-08
+    },
+    {
+      "ground_truth": "fear",
+      "image_path": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\FER2013\\test\\fear\\PrivateTest_10153550.jpg",
+      "prediction": {
+        "label": "fear",
+        "label_vi": "Sợ hãi",
+        "class_index": 2,
+        "confidence": 0.2367032103065739,
+        "scores": {
+          "angry": 0.23500398864685135,
+          "disgust": 0.04017319108687086,
+          "fear": 0.2367032103065739,
+          "happy": 0.20757794299738616,
+          "sad": 0.07037876604975422,
+          "surprise": 0.183014832416962,
+          "neutral": 0.02714806849560144
+        },
+        "meaning": "FER facial-expression category; not a measurement of internal emotional state",
+        "used_for_attendance_acceptance": false
+      },
+      "maximum_score_difference_from_batch": 5.628076782393521e-08
+    },
+    {
+      "ground_truth": "happy",
+      "image_path": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\FER2013\\test\\happy\\PrivateTest_10470092.jpg",
+      "prediction": {
+        "label": "happy",
+        "label_vi": "Vui",
+        "class_index": 3,
+        "confidence": 0.4444899911926917,
+        "scores": {
+          "angry": 0.08797927446477749,
+          "disgust": 0.0020732153644288406,
+          "fear": 0.06758294609524167,
+          "happy": 0.4444899911926917,
+          "sad": 0.1842526680919336,
+          "surprise": 0.011620309572319076,
+          "neutral": 0.20200159521860755
+        },
+        "meaning": "FER facial-expression category; not a measurement of internal emotional state",
+        "used_for_attendance_acceptance": false
+      },
+      "maximum_score_difference_from_batch": 5.2214897183766595e-08
+    },
+    {
+      "ground_truth": "sad",
+      "image_path": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\FER2013\\test\\sad\\PrivateTest_10247676.jpg",
+      "prediction": {
+        "label": "disgust",
+        "label_vi": "Ghê tởm",
+        "class_index": 1,
+        "confidence": 0.3012655781688692,
+        "scores": {
+          "angry": 0.21168626151465067,
+          "disgust": 0.3012655781688692,
+          "fear": 0.26862719903546134,
+          "happy": 0.01409992926681428,
+          "sad": 0.1393455524361957,
+          "surprise": 0.02559143774948306,
+          "neutral": 0.03938404182852572
+        },
+        "meaning": "FER facial-expression category; not a measurement of internal emotional state",
+        "used_for_attendance_acceptance": false
+      },
+      "maximum_score_difference_from_batch": 5.1697277347884096e-08
+    },
+    {
+      "ground_truth": "surprise",
+      "image_path": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\FER2013\\test\\surprise\\PrivateTest_10072988.jpg",
+      "prediction": {
+        "label": "surprise",
+        "label_vi": "Ngạc nhiên",
+        "class_index": 5,
+        "confidence": 0.7845718815160009,
+        "scores": {
+          "angry": 0.006219223956478253,
+          "disgust": 9.097061345304625e-05,
+          "fear": 0.2037208097743357,
+          "happy": 0.003533265796909602,
+          "sad": 0.0011009455728799703,
+          "surprise": 0.7845718815160009,
+          "neutral": 0.0007629027699425848
+        },
+        "meaning": "FER facial-expression category; not a measurement of internal emotional state",
+        "used_for_attendance_acceptance": false
+      },
+      "maximum_score_difference_from_batch": 4.30885342961318e-08
+    },
+    {
+      "ground_truth": "neutral",
+      "image_path": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\FER2013\\test\\neutral\\PrivateTest_10086748.jpg",
+      "prediction": {
+        "label": "neutral",
+        "label_vi": "Trung tính",
+        "class_index": 6,
+        "confidence": 0.2967740619550407,
+        "scores": {
+          "angry": 0.2647260402479898,
+          "disgust": 0.01639262425970708,
+          "fear": 0.16374105483944104,
+          "happy": 0.009830534032185685,
+          "sad": 0.22318648691198864,
+          "surprise": 0.02534919775364697,
+          "neutral": 0.2967740619550407
+        },
+        "meaning": "FER facial-expression category; not a measurement of internal emotional state",
+        "used_for_attendance_acceptance": false
+      },
+      "maximum_score_difference_from_batch": 3.933102743491901e-08
+    }
+  ]
+}

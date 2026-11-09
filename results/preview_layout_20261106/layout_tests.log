@@ -1,0 +1,953 @@
+test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) ... 
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='known', index=0) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='unknown', index=1) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='no_face', index=2) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='spoof', index=3) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='known', index=4) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='multiple_faces', index=5) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='no_face', index=6) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='multiple_faces', index=7) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='face_too_small_or_outside', index=8) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='image_quality', index=9) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='spoof', index=10) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='liveness_unavailable', index=11) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='observation_stale', index=12) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='unknown', index=13) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='ambiguous', index=14) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='known', index=15) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='attendance_confirmed', index=16) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='registering', index=17) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='registered', index=18) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='registration_existing_or_ambiguous', index=19) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='registration_person_changed', index=20) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='appearance_capturing', index=21) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='appearance_added', index=22) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='appearance_conflict', index=23) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='appearance_person_changed', index=24) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='appearance_expired', index=25) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='known', index=0) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='unknown', index=1) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='no_face', index=2) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='spoof', index=3) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='known', index=4) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='multiple_faces', index=5) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='no_face', index=6) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='multiple_faces', index=7) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='face_too_small_or_outside', index=8) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='image_quality', index=9) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='spoof', index=10) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='liveness_unavailable', index=11) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='observation_stale', index=12) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='unknown', index=13) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='ambiguous', index=14) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='known', index=15) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='attendance_confirmed', index=16) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='registering', index=17) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='registered', index=18) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='registration_existing_or_ambiguous', index=19) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='registration_person_changed', index=20) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='appearance_capturing', index=21) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='appearance_added', index=22) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='appearance_conflict', index=23) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='appearance_person_changed', index=24) ... FAIL
+  test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='appearance_expired', index=25) ... FAIL
+test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) ... 
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='known', index=0) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='unknown', index=1) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='no_face', index=2) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='spoof', index=3) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='known', index=4) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='multiple_faces', index=5) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='no_face', index=6) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='multiple_faces', index=7) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='face_too_small_or_outside', index=8) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='image_quality', index=9) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='spoof', index=10) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='liveness_unavailable', index=11) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='observation_stale', index=12) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='unknown', index=13) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='ambiguous', index=14) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='known', index=15) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='attendance_confirmed', index=16) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='registering', index=17) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='registered', index=18) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='registration_existing_or_ambiguous', index=19) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='registration_person_changed', index=20) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='appearance_capturing', index=21) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='appearance_added', index=22) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='appearance_conflict', index=23) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='appearance_person_changed', index=24) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='appearance_expired', index=25) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='known', index=0) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='unknown', index=1) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='no_face', index=2) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='spoof', index=3) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='known', index=4) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='multiple_faces', index=5) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='no_face', index=6) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='multiple_faces', index=7) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='face_too_small_or_outside', index=8) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='image_quality', index=9) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='spoof', index=10) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='liveness_unavailable', index=11) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='observation_stale', index=12) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='unknown', index=13) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='ambiguous', index=14) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='known', index=15) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='attendance_confirmed', index=16) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='registering', index=17) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='registered', index=18) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='registration_existing_or_ambiguous', index=19) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='registration_person_changed', index=20) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='appearance_capturing', index=21) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='appearance_added', index=22) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='appearance_conflict', index=23) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='appearance_person_changed', index=24) ... FAIL
+  test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='appearance_expired', index=25) ... FAIL
+test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) ... ERROR
+
+======================================================================
+ERROR: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 68, in test_real_window_resize_changes_viewport_but_new_statuses_do_not
+    self.assertGreater(expanded[2], initial[2])
+                       ~~~~~~~~^^^
+TypeError: 'NoneType' object is not subscriptable
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='known', index=0)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='unknown', index=1)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='no_face', index=2)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='spoof', index=3)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='known', index=4)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='multiple_faces', index=5)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='no_face', index=6)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='multiple_faces', index=7)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='face_too_small_or_outside', index=8)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='image_quality', index=9)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='spoof', index=10)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='liveness_unavailable', index=11)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='observation_stale', index=12)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='unknown', index=13)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='ambiguous', index=14)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='known', index=15)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='attendance_confirmed', index=16)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='registering', index=17)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='registered', index=18)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='registration_existing_or_ambiguous', index=19)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='registration_person_changed', index=20)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='appearance_capturing', index=21)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='appearance_added', index=22)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='appearance_conflict', index=23)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='appearance_person_changed', index=24)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1200x790', status='appearance_expired', index=25)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='known', index=0)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='unknown', index=1)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='no_face', index=2)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='spoof', index=3)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='known', index=4)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='multiple_faces', index=5)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='no_face', index=6)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='multiple_faces', index=7)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='face_too_small_or_outside', index=8)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='image_quality', index=9)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='spoof', index=10)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='liveness_unavailable', index=11)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='observation_stale', index=12)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='unknown', index=13)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='ambiguous', index=14)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='known', index=15)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='attendance_confirmed', index=16)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='registering', index=17)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='registered', index=18)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='registration_existing_or_ambiguous', index=19)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='registration_person_changed', index=20)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='appearance_capturing', index=21)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='appearance_added', index=22)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='appearance_conflict', index=23)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='appearance_person_changed', index=24)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_camera_viewport_is_stable_while_status_text_changes (tests.test_preview_layout.PreviewLayoutChecks.test_camera_viewport_is_stable_while_status_text_changes) (window='1100x700', status='appearance_expired', index=25)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='known', index=0)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='unknown', index=1)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='no_face', index=2)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='spoof', index=3)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='known', index=4)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='multiple_faces', index=5)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='no_face', index=6)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='multiple_faces', index=7)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='face_too_small_or_outside', index=8)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='image_quality', index=9)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='spoof', index=10)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='liveness_unavailable', index=11)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='observation_stale', index=12)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='unknown', index=13)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='ambiguous', index=14)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='known', index=15)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='attendance_confirmed', index=16)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='registering', index=17)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='registered', index=18)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='registration_existing_or_ambiguous', index=19)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='registration_person_changed', index=20)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='appearance_capturing', index=21)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='appearance_added', index=22)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='appearance_conflict', index=23)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='appearance_person_changed', index=24)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1100x700', status='appearance_expired', index=25)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='known', index=0)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='unknown', index=1)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='no_face', index=2)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='spoof', index=3)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='known', index=4)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='multiple_faces', index=5)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='no_face', index=6)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='multiple_faces', index=7)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='face_too_small_or_outside', index=8)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='image_quality', index=9)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='spoof', index=10)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='liveness_unavailable', index=11)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='observation_stale', index=12)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='unknown', index=13)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='ambiguous', index=14)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='known', index=15)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='attendance_confirmed', index=16)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='registering', index=17)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='registered', index=18)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='registration_existing_or_ambiguous', index=19)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='registration_person_changed', index=20)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='appearance_capturing', index=21)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='appearance_added', index=22)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='appearance_conflict', index=23)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='appearance_person_changed', index=24)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+======================================================================
+FAIL: test_real_window_resize_changes_viewport_but_new_statuses_do_not (tests.test_preview_layout.PreviewLayoutChecks.test_real_window_resize_changes_viewport_but_new_statuses_do_not) (window='1400x900', status='appearance_expired', index=25)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_preview_layout.py", line 54, in cycle_statuses
+    self.assertGreater(measured[2], 100)
+AssertionError: 1 not greater than 100
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.483s
+
+FAILED (failures=104, errors=1)

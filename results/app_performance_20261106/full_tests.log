@@ -1,0 +1,388 @@
+test_templates_of_same_person_do_not_create_ambiguity (test_appearance_service.AppearanceMatchingChecks.test_templates_of_same_person_do_not_create_ambiguity) ... ok
+test_capture_and_open_dialog_hold_attendance_and_block_other_enrollment (test_appearance_service.AppearanceServiceChecks.test_capture_and_open_dialog_hold_attendance_and_block_other_enrollment) ... ok
+test_explicit_confirmation_fresh_live_evidence_and_nonconflicting_identity_required (test_appearance_service.AppearanceServiceChecks.test_explicit_confirmation_fresh_live_evidence_and_nonconflicting_identity_required) ... ok
+test_manual_review_audit_uses_best_template_of_the_selected_person (test_appearance_service.AppearanceServiceChecks.test_manual_review_audit_uses_best_template_of_the_selected_person) ... ok
+test_spoof_reset_and_duplicate_pixels_cannot_complete_capture (test_appearance_service.AppearanceServiceChecks.test_spoof_reset_and_duplicate_pixels_cannot_complete_capture) ... ok
+test_switch_person_expiry_and_session_change_do_not_add_samples (test_appearance_service.AppearanceServiceChecks.test_switch_person_expiry_and_session_change_do_not_add_samples) ... ok
+test_three_distinct_live_views_add_to_same_person_and_match_both_modes (test_appearance_service.AppearanceServiceChecks.test_three_distinct_live_views_add_to_same_person_and_match_both_modes) ... ok
+test_duplicate_labels_and_four_group_limit_are_enforced (test_appearance_store.AppearanceStoreChecks.test_duplicate_labels_and_four_group_limit_are_enforced) ... ok
+test_invalid_addition_never_changes_rows (test_appearance_store.AppearanceStoreChecks.test_invalid_addition_never_changes_rows) ... ok
+test_old_schema_migrates_additively_and_keeps_one_original_group (test_appearance_store.AppearanceStoreChecks.test_old_schema_migrates_additively_and_keeps_one_original_group) ... ok
+test_sample_insert_failure_rolls_back_the_new_group (test_appearance_store.AppearanceStoreChecks.test_sample_insert_failure_rolls_back_the_new_group) ... ok
+test_two_variants_persist_without_changing_original_centroid_or_identity (test_appearance_store.AppearanceStoreChecks.test_two_variants_persist_without_changing_original_centroid_or_identity) ... ok
+test_wrong_fingerprint_is_rejected_before_any_schema_migration (test_appearance_store.AppearanceStoreChecks.test_wrong_fingerprint_is_rejected_before_any_schema_migration) ... ok
+test_csv_does_not_silently_overwrite_and_rejects_database_extension (test_attendance_history.HistoryChecks.test_csv_does_not_silently_overwrite_and_rejects_database_extension) ... ok
+test_csv_exports_filtered_snapshot_with_unicode_bom_and_literal_text (test_attendance_history.HistoryChecks.test_csv_exports_filtered_snapshot_with_unicode_bom_and_literal_text) ... ok
+test_filtering_and_totals_preserve_snapshot_and_exact_session (test_attendance_history.HistoryChecks.test_filtering_and_totals_preserve_snapshot_and_exact_session) ... ok
+test_legacy_database_has_unknown_source_and_is_not_migrated (test_attendance_history.HistoryChecks.test_legacy_database_has_unknown_source_and_is_not_migrated) ... ok
+test_missing_database_is_not_created_and_empty_database_returns_no_rows (test_attendance_history.HistoryChecks.test_missing_database_is_not_created_and_empty_database_returns_no_rows) ... ok
+test_snapshot_is_stable_until_explicit_refresh (test_attendance_history.HistoryChecks.test_snapshot_is_stable_until_explicit_refresh) ... ok
+test_snapshot_reads_all_sessions_and_provenance_without_changing_database (test_attendance_history.HistoryChecks.test_snapshot_reads_all_sessions_and_provenance_without_changing_database) ... ok
+test_spreadsheet_text_blocks_formulas_even_after_whitespace_or_bom (test_attendance_history.HistoryChecks.test_spreadsheet_text_blocks_formulas_even_after_whitespace_or_bom) ... ok
+test_frame_processor_forwards_observation_time_to_service (test_camera_scheduling.CameraSchedulingChecks.test_frame_processor_forwards_observation_time_to_service) ... ok
+test_one_camera_sample_is_processed_once_and_keeps_capture_timestamp (test_camera_scheduling.CameraSchedulingChecks.test_one_camera_sample_is_processed_once_and_keeps_capture_timestamp) ... ok
+test_preview_advances_during_slow_inference_without_new_analysis (test_camera_scheduling.CameraSchedulingChecks.test_preview_advances_during_slow_inference_without_new_analysis) ... ok
+test_slow_analysis_cannot_refresh_the_registration_freshness_clock (test_camera_scheduling.CameraSchedulingChecks.test_slow_analysis_cannot_refresh_the_registration_freshness_clock) ... ok
+test_slow_model_cannot_commit_enrollment_or_attendance_from_aged_frame (test_camera_scheduling.CameraSchedulingChecks.test_slow_model_cannot_commit_enrollment_or_attendance_from_aged_frame) ... ok
+test_stale_camera_sample_is_rejected_before_processing (test_camera_scheduling.CameraSchedulingChecks.test_stale_camera_sample_is_rejected_before_processing) ... ok
+test_stop_clears_pending_pixels_and_resets_analysis_generation (test_camera_scheduling.CameraSchedulingChecks.test_stop_clears_pending_pixels_and_resets_analysis_generation) ... ok
+test_stopped_or_restarted_ui_ignores_old_analysis_and_preview (test_camera_scheduling.CameraSchedulingChecks.test_stopped_or_restarted_ui_ignores_old_analysis_and_preview) ... ok
+test_video_replacement_does_not_drop_ordered_control_events (test_camera_scheduling.CameraSchedulingChecks.test_video_replacement_does_not_drop_ordered_control_events) ... ok
+test_active_capture_expires_on_spoof_and_no_face_without_writing (test_capture_reliability.CaptureReliabilityChecks.test_active_capture_expires_on_spoof_and_no_face_without_writing) ... ok
+test_invalid_appearance_dialog_holds_until_matching_explicit_cancel (test_capture_reliability.CaptureReliabilityChecks.test_invalid_appearance_dialog_holds_until_matching_explicit_cancel) ... ok
+test_invalid_frame_paths_permanently_invalidate_appearance_request (test_capture_reliability.CaptureReliabilityChecks.test_invalid_frame_paths_permanently_invalidate_appearance_request) ... ok
+test_invalid_frame_paths_report_invalid_manual_review_while_holding (test_capture_reliability.CaptureReliabilityChecks.test_invalid_frame_paths_report_invalid_manual_review_while_holding) ... ok
+test_opencv_open_or_property_error_releases_and_allows_retry (test_capture_reliability.CaptureReliabilityChecks.test_opencv_open_or_property_error_releases_and_allows_retry) ... ok
+test_request_expiry_session_change_gap_and_staleness_do_not_revive (test_capture_reliability.CaptureReliabilityChecks.test_request_expiry_session_change_gap_and_staleness_do_not_revive) ... ok
+test_request_token_is_required_consumed_once_and_stale_cancel_is_ignored (test_capture_reliability.CaptureReliabilityChecks.test_request_token_is_required_consumed_once_and_stale_cancel_is_ignored) ... ok
+test_unknown_person_swap_in_open_dialog_cannot_attach_or_revive_ticket (test_capture_reliability.CaptureReliabilityChecks.test_unknown_person_swap_in_open_dialog_cannot_attach_or_revive_ticket) ... ok
+test_index_rejects_invalid_input_without_opening_device (test_device_diagnostics.CameraProbeChecks.test_index_rejects_invalid_input_without_opening_device) ... ok
+test_open_read_and_invalid_frame_failures_release_for_retry (test_device_diagnostics.CameraProbeChecks.test_open_read_and_invalid_frame_failures_release_for_retry) ... ok
+test_opencv_read_and_release_exceptions_are_reported (test_device_diagnostics.CameraProbeChecks.test_opencv_read_and_release_exceptions_are_reported) ... ok
+test_probe_reads_only_selected_device_releases_and_returns_no_pixels (test_device_diagnostics.CameraProbeChecks.test_probe_reads_only_selected_device_releases_and_returns_no_pixels) ... ok
+test_good_quality_telemetry_preserves_same_rgb_crop (test_device_diagnostics.FrameGuidanceChecks.test_good_quality_telemetry_preserves_same_rgb_crop) ... ok
+test_quality_causes_are_separate_and_do_not_run_identity_or_pad (test_device_diagnostics.FrameGuidanceChecks.test_quality_causes_are_separate_and_do_not_run_identity_or_pad) ... ok
+test_stage_specific_guidance_does_not_call_failed_pad_recognition (test_device_diagnostics.FrameGuidanceChecks.test_stage_specific_guidance_does_not_call_failed_pad_recognition) ... ok
+test_bad_index_does_not_open_and_worker_can_retry (test_device_diagnostics.WorkerDiagnosticChecks.test_bad_index_does_not_open_and_worker_can_retry) ... ok
+test_selected_index_changes_only_across_stopped_camera_runs (test_device_diagnostics.WorkerDiagnosticChecks.test_selected_index_changes_only_across_stopped_camera_runs) ... ok
+test_setup_fault_names_exact_component_and_stops_before_camera (test_device_diagnostics.WorkerDiagnosticChecks.test_setup_fault_names_exact_component_and_stops_before_camera) ... ok
+test_uncalibrated_pad_is_attributed_to_liveness (test_device_diagnostics.WorkerDiagnosticChecks.test_uncalibrated_pad_is_attributed_to_liveness) ... ok
+test_alternate_recovers_a_current_frame_face_when_primary_misses (test_face_locator.FaceLocatorChecks.test_alternate_recovers_a_current_frame_face_when_primary_misses) ... ok
+test_missing_detection_resets_tracking_instead_of_reusing_old_box (test_face_locator.FaceLocatorChecks.test_missing_detection_resets_tracking_instead_of_reusing_old_box) ... ok
+test_partly_overlapping_people_are_not_merged_and_block_models (test_face_locator.FaceLocatorChecks.test_partly_overlapping_people_are_not_merged_and_block_models) ... ok
+test_resize_returns_native_coordinates_and_uses_native_face_minimum (test_face_locator.FaceLocatorChecks.test_resize_returns_native_coordinates_and_uses_native_face_minimum) ... ok
+test_two_cascades_one_face_send_one_original_rgb_crop (test_face_locator.FaceLocatorChecks.test_two_cascades_one_face_send_one_original_rgb_crop) ... ok
+Cached train_data: 4 images
+Cached val_data: 4 images
+Cached test_data: 4 images
+test_cache_is_exact_and_rejects_wrong_mapping_or_tampering (test_identity_cache.IdentityCacheChecks.test_cache_is_exact_and_rejects_wrong_mapping_or_tampering) ... ok
+test_conservative_threshold_and_fingerprint (test_identity_calibration.IdentityCalibrationChecks.test_conservative_threshold_and_fingerprint) ... ok
+test_anonymous_official_evaluation_has_no_fabricated_subject_ids (test_lcc_fasd.LCCAdapterChecks.test_anonymous_official_evaluation_has_no_fabricated_subject_ids) ... ok
+test_case_insensitive_layout_and_id_tokens_still_validate_manifest_ids (test_lcc_fasd.LCCAdapterChecks.test_case_insensitive_layout_and_id_tokens_still_validate_manifest_ids) ... ok
+test_conflicting_filename_prefix_and_nested_class_directories_are_rejected (test_lcc_fasd.LCCAdapterChecks.test_conflicting_filename_prefix_and_nested_class_directories_are_rejected) ... ok
+test_every_image_loads_in_explicit_full_mode_without_bbox_sidecars (test_lcc_fasd.LCCAdapterChecks.test_every_image_loads_in_explicit_full_mode_without_bbox_sidecars) ... ok
+test_flat_evaluation_prefixes_preserve_real_spoof_labels_and_subjects (test_lcc_fasd.LCCAdapterChecks.test_flat_evaluation_prefixes_preserve_real_spoof_labels_and_subjects) ... ok
+test_identical_bytes_with_conflicting_labels_are_rejected (test_lcc_fasd.LCCAdapterChecks.test_identical_bytes_with_conflicting_labels_are_rejected) ... ok
+test_identical_cross_split_content_is_removed_without_test_filtering_training (test_lcc_fasd.LCCAdapterChecks.test_identical_cross_split_content_is_removed_without_test_filtering_training) ... ok
+test_identified_evaluation_overlap_is_still_rejected (test_lcc_fasd.LCCAdapterChecks.test_identified_evaluation_overlap_is_still_rejected) ... ok
+test_memory_cache_preserves_pixels_labels_and_avoids_reopening_sources (test_lcc_fasd.LCCAdapterChecks.test_memory_cache_preserves_pixels_labels_and_avoids_reopening_sources) ... ok
+test_missing_empty_and_one_class_splits_are_rejected (test_lcc_fasd.LCCAdapterChecks.test_missing_empty_and_one_class_splits_are_rejected) ... ok
+test_overlap_filter_cannot_produce_an_empty_training_split (test_lcc_fasd.LCCAdapterChecks.test_overlap_filter_cannot_produce_an_empty_training_split) ... ok
+test_preserves_official_splits_canonical_labels_and_actual_subject_ids (test_lcc_fasd.LCCAdapterChecks.test_preserves_official_splits_canonical_labels_and_actual_subject_ids) ... ok
+test_split_reader_and_single_wrapper_root_are_supported (test_lcc_fasd.LCCAdapterChecks.test_split_reader_and_single_wrapper_root_are_supported) ... ok
+test_subject_parser_ignores_device_frame_and_leading_zeros (test_lcc_fasd.LCCAdapterChecks.test_subject_parser_ignores_device_frame_and_leading_zeros) ... ok
+test_training_overlap_with_development_filters_all_matching_subject_records (test_lcc_fasd.LCCAdapterChecks.test_training_overlap_with_development_filters_all_matching_subject_records) ... ok
+test_unknown_subject_ids_in_training_and_development_are_rejected (test_lcc_fasd.LCCAdapterChecks.test_unknown_subject_ids_in_training_and_development_are_rejected) ... ok
+test_unlabelled_image_directories_are_not_silently_ignored (test_lcc_fasd.LCCAdapterChecks.test_unlabelled_image_directories_are_not_silently_ignored) ... ok
+test_full_mode_train_calibration_and_held_out_evaluation (test_lcc_fasd.LCCEndToEndChecks.test_full_mode_train_calibration_and_held_out_evaluation) ... ok
+test_cached_source_is_unchanged_and_seed_reproduces_output (test_liveness_augmentation.CameraAugmentationChecks.test_cached_source_is_unchanged_and_seed_reproduces_output) ... ok
+test_invalid_pixels_or_layout_are_rejected (test_liveness_augmentation.CameraAugmentationChecks.test_invalid_pixels_or_layout_are_rejected) ... ok
+test_shape_dtype_device_range_and_noncontiguous_input (test_liveness_augmentation.CameraAugmentationChecks.test_shape_dtype_device_range_and_noncontiguous_input) ... ok
+test_upper_face_patches_are_small_and_never_cover_full_width (test_liveness_augmentation.CameraAugmentationChecks.test_upper_face_patches_are_small_and_never_cover_full_width) ... ok
+test_maximizes_live_acceptance_without_exceeding_spoof_bound (test_liveness_camera_calibration.CameraCalibrationChecks.test_maximizes_live_acceptance_without_exceeding_spoof_bound) ... ok
+test_tied_scores_cannot_split_live_and_spoof_or_violate_bound (test_liveness_camera_calibration.CameraCalibrationChecks.test_tied_scores_cannot_split_live_and_spoof_or_violate_bound) ... ok
+test_augmentation_runs_only_with_training_optimizer (test_liveness_training_options.CameraTrainingChecks.test_augmentation_runs_only_with_training_optimizer) ... ok
+Fingerprinting 4 training and 4 validation images...
+Caching train/validation tensors in CPU RAM; preprocessing is unchanged.
+Cached tensors occupy 0.000 GiB.
+Training liveness CNN from scratch on cpu; labels: 0=spoof, 1=live.
+Epoch 1/2: train_loss=1.431444, val_loss=0.727697, val_accuracy=0.5000; best epoch=1
+Validation ACER=0.0000, APCER=0.0000, BPCER=0.0000
+Epoch 2/2: train_loss=0.298871, val_loss=0.729430, val_accuracy=0.5000; best epoch=1
+Validation ACER=0.2500, APCER=0.0000, BPCER=0.5000
+Calibrated threshold 0.370689 on ALL 4 validation images using best epoch 1; saved C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tmp\tmpuf0mz3bs\out\best_model.pt
+test_augmented_candidate_selects_and_calibrates_on_complete_validation (test_liveness_training_options.CameraTrainingChecks.test_augmented_candidate_selects_and_calibrates_on_complete_validation) ... ok
+test_data_checker_reports_missing_inputs_without_making_data (test_part2.DatasetChecks.test_data_checker_reports_missing_inputs_without_making_data) ... ok
+test_encoder_outputs_unit_vectors_and_reload_is_identical (test_part2.DatasetChecks.test_encoder_outputs_unit_vectors_and_reload_is_identical) ... ok
+test_image_conversion_handles_grayscale_and_range (test_part2.DatasetChecks.test_image_conversion_handles_grayscale_and_range) ... ok
+test_pair_paths_headers_and_invalid_labels (test_part2.DatasetChecks.test_pair_paths_headers_and_invalid_labels) ... ok
+test_single_trial_uses_calibrated_direction_and_no_guessed_threshold (test_part2.DatasetChecks.test_single_trial_uses_calibrated_direction_and_no_guessed_threshold) ... ok
+test_triplets_use_distinct_same_id_positive_and_other_id_negative (test_part2.DatasetChecks.test_triplets_use_distinct_same_id_positive_and_other_id_negative) ... ok
+test_validation_preserves_training_labels_and_reports_unknown_ids (test_part2.DatasetChecks.test_validation_preserves_training_labels_and_reports_unknown_ids) ... ok
+test_both_training_methods_save_weights_and_evaluate_unseen_pairs (test_part2.EndToEndChecks.test_both_training_methods_save_weights_and_evaluate_unseen_pairs) ... ok
+test_invalid_evaluations_fail (test_part2.MetricChecks.test_invalid_evaluations_fail) ... ok
+test_known_auc_and_score_direction (test_part2.MetricChecks.test_known_auc_and_score_direction) ... ok
+test_normalized_cosine_and_negative_distance_rank_the_same (test_part2.MetricChecks.test_normalized_cosine_and_negative_distance_rank_the_same) ... ok
+test_roc_has_correct_endpoints_and_monotone_rates (test_part2.MetricChecks.test_roc_has_correct_endpoints_and_monotone_rates) ... ok
+test_ties_match_independent_pairwise_probability (test_part2.MetricChecks.test_ties_match_independent_pairwise_probability) ... ok
+test_bbox_scales_each_axis_and_matches_pixel_crop (test_part3.CelebADataChecks.test_bbox_scales_each_axis_and_matches_pixel_crop) ... ok
+test_duplicate_images_and_label_directory_conflicts_are_rejected (test_part3.CelebADataChecks.test_duplicate_images_and_label_directory_conflicts_are_rejected) ... ok
+test_missing_or_invalid_bbox_does_not_silently_use_full_image (test_part3.CelebADataChecks.test_missing_or_invalid_bbox_does_not_silently_use_full_image) ... ok
+test_official_label_inversion_and_subject_disjoint_splits (test_part3.CelebADataChecks.test_official_label_inversion_and_subject_disjoint_splits) ... ok
+test_live_probe_needs_identity_match_and_shares_exact_crop (test_part3.IntegrationGateChecks.test_live_probe_needs_identity_match_and_shares_exact_crop) ... ok
+test_spoof_and_uncalibrated_probes_never_call_identity (test_part3.IntegrationGateChecks.test_spoof_and_uncalibrated_probes_never_call_identity) ... ok
+test_inference_uses_same_crop_and_does_not_guess_uncalibrated_threshold (test_part3.LivenessInferenceChecks.test_inference_uses_same_crop_and_does_not_guess_uncalibrated_threshold) ... ok
+test_attack_and_bona_fide_error_rates_have_the_right_direction (test_part3.LivenessMetricChecks.test_attack_and_bona_fide_error_rates_have_the_right_direction) ... ok
+test_calibration_is_finite_and_describes_validation_scope (test_part3.LivenessMetricChecks.test_calibration_is_finite_and_describes_validation_scope) ... ok
+test_invalid_or_one_class_scores_fail (test_part3.LivenessMetricChecks.test_invalid_or_one_class_scores_fail) ... ok
+test_prepare_train_calibrate_and_test_without_retuning_or_split_leakage (test_part3.Section3EndToEndChecks.test_prepare_train_calibrate_and_test_without_retuning_or_split_leakage) ... ok
+test_expression_is_descriptive_and_same_crop_is_used (test_part4.EmotionGateChecks.test_expression_is_descriptive_and_same_crop_is_used) ... ok
+test_frame_roi_is_shared_and_spoof_frame_skips_expression (test_part4.EmotionGateChecks.test_frame_roi_is_shared_and_spoof_frame_skips_expression) ... ok
+test_spoof_skips_identity_and_expression (test_part4.EmotionGateChecks.test_spoof_skips_identity_and_expression) ... ok
+test_augmentation_preserves_range_shape_and_is_reproducible (test_part4.FERChecks.test_augmentation_preserves_range_shape_and_is_reproducible) ... ok
+test_duplicate_conflict_cleanup_and_test_never_selects_training_images (test_part4.FERChecks.test_duplicate_conflict_cleanup_and_test_never_selects_training_images) ... ok
+Training FER CNN from scratch: 21 train, 21 validation; cpu.
+Epoch 1/1: train_loss=2.0267, val_loss=1.9480, val_accuracy=0.1429, val_macro_f1=0.0357; best=1
+Saved best epoch 1: C:\Users\kiet1\AppData\Local\Packages\sandbox.{42b8864c-8e3a-4a2d-af55-ed89d32e0857}\AC\Temp\fer_synthetic_m56gy9fk\model\best_model.pt
+{
+  "metrics": {
+    "accuracy": 0.14285714285714285,
+    "macro_f1": 0.03571428571428571,
+    "balanced_accuracy": 0.14285714285714285,
+    "sample_count": 21,
+    "labels": [
+      "angry",
+      "disgust",
+      "fear",
+      "happy",
+      "sad",
+      "surprise",
+      "neutral"
+    ],
+    "confusion_matrix": [
+      [
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "per_class": [
+      {
+        "label": "angry",
+        "precision": 0.14285714285714285,
+        "recall": 1.0,
+        "f1": 0.25,
+        "support": 3
+      },
+      {
+        "label": "disgust",
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 3
+      },
+      {
+        "label": "fear",
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 3
+      },
+      {
+        "label": "happy",
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 3
+      },
+      {
+        "label": "sad",
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 3
+      },
+      {
+        "label": "surprise",
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 3
+      },
+      {
+        "label": "neutral",
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 3
+      }
+    ],
+    "confusion_order": "rows=true, columns=predicted; fixed FER label order",
+    "zero_division": 0
+  },
+  "checkpoint": "C:\\Users\\kiet1\\AppData\\Local\\Packages\\sandbox.{42b8864c-8e3a-4a2d-af55-ed89d32e0857}\\AC\\Temp\\fer_synthetic_m56gy9fk\\model\\best_model.pt",
+  "checkpoint_sha256": "a99c1279391db90a29849d41aa875bf87b80e0f2b04a8cb545993323cb24e6db",
+  "manifest_sha256": "f283f1f2f483c883e2e4a6da5916ad1f51960f51a621b7dd5a9977352ece8777",
+  "training_smoke_test": false,
+  "selected_epoch": 1,
+  "evaluation_samples": 21,
+  "evaluation_scope": "Filtered PrivateTest; disjoint paths and decoded pixels, subject separation unverified",
+  "test_used_for_model_selection": false,
+  "checkpoint_changed": false,
+  "subject_disjoint_verified": false,
+  "device": "cpu"
+}
+test_full_train_evaluate_and_infer_keep_fixed_labels_and_holdout (test_part4.FERChecks.test_full_train_evaluate_and_infer_keep_fixed_labels_and_holdout) ... Emotion evaluation failed: Evaluation must be PrivateTest, with paths/pixels absent from train/validation.
+ok
+test_macro_metrics_account_for_unpredicted_classes (test_part4.FERChecks.test_macro_metrics_account_for_unpredicted_classes) ... ok
+test_missing_split_prefix_and_changed_image_are_rejected (test_part4.FERChecks.test_missing_split_prefix_and_changed_image_are_rejected) ... ok
+test_model_logits_and_gradient_are_valid (test_part4.FERChecks.test_model_logits_and_gradient_are_valid) ... ok
+test_official_prefix_splits_and_label_folders (test_part4.FERChecks.test_official_prefix_splits_and_label_folders) ... ok
+test_preprocessing_fixed_label_order_and_invalid_input (test_part4.FERChecks.test_preprocessing_fixed_label_order_and_invalid_input) ... ok
+test_training_content_is_filtered_against_validation (test_part4.FERChecks.test_training_content_is_filtered_against_validation) ... ok
+test_ambiguous_dataset_roots_are_rejected (test_part5.IdentityInputChecks.test_ambiguous_dataset_roots_are_rejected) ... ok
+test_complete_read_only_audit_preserves_pairs (test_part5.IdentityInputChecks.test_complete_read_only_audit_preserves_pairs) ... ok
+test_directory_copy_keeps_root_prefix_and_exact_pair_bytes (test_part5.IdentityInputChecks.test_directory_copy_keeps_root_prefix_and_exact_pair_bytes) ... ok
+test_existing_different_image_is_never_overwritten (test_part5.IdentityInputChecks.test_existing_different_image_is_never_overwritten) ... ok
+test_missing_inputs_do_not_create_fake_data (test_part5.IdentityInputChecks.test_missing_inputs_do_not_create_fake_data) ... ok
+test_pixel_duplicates_are_flagged_even_with_different_file_encoding (test_part5.IdentityInputChecks.test_pixel_duplicates_are_flagged_even_with_different_file_encoding) ... ok
+test_unreadable_image_and_pair_label_conflicts_are_reported (test_part5.IdentityInputChecks.test_unreadable_image_and_pair_label_conflicts_are_reported) ... ok
+{"status": "checking_zip", "source": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_ovkzu72r\\official.zip", "output_dir": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_ovkzu72r\\imported", "files_processed": 0, "files_total": null, "elapsed_seconds": 0.0}
+{"status": "extracting", "source": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_ovkzu72r\\official.zip", "output_dir": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_ovkzu72r\\imported", "files_processed": 0, "files_total": 15, "elapsed_seconds": 0.0}
+{"status": "checking_zip", "source": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_ovkzu72r\\official.zip", "output_dir": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_ovkzu72r\\imported", "files_processed": 0, "files_total": null, "elapsed_seconds": 0.0}
+{"status": "extracting", "source": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_ovkzu72r\\official.zip", "output_dir": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_ovkzu72r\\imported", "files_processed": 0, "files_total": 15, "elapsed_seconds": 0.0}
+test_wrapped_zip_import_is_byte_preserving_and_repeatable (test_part5.IdentityInputChecks.test_wrapped_zip_import_is_byte_preserving_and_repeatable) ... ok
+{"status": "checking_zip", "source": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_01ldr2ml\\unsafe0.zip", "output_dir": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_01ldr2ml\\out0", "files_processed": 0, "files_total": null, "elapsed_seconds": 0.0}
+{"status": "checking_zip", "source": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_01ldr2ml\\unsafe1.zip", "output_dir": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_01ldr2ml\\out1", "files_processed": 0, "files_total": null, "elapsed_seconds": 0.0}
+{"status": "checking_zip", "source": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_01ldr2ml\\unsafe2.zip", "output_dir": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_01ldr2ml\\out2", "files_processed": 0, "files_total": null, "elapsed_seconds": 0.0}
+{"status": "checking_zip", "source": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_01ldr2ml\\unsafe3.zip", "output_dir": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_01ldr2ml\\out3", "files_processed": 0, "files_total": null, "elapsed_seconds": 0.0}
+test_zip_traversal_and_windows_path_aliases_are_rejected_before_writing (test_part5.IdentityInputChecks.test_zip_traversal_and_windows_path_aliases_are_rejected_before_writing) ... ok
+test_attendance_needs_three_frames_and_is_unique_per_session (test_part6.Fixture.test_attendance_needs_three_frames_and_is_unique_per_session) ... ok
+test_camera_read_failure_and_stop_release_device_without_using_a_real_camera (test_part6.Fixture.test_camera_read_failure_and_stop_release_device_without_using_a_real_camera) ... ok
+test_gap_or_spoof_breaks_recognition_streak (test_part6.Fixture.test_gap_or_spoof_breaks_recognition_streak) ... ok
+test_invalid_registration_is_atomic (test_part6.Fixture.test_invalid_registration_is_atomic) ... ok
+test_no_face_multiple_faces_or_quality_failure_skip_all_models (test_part6.Fixture.test_no_face_multiple_faces_or_quality_failure_skip_all_models) ... ok
+test_registration_requires_three_distinct_live_views_and_resets_on_spoof (test_part6.Fixture.test_registration_requires_three_distinct_live_views_and_resets_on_spoof) ... ok
+test_spoof_and_unknown_threshold_skip_identity_and_registration (test_part6.Fixture.test_spoof_and_unknown_threshold_skip_identity_and_registration) ... ok
+test_switching_enrollment_person_or_recognized_person_cannot_enroll (test_part6.Fixture.test_switching_enrollment_person_or_recognized_person_cannot_enroll) ... ok
+test_unicode_persistence_and_encoder_isolation (test_part6.Fixture.test_unicode_persistence_and_encoder_isolation) ... ok
+test_valid_crop_reaches_real_gate_and_rgb_is_preserved (test_part6.Fixture.test_valid_crop_reaches_real_gate_and_rgb_is_preserved) ... ok
+test_camera_control_events_are_not_dropped_by_video_frames (test_part6.RecognitionChecks.test_camera_control_events_are_not_dropped_by_video_frames) ... FAIL
+test_checkpoint_fingerprint_preprocessing_and_smoke_test_guard (test_part6.RecognitionChecks.test_checkpoint_fingerprint_preprocessing_and_smoke_test_guard) ... ok
+test_haar_loads_and_empty_frame_has_no_faces (test_part6.RecognitionChecks.test_haar_loads_and_empty_frame_has_no_faces) ... ok
+test_open_set_unknown_ambiguity_and_single_profile (test_part6.RecognitionChecks.test_open_set_unknown_ambiguity_and_single_profile) ... ok
+test_audit_failure_rolls_back_attendance_and_profile_change_is_not_allowed (test_part7.ManualReviewChecks.test_audit_failure_rolls_back_attendance_and_profile_change_is_not_allowed) ... ok
+test_changed_person_invalidates_ticket_and_holds_automatic_recording (test_part7.ManualReviewChecks.test_changed_person_invalidates_ticket_and_holds_automatic_recording) ... ok
+test_existing_automatic_record_is_not_relabelled_as_manual (test_part7.ManualReviewChecks.test_existing_automatic_record_is_not_relabelled_as_manual) ... ok
+test_explicit_selection_reviewer_reason_and_confirmation_required (test_part7.ManualReviewChecks.test_explicit_selection_reviewer_reason_and_confirmation_required) ... ok
+test_legacy_rows_survive_and_wrong_encoder_does_not_modify_schema (test_part7.ManualReviewChecks.test_legacy_rows_survive_and_wrong_encoder_does_not_modify_schema) ... ok
+test_low_confidence_human_decision_preserves_score_and_records_provenance (test_part7.ManualReviewChecks.test_low_confidence_human_decision_preserves_score_and_records_provenance) ... ok
+test_no_evidence_or_certain_identity_cannot_request_review (test_part7.ManualReviewChecks.test_no_evidence_or_certain_identity_cannot_request_review) ... ok
+test_no_face_or_multiple_faces_invalidates_review (test_part7.ManualReviewChecks.test_no_face_or_multiple_faces_invalidates_review) ... ok
+test_pending_review_suppresses_auto_until_cancel_and_preserves_auto_source (test_part7.ManualReviewChecks.test_pending_review_suppresses_auto_until_cancel_and_preserves_auto_source) ... ok
+test_register_and_review_are_mutually_exclusive (test_part7.ManualReviewChecks.test_register_and_review_are_mutually_exclusive) ... ok
+test_session_change_wrong_token_and_replay_cannot_write (test_part7.ManualReviewChecks.test_session_change_wrong_token_and_replay_cannot_write) ... ok
+test_spoof_or_missing_live_threshold_invalidates_ticket_and_blocks_writes (test_part7.ManualReviewChecks.test_spoof_or_missing_live_threshold_invalidates_ticket_and_blocks_writes) ... ok
+test_stale_latest_frame_and_expired_ticket_cannot_confirm (test_part7.ManualReviewChecks.test_stale_latest_frame_and_expired_ticket_cannot_confirm) ... ok
+test_duplicate_name_last_group_and_foreign_group_are_rejected (test_profile_management.ProfileManagementChecks.test_duplicate_name_last_group_and_foreign_group_are_rejected) ... ok
+test_failed_backup_aborts_change (test_profile_management.ProfileManagementChecks.test_failed_backup_aborts_change) ... ok
+test_removing_original_retains_other_group_and_attendance_with_backup (test_profile_management.ProfileManagementChecks.test_removing_original_retains_other_group_and_attendance_with_backup) ... ok
+test_rename_preserves_identity_samples_attendance_and_makes_backup (test_profile_management.ProfileManagementChecks.test_rename_preserves_identity_samples_attendance_and_makes_backup) ... ok
+test_worker_catalog_contains_no_embeddings_and_camera_blocks_management (test_profile_management.ProfileManagementChecks.test_worker_catalog_contains_no_embeddings_and_camera_blocks_management) ... ok
+test_check_then_commit_adds_one_group_without_attendance_or_training (test_profile_management.ReferenceImportChecks.test_check_then_commit_adds_one_group_without_attendance_or_training) ... ok
+test_checked_snapshot_is_used_and_target_changes_require_recheck (test_profile_management.ReferenceImportChecks.test_checked_snapshot_is_used_and_target_changes_require_recheck) ... ok
+test_confirmation_token_expiry_and_cancellation_are_enforced (test_profile_management.ReferenceImportChecks.test_confirmation_token_expiry_and_cancellation_are_enforced) ... ok
+test_duplicate_pixels_or_any_failed_gate_prevent_partial_writes (test_profile_management.ReferenceImportChecks.test_duplicate_pixels_or_any_failed_gate_prevent_partial_writes) ... ok
+test_encoder_mismatch_is_blocked (test_profile_management.ReferenceImportChecks.test_encoder_mismatch_is_blocked) ... ok
+test_inconsistent_or_other_known_person_is_not_attached (test_profile_management.ReferenceImportChecks.test_inconsistent_or_other_known_person_is_not_attached) ... ok
+test_missing_multi_face_low_quality_and_roi_are_rejected (test_profile_management.ReferenceImportChecks.test_missing_multi_face_low_quality_and_roi_are_rejected) ... ok
+test_new_person_and_duplicate_existing_identity_handling (test_profile_management.ReferenceImportChecks.test_new_person_and_duplicate_existing_identity_handling) ... ok
+test_target_rename_or_new_conflict_after_check_requires_recheck (test_profile_management.ReferenceImportChecks.test_target_rename_or_new_conflict_after_check_requires_recheck) ... ok
+test_capture_handle_is_owned_by_one_background_thread_and_close_is_idempotent (test_video_stream.LatestCameraChecks.test_capture_handle_is_owned_by_one_background_thread_and_close_is_idempotent) ... ok
+test_capture_pacing_prevents_a_fast_driver_from_busy_spinning (test_video_stream.LatestCameraChecks.test_capture_pacing_prevents_a_fast_driver_from_busy_spinning) ... ok
+test_close_wakes_waiting_consumer_without_returning_old_pixels (test_video_stream.LatestCameraChecks.test_close_wakes_waiting_consumer_without_returning_old_pixels) ... ok
+test_final_unread_sample_survives_later_read_error_then_error_is_raised (test_video_stream.LatestCameraChecks.test_final_unread_sample_survives_later_read_error_then_error_is_raised) ... ok
+test_invalid_camera_pixels_fail_without_emitting_preview (test_video_stream.LatestCameraChecks.test_invalid_camera_pixels_fail_without_emitting_preview) ... ok
+test_latest_queue_retains_newest_and_never_requires_consumer_progress (test_video_stream.LatestCameraChecks.test_latest_queue_retains_newest_and_never_requires_consumer_progress) ... ok
+test_open_and_configuration_errors_release_before_retry (test_video_stream.LatestCameraChecks.test_open_and_configuration_errors_release_before_retry) ... ok
+test_slow_consumer_gets_latest_unique_sequence_and_rgb (test_video_stream.LatestCameraChecks.test_slow_consumer_gets_latest_unique_sequence_and_rgb) ... ok
+test_validation_and_read_before_open (test_video_stream.LatestCameraChecks.test_validation_and_read_before_open) ... ok
+test_failed_open_or_invalid_request_never_claims_a_completed_trial (test_webcam_evaluation.CollectorChecks.test_failed_open_or_invalid_request_never_claims_a_completed_trial) ... ok
+CAPTURE_STARTED: keep the declared person/condition in view.
+test_only_selected_camera_is_used_warmup_excluded_and_released (test_webcam_evaluation.CollectorChecks.test_only_selected_camera_is_used_warmup_excluded_and_released) ... ok
+CAPTURE_STARTED: keep the declared person/condition in view.
+CAPTURE_STARTED: keep the declared person/condition in view.
+test_read_or_processor_failure_releases_device_and_preserves_partial_counts (test_webcam_evaluation.CollectorChecks.test_read_or_processor_failure_releases_device_and_preserves_partial_counts) ... ok
+test_attack_presentation_is_declared_not_inferred (test_webcam_evaluation.GroundTruthChecks.test_attack_presentation_is_declared_not_inferred) ... ok
+test_exact_operator_profile_and_unknown_conditions_are_enforced (test_webcam_evaluation.GroundTruthChecks.test_exact_operator_profile_and_unknown_conditions_are_enforced) ... ok
+test_missing_source_is_not_created_and_encoder_failure_cleans_scratch (test_webcam_evaluation.SnapshotChecks.test_missing_source_is_not_created_and_encoder_failure_cleans_scratch) ... ok
+test_production_gallery_bytes_and_rows_unchanged_after_scratch_attendance (test_webcam_evaluation.SnapshotChecks.test_production_gallery_bytes_and_rows_unchanged_after_scratch_attendance) ... ok
+test_attacks_and_unknown_never_report_correct_identity_accuracy (test_webcam_evaluation.TrialCountChecks.test_attacks_and_unknown_never_report_correct_identity_accuracy) ... ok
+test_denominators_include_rejections_before_cnn_and_null_empty_rates (test_webcam_evaluation.TrialCountChecks.test_denominators_include_rejections_before_cnn_and_null_empty_rates) ... ok
+test_nonfinite_or_missing_pad_scores_never_enter_scored_denominator (test_webcam_evaluation.TrialCountChecks.test_nonfinite_or_missing_pad_scores_never_enter_scored_denominator) ... ok
+test_unavailable_pad_and_ambiguous_identity_are_counted_separately (test_webcam_evaluation.TrialCountChecks.test_unavailable_pad_and_ambiguous_identity_are_counted_separately) ... ok
+test_wrong_known_match_and_simulated_attendance_are_distinct (test_webcam_evaluation.TrialCountChecks.test_wrong_known_match_and_simulated_attendance_are_distinct) ... ok
+
+======================================================================
+FAIL: test_camera_control_events_are_not_dropped_by_video_frames (test_part6.RecognitionChecks.test_camera_control_events_are_not_dropped_by_video_frames)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tests\test_part6.py", line 241, in test_camera_control_events_are_not_dropped_by_video_frames
+    self.assertEqual(events, ["started", "frame", "camera_error"])
+AssertionError: Lists differ: ['started', 'camera_error'] != ['started', 'frame', 'camera_error']
+
+First differing element 1:
+'camera_error'
+'frame'
+
+Second list contains 1 additional elements.
+First extra element 2:
+'camera_error'
+
+- ['started', 'camera_error']
++ ['started', 'frame', 'camera_error']
+?            +++++++++
+
+
+----------------------------------------------------------------------
+Ran 189 tests in 59.003s
+
+FAILED (failures=1)

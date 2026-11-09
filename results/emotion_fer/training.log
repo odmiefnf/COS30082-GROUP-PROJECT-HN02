@@ -1,0 +1,19 @@
+Loaded 10000/27170 images from train.csv
+Loaded 20000/27170 images from train.csv
+Training FER CNN from scratch: 27170 train, 3562 validation; cpu.
+Epoch 1/15: train_loss=1.8088, val_loss=1.6634, val_accuracy=0.3630, val_macro_f1=0.2411; best=1
+Epoch 2/15: train_loss=1.6297, val_loss=1.4124, val_accuracy=0.4604, val_macro_f1=0.3651; best=2
+Epoch 3/15: train_loss=1.4984, val_loss=1.3135, val_accuracy=0.4882, val_macro_f1=0.3761; best=3
+Epoch 4/15: train_loss=1.4349, val_loss=1.2774, val_accuracy=0.5166, val_macro_f1=0.4413; best=4
+Epoch 5/15: train_loss=1.3941, val_loss=1.2402, val_accuracy=0.5143, val_macro_f1=0.4345; best=4
+Epoch 6/15: train_loss=1.3695, val_loss=1.2065, val_accuracy=0.5337, val_macro_f1=0.4490; best=6
+Epoch 7/15: train_loss=1.3474, val_loss=1.1882, val_accuracy=0.5480, val_macro_f1=0.4642; best=7
+Epoch 8/15: train_loss=1.3306, val_loss=1.1826, val_accuracy=0.5404, val_macro_f1=0.4679; best=8
+Epoch 9/15: train_loss=1.3069, val_loss=1.1679, val_accuracy=0.5514, val_macro_f1=0.4804; best=9
+Epoch 10/15: train_loss=1.2941, val_loss=1.1676, val_accuracy=0.5449, val_macro_f1=0.4782; best=9
+Epoch 11/15: train_loss=1.2796, val_loss=1.1365, val_accuracy=0.5609, val_macro_f1=0.4892; best=11
+Epoch 12/15: train_loss=1.2736, val_loss=1.1307, val_accuracy=0.5640, val_macro_f1=0.4940; best=12
+Epoch 13/15: train_loss=1.2648, val_loss=1.1179, val_accuracy=0.5702, val_macro_f1=0.5135; best=13
+Epoch 14/15: train_loss=1.2454, val_loss=1.1054, val_accuracy=0.5794, val_macro_f1=0.5112; best=13
+Epoch 15/15: train_loss=1.2404, val_loss=1.1122, val_accuracy=0.5772, val_macro_f1=0.5218; best=15
+Saved best epoch 15: results\emotion_fer\best_model.pt

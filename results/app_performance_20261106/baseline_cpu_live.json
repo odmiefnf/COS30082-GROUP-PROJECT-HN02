@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "status": "completed",
+  "mode": "synchronous",
+  "created_utc": "2026-11-06T08:50:38.002345+00:00",
+  "purpose": "Performance timings only; no accuracy or liveness efficacy conclusion",
+  "production_database_read_only": true,
+  "images_or_video_saved": false,
+  "camera_embeddings_in_report": false,
+  "thresholds_retuned": false,
+  "profiles_or_attendance_written_to_production": false,
+  "capture_request": {
+    "camera": 0,
+    "seconds": 8.0,
+    "resolution": [
+      960,
+      720
+    ],
+    "warmup_frames_excluded": 8
+  },
+  "runtime": {
+    "device": "cpu",
+    "torch": "2.5.1+cu124",
+    "torch_threads": 4,
+    "opencv": "4.13.0",
+    "opencv_threads": 16,
+    "gpu": null
+  },
+  "setup_seconds": 0.8976559000002453,
+  "model_configuration": {
+    "identity_sha256": "c94e9eaaf4b44424c1744e03aabf53e9da128861c0701948a649af0a1797a815",
+    "identity_threshold": 0.8695402108345607,
+    "identity_margin": 0.05,
+    "liveness_threshold": 0.0021445315221842592,
+    "liveness_threshold_source": "validation"
+  },
+  "gallery_profile_count": 1,
+  "camera_open_ms": 2400.624300000345,
+  "camera_backend": "MSMF",
+  "duration_seconds": 8.029016799999226,
+  "processed_frames": 221,
+  "processing_fps": 27.525163479546002,
+  "simulated_attendance_records": 0,
+  "timings": {
+    "camera_read": {
+      "calls": 221,
+      "mean_ms": 8.683134841407272,
+      "p50_ms": 7.814100001269253,
+      "p95_ms": 13.620599998830585,
+      "max_ms": 32.19850000095903
+    },
+    "rgb_conversion": {
+      "calls": 221,
+      "mean_ms": 0.4393009050166902,
+      "p50_ms": 0.4154999987804331,
+      "p95_ms": 0.6121000005805399,
+      "max_ms": 1.247300002432894
+    },
+    "face_detector": {
+      "calls": 221,
+      "mean_ms": 22.15028371037947,
+      "p50_ms": 21.193299999140436,
+      "p95_ms": 23.365400000329828,
+      "max_ms": 306.7426000015985
+    },
+    "frame_processing": {
+      "calls": 221,
+      "mean_ms": 26.936977375500884,
+      "p50_ms": 26.953699998557568,
+      "p95_ms": 30.929199998354306,
+      "max_ms": 306.8048999994062
+    },
+    "attendance_query": {
+      "calls": 221,
+      "mean_ms": 0.25236968347977645,
+      "p50_ms": 0.23220000002766028,
+      "p95_ms": 0.34890000097220764,
+      "max_ms": 0.632199997198768
+    },
+    "loop_total": {
+      "calls": 221,
+      "mean_ms": 36.326760633446156,
+      "p50_ms": 35.593900000094436,
+      "p95_ms": 40.50649999771849,
+      "max_ms": 340.9073000002536
+    },
+    "liveness_model": {
+      "calls": 134,
+      "mean_ms": 2.7143313432609273,
+      "p50_ms": 2.3034000005281996,
+      "p95_ms": 3.040624999084684,
+      "max_ms": 46.220500000345055
+    },
+    "expression_model": {
+      "calls": 134,
+      "mean_ms": 1.4075522389547004,
+      "p50_ms": 1.3156999993952923,
+      "p95_ms": 1.8219599975054732,
+      "max_ms": 4.106300002604257
+    },
+    "identity_embedding": {
+      "calls": 134,
+      "mean_ms": 1.5044791043013657,
+      "p50_ms": 1.1207999996258877,
+      "p95_ms": 1.7789300003641981,
+      "max_ms": 36.28430000026128
+    },
+    "identity_match": {
+      "calls": 134,
+      "mean_ms": 0.09532985050507488,
+      "p50_ms": 0.0851499989948934,
+      "p95_ms": 0.13671999986399894,
+      "max_ms": 0.24930000290623866
+    },
+    "service_analyze": {
+      "calls": 134,
+      "mean_ms": 5.819415671523068,
+      "p50_ms": 4.992700000002515,
+      "p95_ms": 6.385520000003453,
+      "max_ms": 56.04479999965406
+    }
+  },
+  "frame_statuses": {
+    "no_face": 87,
+    "unknown": 133,
+    "known": 1
+  },
+  "frame_sizes": [
+    {
+      "width": 960,
+      "height": 540,
+      "frames": 221
+    }
+  ],
+  "timing_note": "Nested stages overlap; sums of stage timings are not a total. Cold first inference is included. GUI drawing is not measured.",
+  "finished_utc": "2026-11-06T08:50:52.462001+00:00"
+}

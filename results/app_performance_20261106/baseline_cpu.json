@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "status": "not_completed",
+  "mode": "synchronous",
+  "created_utc": "2026-11-06T08:50:18.266678+00:00",
+  "purpose": "Performance timings only; no accuracy or liveness efficacy conclusion",
+  "production_database_read_only": true,
+  "images_or_video_saved": false,
+  "camera_embeddings_in_report": false,
+  "thresholds_retuned": false,
+  "profiles_or_attendance_written_to_production": false,
+  "capture_request": {
+    "camera": 0,
+    "seconds": 8.0,
+    "resolution": [
+      960,
+      720
+    ],
+    "warmup_frames_excluded": 8
+  },
+  "runtime": {
+    "device": "cpu",
+    "torch": "2.5.1+cu124",
+    "torch_threads": 4,
+    "opencv": "4.13.0",
+    "opencv_threads": 16,
+    "gpu": null
+  },
+  "setup_seconds": 0.9392311000010523,
+  "model_configuration": {
+    "identity_sha256": "c94e9eaaf4b44424c1744e03aabf53e9da128861c0701948a649af0a1797a815",
+    "identity_threshold": 0.8695402108345607,
+    "identity_margin": 0.05,
+    "liveness_threshold": 0.0021445315221842592,
+    "liveness_threshold_source": "validation"
+  },
+  "gallery_profile_count": 1,
+  "error": {
+    "stage": "Camera open",
+    "message": "The selected webcam could not be opened."
+  },
+  "timings": {},
+  "frame_statuses": {},
+  "frame_sizes": [],
+  "timing_note": "Nested stages overlap; sums of stage timings are not a total. Cold first inference is included. GUI drawing is not measured.",
+  "finished_utc": "2026-11-06T08:50:22.364050+00:00"
+}

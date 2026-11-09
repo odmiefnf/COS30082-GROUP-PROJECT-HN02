@@ -1,0 +1,4 @@
+# Versions used for Sections 2-4 on Python 3.11; webcam extras are separate.
+torch==2.5.1
+numpy==2.4.6
+Pillow==12.3.0

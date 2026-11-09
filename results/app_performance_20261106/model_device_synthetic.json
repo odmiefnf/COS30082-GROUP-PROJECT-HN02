@@ -1,0 +1,15 @@
+{
+  "purpose": "Three CNN timing on the same synthetic RGB crop; no face accuracy inference",
+  "results": {
+    "cpu": {
+      "mean_ms": 3.9355139999679523,
+      "p95_ms": 4.760229999556031,
+      "samples": 100
+    },
+    "cuda": {
+      "mean_ms": 4.374967000185279,
+      "p95_ms": 5.705765000129759,
+      "samples": 100
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "section": 6,
+  "status": "implemented_pending_physical_webcam_trial",
+  "verified_at_utc": "2026-10-27T01:52:47.552587+00:00",
+  "software_tests": {
+    "count": 79,
+    "passed": 79,
+    "log": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\section6_full_tests.log"
+  },
+  "identity_training": {
+    "epochs_each": 10,
+    "images_each_epoch": 380638,
+    "methods": {
+      "classification": 0.8256012717846019,
+      "triplet": 0.8599687731459378
+    }
+  },
+  "selected_method": "triplet",
+  "threshold": 0.8695402108345607,
+  "validation_pair_tpr": 0.09733487833140209,
+  "validation_pair_fpr": 0.009799554565701559,
+  "physical_camera_tested": false,
+  "original_pairs_sha256": "55ecf1495188024f414e3b0faac2b7f4cc374000a809e3b98579ecd8f4f25fdd",
+  "offline_integration": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\attendance_integration.json",
+  "preview_layout_visually_checked": true,
+  "innovation_section_7_started": false
+}

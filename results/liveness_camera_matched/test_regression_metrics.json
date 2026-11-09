@@ -1,0 +1,45 @@
+{
+  "metrics": {
+    "accuracy": 0.811619250199415,
+    "APCER": 0.19102669969721991,
+    "BPCER": 0.11328125,
+    "ACER": 0.15215397484860996,
+    "AUC": 0.9290843053261767,
+    "threshold": 0.0021445315221842592,
+    "accept_rule": "live_score >= threshold",
+    "sample_count": 7522,
+    "live_count": 256,
+    "spoof_count": 7266,
+    "confusion": {
+      "true_live": 227,
+      "spoof_accepted_live": 1388,
+      "true_spoof": 5878,
+      "live_rejected_spoof": 29
+    },
+    "confusion_matrix": [
+      [
+        5878,
+        1388
+      ],
+      [
+        29,
+        227
+      ]
+    ],
+    "confusion_matrix_order": {
+      "rows": [
+        "spoof",
+        "live"
+      ],
+      "columns": [
+        "spoof",
+        "live"
+      ]
+    },
+    "score_definition": "softmax(logits)[live_label=1]; higher means more likely live"
+  },
+  "scope": "Regression on reused original test predictions; weights unchanged; threshold chosen only from validation, not test or camera.",
+  "prediction_source": "results\\liveness_camera_aug_test\\predictions.csv",
+  "threshold_source": "validation",
+  "threshold_retuned_on_test": false
+}

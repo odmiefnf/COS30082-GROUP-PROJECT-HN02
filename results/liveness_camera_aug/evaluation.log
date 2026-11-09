@@ -1,0 +1,3 @@
+Liveness evaluation: AUC=0.929084, APCER=0.0688, BPCER=0.2969, ACER=0.1828
+Scope: held-out evaluation by image path/content; evaluation subject separation cannot be verified
+Saved predictions, metrics and ROC artifacts to C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\results\liveness_camera_aug_test

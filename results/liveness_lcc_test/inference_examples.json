@@ -1,0 +1,39 @@
+{
+  "selection": "First retained evaluation image per ground-truth class in the manifest; not selected for correctness. Descriptive examples only.",
+  "examples": [
+    {
+      "ground_truth": "live",
+      "image_path": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\LCC_FASD\\LCC_FASD_evaluation\\real\\real_0.png",
+      "prediction": {
+        "live_score": 0.5837251330468324,
+        "spoof_score": 0.4162748669531676,
+        "is_live": true,
+        "status": "live",
+        "threshold": 0.07299606294461634,
+        "threshold_source": "validation",
+        "accept_rule": "P(live) >= threshold",
+        "live_label": 1,
+        "spoof_label": 0,
+        "checkpoint": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\liveness_lcc\\best_model.pt",
+        "checkpoint_smoke_test": false
+      }
+    },
+    {
+      "ground_truth": "spoof",
+      "image_path": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\LCC_FASD\\LCC_FASD_evaluation\\spoof\\spoof_1000.png",
+      "prediction": {
+        "live_score": 0.059204460506659326,
+        "spoof_score": 0.9407955394933407,
+        "is_live": false,
+        "status": "spoof",
+        "threshold": 0.07299606294461634,
+        "threshold_source": "validation",
+        "accept_rule": "P(live) >= threshold",
+        "live_label": 1,
+        "spoof_label": 0,
+        "checkpoint": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\liveness_lcc\\best_model.pt",
+        "checkpoint_smoke_test": false
+      }
+    }
+  ]
+}

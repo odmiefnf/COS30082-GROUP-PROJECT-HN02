@@ -1,0 +1,37 @@
+Fingerprinting 8093 training and 2948 validation images...
+Caching train/validation tensors in CPU RAM; preprocessing is unchanged.
+Cached 1000/8093 images from train.csv
+Cached 2000/8093 images from train.csv
+Cached 3000/8093 images from train.csv
+Cached 4000/8093 images from train.csv
+Cached 5000/8093 images from train.csv
+Cached 6000/8093 images from train.csv
+Cached 7000/8093 images from train.csv
+Cached 8000/8093 images from train.csv
+Cached 1000/2948 images from val.csv
+Cached 2000/2948 images from val.csv
+Cached tensors occupy 1.548 GiB.
+Training liveness CNN from scratch on cuda; labels: 0=spoof, 1=live.
+C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\.venv-gpu\Lib\site-packages\torch\autograd\graph.py:825: UserWarning: adaptive_avg_pool2d_backward_cuda does not have a deterministic implementation, but you set 'torch.use_deterministic_algorithms(True, warn_only=True)'. You can file an issue at https://github.com/pytorch/pytorch/issues to help us prioritize adding deterministic support for this operation. (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\Context.cpp:95.)
+  return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+Epoch 1/10: train_loss=0.348001, val_loss=0.483135, val_accuracy=0.7812; best epoch=1
+Validation ACER=0.2629, APCER=0.4294, BPCER=0.0963
+Epoch 2/10: train_loss=0.275623, val_loss=0.319001, val_accuracy=0.8962; best epoch=2
+Validation ACER=0.2168, APCER=0.1793, BPCER=0.2543
+Epoch 3/10: train_loss=0.221239, val_loss=0.455232, val_accuracy=0.7931; best epoch=3
+Validation ACER=0.2095, APCER=0.1030, BPCER=0.3160
+Epoch 4/10: train_loss=0.187263, val_loss=0.646473, val_accuracy=0.7466; best epoch=3
+Validation ACER=0.2286, APCER=0.2548, BPCER=0.2025
+Epoch 5/10: train_loss=0.149545, val_loss=0.531099, val_accuracy=0.8175; best epoch=3
+Validation ACER=0.2220, APCER=0.2316, BPCER=0.2123
+Epoch 6/10: train_loss=0.124154, val_loss=1.000226, val_accuracy=0.7083; best epoch=6
+Validation ACER=0.2043, APCER=0.2234, BPCER=0.1852
+Epoch 7/10: train_loss=0.109730, val_loss=0.527769, val_accuracy=0.8613; best epoch=7
+Validation ACER=0.1980, APCER=0.1195, BPCER=0.2765
+Epoch 8/10: train_loss=0.093474, val_loss=1.334693, val_accuracy=0.6917; best epoch=7
+Validation ACER=0.2324, APCER=0.3044, BPCER=0.1605
+Epoch 9/10: train_loss=0.093738, val_loss=0.705931, val_accuracy=0.8402; best epoch=7
+Validation ACER=0.2328, APCER=0.2977, BPCER=0.1679
+Epoch 10/10: train_loss=0.082333, val_loss=0.423165, val_accuracy=0.9071; best epoch=10
+Validation ACER=0.1934, APCER=0.1695, BPCER=0.2173
+Calibrated threshold 0.040205 on ALL 2948 validation images using best epoch 10; saved C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\results\liveness_camera_aug\best_model.pt

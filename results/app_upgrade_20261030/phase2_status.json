@@ -1,0 +1,37 @@
+{
+  "phase": 2,
+  "status": "completed_pending_user_review",
+  "completed_utc": "2026-10-30T04:28:05.941538+00:00",
+  "features": [
+    "read-only_session_history",
+    "session_source_name_filters",
+    "record_counts",
+    "manual_provenance_details",
+    "filtered_snapshot_csv_export"
+  ],
+  "software_tests": {
+    "passed": 134,
+    "total": 134,
+    "seconds": 61.737,
+    "new_history_tests": 8,
+    "log": "results/app_upgrade_20261030/phase2_full_tests.log"
+  },
+  "gui_preview_checked": true,
+  "automatic_source_filter_visually_checked": true,
+  "csv_backend_verified_with_temporary_data": true,
+  "csv_export_of_production_data_performed": false,
+  "production_database_used": false,
+  "camera_activated": false,
+  "legacy_unknown_source_preserved": true,
+  "read_path_migrates_database": false,
+  "utf8_bom": true,
+  "spreadsheet_text_escaped": true,
+  "embeddings_or_images_exported": false,
+  "models_unchanged": {
+    "results\\triplet\\best_model.pt": "c94e9eaaf4b44424c1744e03aabf53e9da128861c0701948a649af0a1797a815",
+    "results\\liveness_camera_matched\\best_model.pt": "fdbb5efc65a1df89c984a49afbada3734945523a6f0ef0b233e9391cf024cd2d",
+    "results\\emotion_fer\\best_model.pt": "903664abcbcb5e4436ddcc5bc60f6a361256511f031661419e427417f84ef278"
+  },
+  "phase3_started": false,
+  "guide": "docs/attendance_history.md"
+}

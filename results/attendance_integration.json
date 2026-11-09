@@ -1,0 +1,1078 @@
+{
+  "camera_activated": false,
+  "production_store_used": false,
+  "fixture_registration": "Ground-truth dataset ID references, not a webcam enrollment test.",
+  "sample_source": "24 train-split photos; software integration only, not a held-out accuracy benchmark.",
+  "identity_checkpoint_sha256": "c94e9eaaf4b44424c1744e03aabf53e9da128861c0701948a649af0a1797a815",
+  "liveness_checkpoint_sha256": "fdf0158c6b628b14a7d49dfe3c4a4e872162e078d397c8a790713be7c10f6a2d",
+  "emotion_checkpoint_sha256": "903664abcbcb5e4436ddcc5bc60f6a361256511f031661419e427417f84ef278",
+  "trial_count": 24,
+  "live_gate_passed": 18,
+  "identity_and_expression_executed": 18,
+  "unregistered_probe_matched_gallery": 1,
+  "temporary_attendance_record_count": 1,
+  "trials": [
+    {
+      "path": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\face_recognition\\classification_data\\train_data\\n000003\\0014_01.jpg",
+      "dataset_subject": "n000003",
+      "subject_enrolled_in_test_store": true,
+      "elapsed_ms": 9.553699999742093,
+      "result": {
+        "status": "unknown",
+        "liveness": {
+          "live_score": 0.6947452343130749,
+          "spoof_score": 0.3052547656869251,
+          "is_live": true,
+          "status": "live",
+          "threshold": 0.07299606294461634,
+          "threshold_source": "validation",
+          "accept_rule": "P(live) >= threshold",
+          "live_label": 1,
+          "spoof_label": 0,
+          "checkpoint": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\liveness_lcc\\best_model.pt",
+          "checkpoint_smoke_test": false
+        },
+        "identity": {
+          "status": "unknown",
+          "person_id": null,
+          "name": null,
+          "cosine": 0.8421512842178345,
+          "gap": 1.119375467300415
+        },
+        "expression": {
+          "label": "neutral",
+          "label_vi": "Trung tính",
+          "class_index": 6,
+          "confidence": 0.33119091605150297,
+          "scores": {
+            "angry": 0.10263041382458016,
+            "disgust": 0.001654251543519411,
+            "fear": 0.05999915317996541,
+            "happy": 0.32130051011197885,
+            "sad": 0.17261509571512476,
+            "surprise": 0.010609659573328422,
+            "neutral": 0.33119091605150297
+          },
+          "meaning": "FER facial-expression category; not a measurement of internal emotional state",
+          "used_for_attendance_acceptance": false
+        },
+        "registered": false,
+        "attendance_recorded": false,
+        "registration_samples": 0,
+        "stable_frames": 0
+      }
+    },
+    {
+      "path": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\face_recognition\\classification_data\\train_data\\n000003\\0015_01.jpg",
+      "dataset_subject": "n000003",
+      "subject_enrolled_in_test_store": true,
+      "elapsed_ms": 4.389599999740312,
+      "result": {
+        "status": "known",
+        "liveness": {
+          "live_score": 0.40418431634002944,
+          "spoof_score": 0.5958156836599706,
+          "is_live": true,
+          "status": "live",
+          "threshold": 0.07299606294461634,
+          "threshold_source": "validation",
+          "accept_rule": "P(live) >= threshold",
+          "live_label": 1,
+          "spoof_label": 0,
+          "checkpoint": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\liveness_lcc\\best_model.pt",
+          "checkpoint_smoke_test": false
+        },
+        "identity": {
+          "status": "known",
+          "person_id": "ffffd9c9a78e4b7c889e18634d38ce59",
+          "name": "Dataset n000003",
+          "cosine": 0.8897098302841187,
+          "gap": 1.2079339027404785
+        },
+        "expression": {
+          "label": "angry",
+          "label_vi": "Giận dữ",
+          "class_index": 0,
+          "confidence": 0.32242338637241846,
+          "scores": {
+            "angry": 0.32242338637241846,
+            "disgust": 0.010903786125832322,
+            "fear": 0.140246647383094,
+            "happy": 0.1032906442013288,
+            "sad": 0.2445615770407653,
+            "surprise": 0.012677841555387924,
+            "neutral": 0.1658961173211732
+          },
+          "meaning": "FER facial-expression category; not a measurement of internal emotional state",
+          "used_for_attendance_acceptance": false
+        },
+        "registered": false,
+        "attendance_recorded": false,
+        "registration_samples": 0,
+        "stable_frames": 1
+      }
+    },
+    {
+      "path": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\face_recognition\\classification_data\\train_data\\n000003\\0016_03.jpg",
+      "dataset_subject": "n000003",
+      "subject_enrolled_in_test_store": true,
+      "elapsed_ms": 3.8491000000249187,
+      "result": {
+        "status": "unknown",
+        "liveness": {
+          "live_score": 0.49595100343054027,
+          "spoof_score": 0.5040489965694597,
+          "is_live": true,
+          "status": "live",
+          "threshold": 0.07299606294461634,
+          "threshold_source": "validation",
+          "accept_rule": "P(live) >= threshold",
+          "live_label": 1,
+          "spoof_label": 0,
+          "checkpoint": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\liveness_lcc\\best_model.pt",
+          "checkpoint_smoke_test": false
+        },
+        "identity": {
+          "status": "unknown",
+          "person_id": null,
+          "name": null,
+          "cosine": 0.7396954298019409,
+          "gap": 1.1499011516571045
+        },
+        "expression": {
+          "label": "sad",
+          "label_vi": "Buồn",
+          "class_index": 4,
+          "confidence": 0.3923373077722403,
+          "scores": {
+            "angry": 0.10678603823946664,
+            "disgust": 0.004392636258084746,
+            "fear": 0.135689228403345,
+            "happy": 0.12088140034821585,
+            "sad": 0.3923373077722403,
+            "surprise": 0.00667947812420301,
+            "neutral": 0.23323391085444448
+          },
+          "meaning": "FER facial-expression category; not a measurement of internal emotional state",
+          "used_for_attendance_acceptance": false
+        },
+        "registered": false,
+        "attendance_recorded": false,
+        "registration_samples": 0,
+        "stable_frames": 0
+      }
+    },
+    {
+      "path": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\face_recognition\\classification_data\\train_data\\n000003\\0023_03.jpg",
+      "dataset_subject": "n000003",
+      "subject_enrolled_in_test_store": true,
+      "elapsed_ms": 1.9084000000475498,
+      "result": {
+        "status": "spoof",
+        "liveness": {
+          "live_score": 0.053098127458226146,
+          "spoof_score": 0.9469018725417738,
+          "is_live": false,
+          "status": "spoof",
+          "threshold": 0.07299606294461634,
+          "threshold_source": "validation",
+          "accept_rule": "P(live) >= threshold",
+          "live_label": 1,
+          "spoof_label": 0,
+          "checkpoint": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\liveness_lcc\\best_model.pt",
+          "checkpoint_smoke_test": false
+        },
+        "identity": null,
+        "expression": null,
+        "registered": false,
+        "attendance_recorded": false,
+        "registration_samples": 0
+      }
+    },
+    {
+      "path": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\face_recognition\\classification_data\\train_data\\n000003\\0029_01.jpg",
+      "dataset_subject": "n000003",
+      "subject_enrolled_in_test_store": true,
+      "elapsed_ms": 7.500799999888841,
+      "result": {
+        "status": "known",
+        "liveness": {
+          "live_score": 0.45226810343743057,
+          "spoof_score": 0.5477318965625695,
+          "is_live": true,
+          "status": "live",
+          "threshold": 0.07299606294461634,
+          "threshold_source": "validation",
+          "accept_rule": "P(live) >= threshold",
+          "live_label": 1,
+          "spoof_label": 0,
+          "checkpoint": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\liveness_lcc\\best_model.pt",
+          "checkpoint_smoke_test": false
+        },
+        "identity": {
+          "status": "known",
+          "person_id": "ffffd9c9a78e4b7c889e18634d38ce59",
+          "name": "Dataset n000003",
+          "cosine": 0.8969519138336182,
+          "gap": 1.0779452323913574
+        },
+        "expression": {
+          "label": "neutral",
+          "label_vi": "Trung tính",
+          "class_index": 6,
+          "confidence": 0.28356440924181664,
+          "scores": {
+            "angry": 0.09751195331623151,
+            "disgust": 0.0005625556371499532,
+            "fear": 0.12827975508784248,
+            "happy": 0.2436247765028606,
+            "sad": 0.23342760068532148,
+            "surprise": 0.0130289495287774,
+            "neutral": 0.28356440924181664
+          },
+          "meaning": "FER facial-expression category; not a measurement of internal emotional state",
+          "used_for_attendance_acceptance": false
+        },
+        "registered": false,
+        "attendance_recorded": false,
+        "registration_samples": 0,
+        "stable_frames": 1
+      }
+    },
+    {
+      "path": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\face_recognition\\classification_data\\train_data\\n000003\\0035_01.jpg",
+      "dataset_subject": "n000003",
+      "subject_enrolled_in_test_store": true,
+      "elapsed_ms": 2.904599999965285,
+      "result": {
+        "status": "spoof",
+        "liveness": {
+          "live_score": 0.03302365511794992,
+          "spoof_score": 0.9669763448820501,
+          "is_live": false,
+          "status": "spoof",
+          "threshold": 0.07299606294461634,
+          "threshold_source": "validation",
+          "accept_rule": "P(live) >= threshold",
+          "live_label": 1,
+          "spoof_label": 0,
+          "checkpoint": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\liveness_lcc\\best_model.pt",
+          "checkpoint_smoke_test": false
+        },
+        "identity": null,
+        "expression": null,
+        "registered": false,
+        "attendance_recorded": false,
+        "registration_samples": 0
+      }
+    },
+    {
+      "path": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\face_recognition\\classification_data\\train_data\\n000010\\0015_01.jpg",
+      "dataset_subject": "n000010",
+      "subject_enrolled_in_test_store": true,
+      "elapsed_ms": 5.290000000059081,
+      "result": {
+        "status": "known",
+        "liveness": {
+          "live_score": 0.20294887159222694,
+          "spoof_score": 0.797051128407773,
+          "is_live": true,
+          "status": "live",
+          "threshold": 0.07299606294461634,
+          "threshold_source": "validation",
+          "accept_rule": "P(live) >= threshold",
+          "live_label": 1,
+          "spoof_label": 0,
+          "checkpoint": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\liveness_lcc\\best_model.pt",
+          "checkpoint_smoke_test": false
+        },
+        "identity": {
+          "status": "known",
+          "person_id": "c199a7bd3c13426eaff732e1c7590e57",
+          "name": "Dataset n000010",
+          "cosine": 0.9406870603561401,
+          "gap": 1.2971426248550415
+        },
+        "expression": {
+          "label": "neutral",
+          "label_vi": "Trung tính",
+          "class_index": 6,
+          "confidence": 0.3309800492647169,
+          "scores": {
+            "angry": 0.10387264249391895,
+            "disgust": 0.0008535258613938309,
+            "fear": 0.12924820139819657,
+            "happy": 0.196546922146683,
+            "sad": 0.22065530871973416,
+            "surprise": 0.0178433501153566,
+            "neutral": 0.3309800492647169
+          },
+          "meaning": "FER facial-expression category; not a measurement of internal emotional state",
+          "used_for_attendance_acceptance": false
+        },
+        "registered": false,
+        "attendance_recorded": false,
+        "registration_samples": 0,
+        "stable_frames": 1
+      }
+    },
+    {
+      "path": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\face_recognition\\classification_data\\train_data\\n000010\\0016_01.jpg",
+      "dataset_subject": "n000010",
+      "subject_enrolled_in_test_store": true,
+      "elapsed_ms": 5.0017999997180596,
+      "result": {
+        "status": "known",
+        "liveness": {
+          "live_score": 0.1541267563638148,
+          "spoof_score": 0.8458732436361852,
+          "is_live": true,
+          "status": "live",
+          "threshold": 0.07299606294461634,
+          "threshold_source": "validation",
+          "accept_rule": "P(live) >= threshold",
+          "live_label": 1,
+          "spoof_label": 0,
+          "checkpoint": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\liveness_lcc\\best_model.pt",
+          "checkpoint_smoke_test": false
+        },
+        "identity": {
+          "status": "known",
+          "person_id": "c199a7bd3c13426eaff732e1c7590e57",
+          "name": "Dataset n000010",
+          "cosine": 0.9459571838378906,
+          "gap": 1.3354003429412842
+        },
+        "expression": {
+          "label": "sad",
+          "label_vi": "Buồn",
+          "class_index": 4,
+          "confidence": 0.28428826542725705,
+          "scores": {
+            "angry": 0.11877588352553037,
+            "disgust": 0.004329619676207104,
+            "fear": 0.1490515014974214,
+            "happy": 0.2043622281357058,
+            "sad": 0.28428826542725705,
+            "surprise": 0.023812980650503923,
+            "neutral": 0.21537952108737438
+          },
+          "meaning": "FER facial-expression category; not a measurement of internal emotional state",
+          "used_for_attendance_acceptance": false
+        },
+        "registered": false,
+        "attendance_recorded": false,
+        "registration_samples": 0,
+        "stable_frames": 2
+      }
+    },
+    {
+      "path": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\face_recognition\\classification_data\\train_data\\n000010\\0017_01.jpg",
+      "dataset_subject": "n000010",
+      "subject_enrolled_in_test_store": true,
+      "elapsed_ms": 7.948400000259426,
+      "result": {
+        "status": "attendance_confirmed",
+        "liveness": {
+          "live_score": 0.2750276486920739,
+          "spoof_score": 0.724972351307926,
+          "is_live": true,
+          "status": "live",
+          "threshold": 0.07299606294461634,
+          "threshold_source": "validation",
+          "accept_rule": "P(live) >= threshold",
+          "live_label": 1,
+          "spoof_label": 0,
+          "checkpoint": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\liveness_lcc\\best_model.pt",
+          "checkpoint_smoke_test": false
+        },
+        "identity": {
+          "status": "known",
+          "person_id": "c199a7bd3c13426eaff732e1c7590e57",
+          "name": "Dataset n000010",
+          "cosine": 0.95597243309021,
+          "gap": 1.23869788646698
+        },
+        "expression": {
+          "label": "neutral",
+          "label_vi": "Trung tính",
+          "class_index": 6,
+          "confidence": 0.25409009608262817,
+          "scores": {
+            "angry": 0.10606770371110305,
+            "disgust": 0.0011050618000967803,
+            "fear": 0.12078284333759333,
+            "happy": 0.2528071911474142,
+            "sad": 0.25130795533056366,
+            "surprise": 0.0138391485906008,
+            "neutral": 0.25409009608262817
+          },
+          "meaning": "FER facial-expression category; not a measurement of internal emotional state",
+          "used_for_attendance_acceptance": false
+        },
+        "registered": false,
+        "attendance_recorded": true,
+        "registration_samples": 0,
+        "stable_frames": 3
+      }
+    },
+    {
+      "path": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\face_recognition\\classification_data\\train_data\\n000010\\0019_01.jpg",
+      "dataset_subject": "n000010",
+      "subject_enrolled_in_test_store": true,
+      "elapsed_ms": 4.6441999998023675,
+      "result": {
+        "status": "attendance_confirmed",
+        "liveness": {
+          "live_score": 0.5241035823052534,
+          "spoof_score": 0.47589641769474655,
+          "is_live": true,
+          "status": "live",
+          "threshold": 0.07299606294461634,
+          "threshold_source": "validation",
+          "accept_rule": "P(live) >= threshold",
+          "live_label": 1,
+          "spoof_label": 0,
+          "checkpoint": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\liveness_lcc\\best_model.pt",
+          "checkpoint_smoke_test": false
+        },
+        "identity": {
+          "status": "known",
+          "person_id": "c199a7bd3c13426eaff732e1c7590e57",
+          "name": "Dataset n000010",
+          "cosine": 0.9308604001998901,
+          "gap": 1.0780105590820312
+        },
+        "expression": {
+          "label": "happy",
+          "label_vi": "Vui",
+          "class_index": 3,
+          "confidence": 0.5027668510577629,
+          "scores": {
+            "angry": 0.08570939111448611,
+            "disgust": 0.0009288702441716246,
+            "fear": 0.059194858777628485,
+            "happy": 0.5027668510577629,
+            "sad": 0.12717115851998337,
+            "surprise": 0.010920954004333164,
+            "neutral": 0.2133079162816343
+          },
+          "meaning": "FER facial-expression category; not a measurement of internal emotional state",
+          "used_for_attendance_acceptance": false
+        },
+        "registered": false,
+        "attendance_recorded": false,
+        "registration_samples": 0,
+        "stable_frames": 4
+      }
+    },
+    {
+      "path": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\face_recognition\\classification_data\\train_data\\n000010\\0025_01.jpg",
+      "dataset_subject": "n000010",
+      "subject_enrolled_in_test_store": true,
+      "elapsed_ms": 5.15049999967232,
+      "result": {
+        "status": "attendance_confirmed",
+        "liveness": {
+          "live_score": 0.24930439725006173,
+          "spoof_score": 0.7506956027499383,
+          "is_live": true,
+          "status": "live",
+          "threshold": 0.07299606294461634,
+          "threshold_source": "validation",
+          "accept_rule": "P(live) >= threshold",
+          "live_label": 1,
+          "spoof_label": 0,
+          "checkpoint": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\liveness_lcc\\best_model.pt",
+          "checkpoint_smoke_test": false
+        },
+        "identity": {
+          "status": "known",
+          "person_id": "c199a7bd3c13426eaff732e1c7590e57",
+          "name": "Dataset n000010",
+          "cosine": 0.952809751033783,
+          "gap": 1.3056772947311401
+        },
+        "expression": {
+          "label": "happy",
+          "label_vi": "Vui",
+          "class_index": 3,
+          "confidence": 0.45261436593677334,
+          "scores": {
+            "angry": 0.1357847492221059,
+            "disgust": 0.005143719351033586,
+            "fear": 0.06572088050957121,
+            "happy": 0.45261436593677334,
+            "sad": 0.16661245630968452,
+            "surprise": 0.010477734842087708,
+            "neutral": 0.16364609382874373
+          },
+          "meaning": "FER facial-expression category; not a measurement of internal emotional state",
+          "used_for_attendance_acceptance": false
+        },
+        "registered": false,
+        "attendance_recorded": false,
+        "registration_samples": 0,
+        "stable_frames": 5
+      }
+    },
+    {
+      "path": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\face_recognition\\classification_data\\train_data\\n000010\\0026_01.jpg",
+      "dataset_subject": "n000010",
+      "subject_enrolled_in_test_store": true,
+      "elapsed_ms": 4.5473000000129105,
+      "result": {
+        "status": "attendance_confirmed",
+        "liveness": {
+          "live_score": 0.14906872473395638,
+          "spoof_score": 0.8509312752660436,
+          "is_live": true,
+          "status": "live",
+          "threshold": 0.07299606294461634,
+          "threshold_source": "validation",
+          "accept_rule": "P(live) >= threshold",
+          "live_label": 1,
+          "spoof_label": 0,
+          "checkpoint": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\liveness_lcc\\best_model.pt",
+          "checkpoint_smoke_test": false
+        },
+        "identity": {
+          "status": "known",
+          "person_id": "c199a7bd3c13426eaff732e1c7590e57",
+          "name": "Dataset n000010",
+          "cosine": 0.9776319265365601,
+          "gap": 1.2397594451904297
+        },
+        "expression": {
+          "label": "happy",
+          "label_vi": "Vui",
+          "class_index": 3,
+          "confidence": 0.4360383084935297,
+          "scores": {
+            "angry": 0.07998109080265987,
+            "disgust": 0.001818898324073733,
+            "fear": 0.07789906031180986,
+            "happy": 0.4360383084935297,
+            "sad": 0.13589247750427494,
+            "surprise": 0.025641957024304995,
+            "neutral": 0.24272820753934687
+          },
+          "meaning": "FER facial-expression category; not a measurement of internal emotional state",
+          "used_for_attendance_acceptance": false
+        },
+        "registered": false,
+        "attendance_recorded": false,
+        "registration_samples": 0,
+        "stable_frames": 6
+      }
+    },
+    {
+      "path": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\face_recognition\\classification_data\\train_data\\n000011\\0014_01.jpg",
+      "dataset_subject": "n000011",
+      "subject_enrolled_in_test_store": false,
+      "elapsed_ms": 1.914400000259775,
+      "result": {
+        "status": "spoof",
+        "liveness": {
+          "live_score": 0.024713490428043255,
+          "spoof_score": 0.9752865095719567,
+          "is_live": false,
+          "status": "spoof",
+          "threshold": 0.07299606294461634,
+          "threshold_source": "validation",
+          "accept_rule": "P(live) >= threshold",
+          "live_label": 1,
+          "spoof_label": 0,
+          "checkpoint": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\liveness_lcc\\best_model.pt",
+          "checkpoint_smoke_test": false
+        },
+        "identity": null,
+        "expression": null,
+        "registered": false,
+        "attendance_recorded": false,
+        "registration_samples": 0
+      }
+    },
+    {
+      "path": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\face_recognition\\classification_data\\train_data\\n000011\\0017_01.jpg",
+      "dataset_subject": "n000011",
+      "subject_enrolled_in_test_store": false,
+      "elapsed_ms": 4.229000000123051,
+      "result": {
+        "status": "unknown",
+        "liveness": {
+          "live_score": 0.2063821487424222,
+          "spoof_score": 0.7936178512575778,
+          "is_live": true,
+          "status": "live",
+          "threshold": 0.07299606294461634,
+          "threshold_source": "validation",
+          "accept_rule": "P(live) >= threshold",
+          "live_label": 1,
+          "spoof_label": 0,
+          "checkpoint": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\liveness_lcc\\best_model.pt",
+          "checkpoint_smoke_test": false
+        },
+        "identity": {
+          "status": "unknown",
+          "person_id": null,
+          "name": null,
+          "cosine": 0.8094451427459717,
+          "gap": 0.9346630573272705
+        },
+        "expression": {
+          "label": "happy",
+          "label_vi": "Vui",
+          "class_index": 3,
+          "confidence": 0.5634202376113028,
+          "scores": {
+            "angry": 0.08282689315544844,
+            "disgust": 0.002258367272505514,
+            "fear": 0.04374387920890289,
+            "happy": 0.5634202376113028,
+            "sad": 0.12071364660970382,
+            "surprise": 0.010701154016266475,
+            "neutral": 0.17633582212587012
+          },
+          "meaning": "FER facial-expression category; not a measurement of internal emotional state",
+          "used_for_attendance_acceptance": false
+        },
+        "registered": false,
+        "attendance_recorded": false,
+        "registration_samples": 0,
+        "stable_frames": 0
+      }
+    },
+    {
+      "path": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\face_recognition\\classification_data\\train_data\\n000011\\0018_02.jpg",
+      "dataset_subject": "n000011",
+      "subject_enrolled_in_test_store": false,
+      "elapsed_ms": 1.8244000002596295,
+      "result": {
+        "status": "spoof",
+        "liveness": {
+          "live_score": 0.04447398662677196,
+          "spoof_score": 0.9555260133732281,
+          "is_live": false,
+          "status": "spoof",
+          "threshold": 0.07299606294461634,
+          "threshold_source": "validation",
+          "accept_rule": "P(live) >= threshold",
+          "live_label": 1,
+          "spoof_label": 0,
+          "checkpoint": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\liveness_lcc\\best_model.pt",
+          "checkpoint_smoke_test": false
+        },
+        "identity": null,
+        "expression": null,
+        "registered": false,
+        "attendance_recorded": false,
+        "registration_samples": 0
+      }
+    },
+    {
+      "path": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\face_recognition\\classification_data\\train_data\\n000011\\0019_01.jpg",
+      "dataset_subject": "n000011",
+      "subject_enrolled_in_test_store": false,
+      "elapsed_ms": 1.7732000001160486,
+      "result": {
+        "status": "spoof",
+        "liveness": {
+          "live_score": 0.010845941473403689,
+          "spoof_score": 0.9891540585265963,
+          "is_live": false,
+          "status": "spoof",
+          "threshold": 0.07299606294461634,
+          "threshold_source": "validation",
+          "accept_rule": "P(live) >= threshold",
+          "live_label": 1,
+          "spoof_label": 0,
+          "checkpoint": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\liveness_lcc\\best_model.pt",
+          "checkpoint_smoke_test": false
+        },
+        "identity": null,
+        "expression": null,
+        "registered": false,
+        "attendance_recorded": false,
+        "registration_samples": 0
+      }
+    },
+    {
+      "path": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\face_recognition\\classification_data\\train_data\\n000011\\0022_01.jpg",
+      "dataset_subject": "n000011",
+      "subject_enrolled_in_test_store": false,
+      "elapsed_ms": 1.7913000001499313,
+      "result": {
+        "status": "spoof",
+        "liveness": {
+          "live_score": 0.012138381599031633,
+          "spoof_score": 0.9878616184009683,
+          "is_live": false,
+          "status": "spoof",
+          "threshold": 0.07299606294461634,
+          "threshold_source": "validation",
+          "accept_rule": "P(live) >= threshold",
+          "live_label": 1,
+          "spoof_label": 0,
+          "checkpoint": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\liveness_lcc\\best_model.pt",
+          "checkpoint_smoke_test": false
+        },
+        "identity": null,
+        "expression": null,
+        "registered": false,
+        "attendance_recorded": false,
+        "registration_samples": 0
+      }
+    },
+    {
+      "path": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\face_recognition\\classification_data\\train_data\\n000011\\0023_01.jpg",
+      "dataset_subject": "n000011",
+      "subject_enrolled_in_test_store": false,
+      "elapsed_ms": 6.502899999759393,
+      "result": {
+        "status": "known",
+        "liveness": {
+          "live_score": 0.08428555220801662,
+          "spoof_score": 0.9157144477919834,
+          "is_live": true,
+          "status": "live",
+          "threshold": 0.07299606294461634,
+          "threshold_source": "validation",
+          "accept_rule": "P(live) >= threshold",
+          "live_label": 1,
+          "spoof_label": 0,
+          "checkpoint": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\liveness_lcc\\best_model.pt",
+          "checkpoint_smoke_test": false
+        },
+        "identity": {
+          "status": "known",
+          "person_id": "c199a7bd3c13426eaff732e1c7590e57",
+          "name": "Dataset n000010",
+          "cosine": 0.9175862073898315,
+          "gap": 1.142568826675415
+        },
+        "expression": {
+          "label": "angry",
+          "label_vi": "Giận dữ",
+          "class_index": 0,
+          "confidence": 0.3372278240866577,
+          "scores": {
+            "angry": 0.3372278240866577,
+            "disgust": 0.008761795377855073,
+            "fear": 0.12259283226536288,
+            "happy": 0.13613991943314208,
+            "sad": 0.2182737943096898,
+            "surprise": 0.033415698013863154,
+            "neutral": 0.14358813651342936
+          },
+          "meaning": "FER facial-expression category; not a measurement of internal emotional state",
+          "used_for_attendance_acceptance": false
+        },
+        "registered": false,
+        "attendance_recorded": false,
+        "registration_samples": 0,
+        "stable_frames": 1
+      }
+    },
+    {
+      "path": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\face_recognition\\classification_data\\train_data\\n000013\\0019_02.jpg",
+      "dataset_subject": "n000013",
+      "subject_enrolled_in_test_store": false,
+      "elapsed_ms": 4.138000000239117,
+      "result": {
+        "status": "unknown",
+        "liveness": {
+          "live_score": 0.9523453514965128,
+          "spoof_score": 0.04765464850348722,
+          "is_live": true,
+          "status": "live",
+          "threshold": 0.07299606294461634,
+          "threshold_source": "validation",
+          "accept_rule": "P(live) >= threshold",
+          "live_label": 1,
+          "spoof_label": 0,
+          "checkpoint": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\liveness_lcc\\best_model.pt",
+          "checkpoint_smoke_test": false
+        },
+        "identity": {
+          "status": "unknown",
+          "person_id": null,
+          "name": null,
+          "cosine": 0.24073757231235504,
+          "gap": 0.2528054714202881
+        },
+        "expression": {
+          "label": "happy",
+          "label_vi": "Vui",
+          "class_index": 3,
+          "confidence": 0.6317085958589165,
+          "scores": {
+            "angry": 0.03227904359715127,
+            "disgust": 0.0005294716531071841,
+            "fear": 0.055655732388291364,
+            "happy": 0.6317085958589165,
+            "sad": 0.07268049257081065,
+            "surprise": 0.030137519471109143,
+            "neutral": 0.1770091444606139
+          },
+          "meaning": "FER facial-expression category; not a measurement of internal emotional state",
+          "used_for_attendance_acceptance": false
+        },
+        "registered": false,
+        "attendance_recorded": false,
+        "registration_samples": 0,
+        "stable_frames": 0
+      }
+    },
+    {
+      "path": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\face_recognition\\classification_data\\train_data\\n000013\\0020_01.jpg",
+      "dataset_subject": "n000013",
+      "subject_enrolled_in_test_store": false,
+      "elapsed_ms": 4.087699999672623,
+      "result": {
+        "status": "unknown",
+        "liveness": {
+          "live_score": 0.6669314710075479,
+          "spoof_score": 0.3330685289924521,
+          "is_live": true,
+          "status": "live",
+          "threshold": 0.07299606294461634,
+          "threshold_source": "validation",
+          "accept_rule": "P(live) >= threshold",
+          "live_label": 1,
+          "spoof_label": 0,
+          "checkpoint": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\liveness_lcc\\best_model.pt",
+          "checkpoint_smoke_test": false
+        },
+        "identity": {
+          "status": "unknown",
+          "person_id": null,
+          "name": null,
+          "cosine": 0.1923564076423645,
+          "gap": 0.020646944642066956
+        },
+        "expression": {
+          "label": "happy",
+          "label_vi": "Vui",
+          "class_index": 3,
+          "confidence": 0.48045847136716197,
+          "scores": {
+            "angry": 0.05854509852870198,
+            "disgust": 0.0010794902911674257,
+            "fear": 0.0804479084238741,
+            "happy": 0.48045847136716197,
+            "sad": 0.1511021207575324,
+            "surprise": 0.02124794856865752,
+            "neutral": 0.20711896206290462
+          },
+          "meaning": "FER facial-expression category; not a measurement of internal emotional state",
+          "used_for_attendance_acceptance": false
+        },
+        "registered": false,
+        "attendance_recorded": false,
+        "registration_samples": 0,
+        "stable_frames": 0
+      }
+    },
+    {
+      "path": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\face_recognition\\classification_data\\train_data\\n000013\\0025_01.jpg",
+      "dataset_subject": "n000013",
+      "subject_enrolled_in_test_store": false,
+      "elapsed_ms": 4.14939999973285,
+      "result": {
+        "status": "unknown",
+        "liveness": {
+          "live_score": 0.6209858057496825,
+          "spoof_score": 0.37901419425031746,
+          "is_live": true,
+          "status": "live",
+          "threshold": 0.07299606294461634,
+          "threshold_source": "validation",
+          "accept_rule": "P(live) >= threshold",
+          "live_label": 1,
+          "spoof_label": 0,
+          "checkpoint": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\liveness_lcc\\best_model.pt",
+          "checkpoint_smoke_test": false
+        },
+        "identity": {
+          "status": "unknown",
+          "person_id": null,
+          "name": null,
+          "cosine": 0.334709107875824,
+          "gap": 0.10369330644607544
+        },
+        "expression": {
+          "label": "happy",
+          "label_vi": "Vui",
+          "class_index": 3,
+          "confidence": 0.5875311377108118,
+          "scores": {
+            "angry": 0.04769002092330605,
+            "disgust": 0.0010588865845586035,
+            "fear": 0.06610778478910741,
+            "happy": 0.5875311377108118,
+            "sad": 0.09526008246355464,
+            "surprise": 0.03566829965823231,
+            "neutral": 0.16668378787042937
+          },
+          "meaning": "FER facial-expression category; not a measurement of internal emotional state",
+          "used_for_attendance_acceptance": false
+        },
+        "registered": false,
+        "attendance_recorded": false,
+        "registration_samples": 0,
+        "stable_frames": 0
+      }
+    },
+    {
+      "path": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\face_recognition\\classification_data\\train_data\\n000013\\0026_01.jpg",
+      "dataset_subject": "n000013",
+      "subject_enrolled_in_test_store": false,
+      "elapsed_ms": 3.5884999997506384,
+      "result": {
+        "status": "unknown",
+        "liveness": {
+          "live_score": 0.4511748368538939,
+          "spoof_score": 0.5488251631461061,
+          "is_live": true,
+          "status": "live",
+          "threshold": 0.07299606294461634,
+          "threshold_source": "validation",
+          "accept_rule": "P(live) >= threshold",
+          "live_label": 1,
+          "spoof_label": 0,
+          "checkpoint": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\liveness_lcc\\best_model.pt",
+          "checkpoint_smoke_test": false
+        },
+        "identity": {
+          "status": "unknown",
+          "person_id": null,
+          "name": null,
+          "cosine": 0.41056549549102783,
+          "gap": 0.683272123336792
+        },
+        "expression": {
+          "label": "happy",
+          "label_vi": "Vui",
+          "class_index": 3,
+          "confidence": 0.6034928680337599,
+          "scores": {
+            "angry": 0.08769100474538404,
+            "disgust": 0.0021133049524106008,
+            "fear": 0.09889469781181429,
+            "happy": 0.6034928680337599,
+            "sad": 0.13703657425554333,
+            "surprise": 0.013854319807667747,
+            "neutral": 0.05691723039341994
+          },
+          "meaning": "FER facial-expression category; not a measurement of internal emotional state",
+          "used_for_attendance_acceptance": false
+        },
+        "registered": false,
+        "attendance_recorded": false,
+        "registration_samples": 0,
+        "stable_frames": 0
+      }
+    },
+    {
+      "path": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\face_recognition\\classification_data\\train_data\\n000013\\0029_01.jpg",
+      "dataset_subject": "n000013",
+      "subject_enrolled_in_test_store": false,
+      "elapsed_ms": 3.719599999840284,
+      "result": {
+        "status": "unknown",
+        "liveness": {
+          "live_score": 0.8263432521416385,
+          "spoof_score": 0.1736567478583615,
+          "is_live": true,
+          "status": "live",
+          "threshold": 0.07299606294461634,
+          "threshold_source": "validation",
+          "accept_rule": "P(live) >= threshold",
+          "live_label": 1,
+          "spoof_label": 0,
+          "checkpoint": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\liveness_lcc\\best_model.pt",
+          "checkpoint_smoke_test": false
+        },
+        "identity": {
+          "status": "unknown",
+          "person_id": null,
+          "name": null,
+          "cosine": 0.20895139873027802,
+          "gap": 0.066557377576828
+        },
+        "expression": {
+          "label": "happy",
+          "label_vi": "Vui",
+          "class_index": 3,
+          "confidence": 0.35833712983282917,
+          "scores": {
+            "angry": 0.07710193499124703,
+            "disgust": 0.001470643904629721,
+            "fear": 0.06388147291044448,
+            "happy": 0.35833712983282917,
+            "sad": 0.15532294531399704,
+            "surprise": 0.019285659368408477,
+            "neutral": 0.32460021367844405
+          },
+          "meaning": "FER facial-expression category; not a measurement of internal emotional state",
+          "used_for_attendance_acceptance": false
+        },
+        "registered": false,
+        "attendance_recorded": false,
+        "registration_samples": 0,
+        "stable_frames": 0
+      }
+    },
+    {
+      "path": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\face_recognition\\classification_data\\train_data\\n000013\\0031_01.jpg",
+      "dataset_subject": "n000013",
+      "subject_enrolled_in_test_store": false,
+      "elapsed_ms": 3.406599999834725,
+      "result": {
+        "status": "unknown",
+        "liveness": {
+          "live_score": 0.07880948295559563,
+          "spoof_score": 0.9211905170444044,
+          "is_live": true,
+          "status": "live",
+          "threshold": 0.07299606294461634,
+          "threshold_source": "validation",
+          "accept_rule": "P(live) >= threshold",
+          "live_label": 1,
+          "spoof_label": 0,
+          "checkpoint": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\liveness_lcc\\best_model.pt",
+          "checkpoint_smoke_test": false
+        },
+        "identity": {
+          "status": "unknown",
+          "person_id": null,
+          "name": null,
+          "cosine": 0.3714785873889923,
+          "gap": 0.2520946264266968
+        },
+        "expression": {
+          "label": "surprise",
+          "label_vi": "Ngạc nhiên",
+          "class_index": 5,
+          "confidence": 0.4088120048614198,
+          "scores": {
+            "angry": 0.13004900693217833,
+            "disgust": 0.01055492885020447,
+            "fear": 0.26256899650042126,
+            "happy": 0.0446423825933836,
+            "sad": 0.07575244619166539,
+            "surprise": 0.4088120048614198,
+            "neutral": 0.06762023407072716
+          },
+          "meaning": "FER facial-expression category; not a measurement of internal emotional state",
+          "used_for_attendance_acceptance": false
+        },
+        "registered": false,
+        "attendance_recorded": false,
+        "registration_samples": 0,
+        "stable_frames": 0
+      }
+    }
+  ]
+}

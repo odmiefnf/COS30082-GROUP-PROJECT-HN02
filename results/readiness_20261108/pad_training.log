@@ -1,0 +1,57 @@
+Fingerprinting 8093 training and 2948 validation images...
+Caching train/validation tensors in CPU RAM; preprocessing is unchanged.
+Cached 1000/8093 images from train.csv
+Cached 2000/8093 images from train.csv
+Cached 3000/8093 images from train.csv
+Cached 4000/8093 images from train.csv
+Cached 5000/8093 images from train.csv
+Cached 6000/8093 images from train.csv
+Cached 7000/8093 images from train.csv
+Cached 8000/8093 images from train.csv
+Cached 1000/2948 images from val.csv
+Cached 2000/2948 images from val.csv
+Cached tensors occupy 1.548 GiB.
+Training liveness CNN from scratch on cuda; labels: 0=spoof, 1=live.
+C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\.venv-gpu\Lib\site-packages\torch\autograd\graph.py:825: UserWarning: adaptive_avg_pool2d_backward_cuda does not have a deterministic implementation, but you set 'torch.use_deterministic_algorithms(True, warn_only=True)'. You can file an issue at https://github.com/pytorch/pytorch/issues to help us prioritize adding deterministic support for this operation. (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\builder\windows\pytorch\aten\src\ATen\Context.cpp:95.)
+  return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+Epoch 1/20: train_loss=0.343393, val_loss=0.541454, val_accuracy=0.7446; best epoch=1
+Validation ACER=0.2666, APCER=0.2764, BPCER=0.2568
+Epoch 2/20: train_loss=0.265752, val_loss=0.322516, val_accuracy=0.8725; best epoch=2
+Validation ACER=0.2265, APCER=0.2135, BPCER=0.2395
+Epoch 3/20: train_loss=0.202566, val_loss=0.373054, val_accuracy=0.8579; best epoch=3
+Validation ACER=0.2248, APCER=0.1534, BPCER=0.2963
+Epoch 4/20: train_loss=0.160682, val_loss=0.678316, val_accuracy=0.7632; best epoch=3
+Validation ACER=0.2341, APCER=0.2485, BPCER=0.2198
+Epoch 5/20: train_loss=0.137708, val_loss=0.571774, val_accuracy=0.7839; best epoch=3
+Validation ACER=0.2254, APCER=0.2509, BPCER=0.2000
+Epoch 6/20: train_loss=0.111766, val_loss=0.881300, val_accuracy=0.7347; best epoch=6
+Validation ACER=0.1982, APCER=0.1667, BPCER=0.2296
+Epoch 7/20: train_loss=0.103004, val_loss=0.481481, val_accuracy=0.8328; best epoch=6
+Validation ACER=0.2085, APCER=0.2171, BPCER=0.2000
+Epoch 8/20: train_loss=0.094148, val_loss=0.511844, val_accuracy=0.8477; best epoch=6
+Validation ACER=0.2237, APCER=0.2375, BPCER=0.2099
+Epoch 9/20: train_loss=0.075892, val_loss=0.816782, val_accuracy=0.7751; best epoch=6
+Validation ACER=0.2106, APCER=0.2682, BPCER=0.1531
+Epoch 10/20: train_loss=0.077221, val_loss=0.607932, val_accuracy=0.7955; best epoch=6
+Validation ACER=0.2021, APCER=0.2190, BPCER=0.1852
+Epoch 11/20: train_loss=0.061554, val_loss=0.906952, val_accuracy=0.7673; best epoch=6
+Validation ACER=0.2168, APCER=0.2705, BPCER=0.1630
+Epoch 12/20: train_loss=0.058232, val_loss=1.071094, val_accuracy=0.7653; best epoch=6
+Validation ACER=0.2014, APCER=0.2694, BPCER=0.1333
+Epoch 13/20: train_loss=0.057620, val_loss=0.699297, val_accuracy=0.8100; best epoch=6
+Validation ACER=0.2030, APCER=0.2332, BPCER=0.1728
+Epoch 14/20: train_loss=0.058185, val_loss=0.951376, val_accuracy=0.7714; best epoch=6
+Validation ACER=0.2138, APCER=0.2894, BPCER=0.1383
+Epoch 15/20: train_loss=0.044849, val_loss=1.132580, val_accuracy=0.7632; best epoch=6
+Validation ACER=0.2305, APCER=0.2981, BPCER=0.1630
+Epoch 16/20: train_loss=0.041594, val_loss=0.852519, val_accuracy=0.7880; best epoch=6
+Validation ACER=0.2124, APCER=0.2816, BPCER=0.1432
+Epoch 17/20: train_loss=0.037406, val_loss=0.780135, val_accuracy=0.8226; best epoch=6
+Validation ACER=0.2102, APCER=0.2426, BPCER=0.1778
+Epoch 18/20: train_loss=0.045654, val_loss=0.795824, val_accuracy=0.8060; best epoch=6
+Validation ACER=0.2053, APCER=0.2945, BPCER=0.1160
+Epoch 19/20: train_loss=0.036636, val_loss=1.338268, val_accuracy=0.7147; best epoch=6
+Validation ACER=0.2058, APCER=0.3004, BPCER=0.1111
+Epoch 20/20: train_loss=0.029073, val_loss=1.118734, val_accuracy=0.7877; best epoch=6
+Validation ACER=0.2057, APCER=0.2411, BPCER=0.1704
+Calibrated threshold 0.871716 on ALL 2948 validation images using best epoch 6; saved C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\results\liveness_regularized_20261108\best_model.pt

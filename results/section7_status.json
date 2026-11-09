@@ -1,0 +1,25 @@
+{
+  "section": 7,
+  "feature": "manual_review_with_attendance_provenance",
+  "status": "implemented_pending_physical_webcam_and_operator_trial",
+  "verified_at_utc": "2026-10-27T02:42:50.012266+00:00",
+  "software_tests": {
+    "passed": 92,
+    "total": 92,
+    "new_section7_cases": 13,
+    "log": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\section7_full_tests.log"
+  },
+  "real_model_integration": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\manual_review_integration.json",
+  "real_model_worker_startup_verified": true,
+  "camera_activated": false,
+  "production_database_used": false,
+  "checkpoint_hashes_unchanged": true,
+  "original_pairs_unchanged": true,
+  "model_accuracy_improved": false,
+  "operator_role_authentication_implemented": false,
+  "physical_webcam_trial_completed": false,
+  "gui_layout_visually_checked": true,
+  "group_report_section8_started": false,
+  "report": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\docs\\07_innovative_feature.md",
+  "gui_check_scope": "Main window and manual-review dialog checked with fictional preview data; no camera or production attendance writes."
+}

@@ -1,0 +1,22 @@
+{
+  "scope": "Software integration on a train-split photo; reviewer is scripted from the dataset label, not a human trial.",
+  "camera_activated": false,
+  "production_database_used": false,
+  "temporary_database_removed": true,
+  "real_model_startup": "ready_with_camera_off",
+  "checkpoint_hashes_unchanged": {
+    "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\triplet\\best_model.pt": "c94e9eaaf4b44424c1744e03aabf53e9da128861c0701948a649af0a1797a815",
+    "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\liveness_lcc\\best_model.pt": "fdf0158c6b628b14a7d49dfe3c4a4e872162e078d397c8a790713be7c10f6a2d",
+    "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\emotion_fer\\best_model.pt": "903664abcbcb5e4436ddcc5bc60f6a361256511f031661419e427417f84ef278"
+  },
+  "selected_dataset_subject": "n000003",
+  "model_status_before_review": "unknown",
+  "model_status_after_review": "unknown",
+  "automatic_threshold": 0.8695402108345607,
+  "stored_cosine": 0.8421513438224792,
+  "saved_source": "manual_review",
+  "saved_reviewer": "Software fixture operator",
+  "saved_reason": "Dataset label oracle; software test, not a human decision.",
+  "live_gate_failure_blocked_review": true,
+  "no_model_accuracy_improvement_claimed": true
+}

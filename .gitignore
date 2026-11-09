@@ -1,0 +1,20 @@
+.venv/
+.venv-gpu/
+__pycache__/
+*.pyc
+data/
+results/
+tmp/
+.pytest_cache/
+reports/*.zip
+reports/archive/
+*.sqlite*
+*.db
+.env
+.env.*
+kaggle.json
+credentials*.json
+*.pem
+*.key
+/Facial Recognition with Emotion and Liveness.pdf
+docs/*.json

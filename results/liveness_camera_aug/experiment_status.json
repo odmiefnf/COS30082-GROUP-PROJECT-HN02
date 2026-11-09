@@ -1,0 +1,272 @@
+{
+  "status": "selected_for_demo_pending_broader_camera_attack_validation",
+  "runtime_changed": true,
+  "baseline_preserved": true,
+  "baseline_sha256": "fdf0158c6b628b14a7d49dfe3c4a4e872162e078d397c8a790713be7c10f6a2d",
+  "candidate_sha256": "99e32d105c0764f9a5707648918feafdef7f8afc7f86ed07bd29d1a337a3845d",
+  "matched_candidate_sha256": "fdbb5efc65a1df89c984a49afbada3734945523a6f0ef0b233e9391cf024cd2d",
+  "baseline_validation": {
+    "accuracy": 0.689280868385346,
+    "APCER": 0.3440817931576878,
+    "BPCER": 0.10123456790123457,
+    "ACER": 0.22265818052946118,
+    "AUC": 0.8295568080861042,
+    "threshold": 0.07299606294461634,
+    "accept_rule": "live_score >= threshold",
+    "sample_count": 2948,
+    "live_count": 405,
+    "spoof_count": 2543,
+    "confusion": {
+      "true_live": 364,
+      "spoof_accepted_live": 875,
+      "true_spoof": 1668,
+      "live_rejected_spoof": 41
+    },
+    "confusion_matrix": [
+      [
+        1668,
+        875
+      ],
+      [
+        41,
+        364
+      ]
+    ],
+    "confusion_matrix_order": {
+      "rows": [
+        "spoof",
+        "live"
+      ],
+      "columns": [
+        "spoof",
+        "live"
+      ]
+    },
+    "score_definition": "softmax(logits)[live_label=1]; higher means more likely live"
+  },
+  "candidate_minimum_acer_validation": {
+    "accuracy": 0.8239484396200815,
+    "APCER": 0.16948486040110106,
+    "BPCER": 0.21728395061728395,
+    "ACER": 0.1933844055091925,
+    "AUC": 0.8745168290587086,
+    "threshold": 0.04020490087741269,
+    "accept_rule": "live_score >= threshold",
+    "sample_count": 2948,
+    "live_count": 405,
+    "spoof_count": 2543,
+    "confusion": {
+      "true_live": 317,
+      "spoof_accepted_live": 431,
+      "true_spoof": 2112,
+      "live_rejected_spoof": 88
+    },
+    "confusion_matrix": [
+      [
+        2112,
+        431
+      ],
+      [
+        88,
+        317
+      ]
+    ],
+    "confusion_matrix_order": {
+      "rows": [
+        "spoof",
+        "live"
+      ],
+      "columns": [
+        "spoof",
+        "live"
+      ]
+    },
+    "score_definition": "softmax(logits)[live_label=1]; higher means more likely live"
+  },
+  "candidate_matched_validation": {
+    "accuracy": 0.6886024423337856,
+    "APCER": 0.33936295713723946,
+    "BPCER": 0.13580246913580246,
+    "ACER": 0.23758271313652096,
+    "AUC": 0.8745148871508813,
+    "threshold": 0.0021445315221842592,
+    "accept_rule": "live_score >= threshold",
+    "sample_count": 2948,
+    "live_count": 405,
+    "spoof_count": 2543,
+    "confusion": {
+      "true_live": 350,
+      "spoof_accepted_live": 863,
+      "true_spoof": 1680,
+      "live_rejected_spoof": 55
+    },
+    "confusion_matrix": [
+      [
+        1680,
+        863
+      ],
+      [
+        55,
+        350
+      ]
+    ],
+    "confusion_matrix_order": {
+      "rows": [
+        "spoof",
+        "live"
+      ],
+      "columns": [
+        "spoof",
+        "live"
+      ]
+    },
+    "score_definition": "softmax(logits)[live_label=1]; higher means more likely live"
+  },
+  "baseline_test_regression": {
+    "accuracy": 0.7697420898697155,
+    "APCER": 0.2280484448114506,
+    "BPCER": 0.29296875,
+    "ACER": 0.2605085974057253,
+    "AUC": 0.8239074757431875,
+    "threshold": 0.07299606294461634,
+    "accept_rule": "live_score >= threshold",
+    "sample_count": 7522,
+    "live_count": 256,
+    "spoof_count": 7266,
+    "confusion": {
+      "true_live": 181,
+      "spoof_accepted_live": 1657,
+      "true_spoof": 5609,
+      "live_rejected_spoof": 75
+    },
+    "confusion_matrix": [
+      [
+        5609,
+        1657
+      ],
+      [
+        75,
+        181
+      ]
+    ],
+    "confusion_matrix_order": {
+      "rows": [
+        "spoof",
+        "live"
+      ],
+      "columns": [
+        "spoof",
+        "live"
+      ]
+    },
+    "score_definition": "softmax(logits)[live_label=1]; higher means more likely live"
+  },
+  "candidate_minimum_acer_test_regression": {
+    "accuracy": 0.9234246211114066,
+    "APCER": 0.06881365262868153,
+    "BPCER": 0.296875,
+    "ACER": 0.18284432631434078,
+    "AUC": 0.9290843053261767,
+    "threshold": 0.04020490087741269,
+    "accept_rule": "live_score >= threshold",
+    "sample_count": 7522,
+    "live_count": 256,
+    "spoof_count": 7266,
+    "confusion": {
+      "true_live": 180,
+      "spoof_accepted_live": 500,
+      "true_spoof": 6766,
+      "live_rejected_spoof": 76
+    },
+    "confusion_matrix": [
+      [
+        6766,
+        500
+      ],
+      [
+        76,
+        180
+      ]
+    ],
+    "confusion_matrix_order": {
+      "rows": [
+        "spoof",
+        "live"
+      ],
+      "columns": [
+        "spoof",
+        "live"
+      ]
+    },
+    "score_definition": "softmax(logits)[live_label=1]; higher means more likely live"
+  },
+  "candidate_matched_test_regression": {
+    "accuracy": 0.811619250199415,
+    "APCER": 0.19102669969721991,
+    "BPCER": 0.11328125,
+    "ACER": 0.15215397484860996,
+    "AUC": 0.9290843053261767,
+    "threshold": 0.0021445315221842592,
+    "accept_rule": "live_score >= threshold",
+    "sample_count": 7522,
+    "live_count": 256,
+    "spoof_count": 7266,
+    "confusion": {
+      "true_live": 227,
+      "spoof_accepted_live": 1388,
+      "true_spoof": 5878,
+      "live_rejected_spoof": 29
+    },
+    "confusion_matrix": [
+      [
+        5878,
+        1388
+      ],
+      [
+        29,
+        227
+      ]
+    ],
+    "confusion_matrix_order": {
+      "rows": [
+        "spoof",
+        "live"
+      ],
+      "columns": [
+        "spoof",
+        "live"
+      ]
+    },
+    "score_definition": "softmax(logits)[live_label=1]; higher means more likely live"
+  },
+  "weight_selection": "minimum full validation ACER, validation loss tie break; epoch10 of10",
+  "matched_threshold_selection": "maximum validation TPR subject to APCER <= baseline validation APCER; lower APCER then higher threshold break ties",
+  "glasses_trial_minimum_acer": "results/liveness_camera_aug/webcam_glasses.json",
+  "matched_glasses_trial_completed": true,
+  "independent_eyeglasses_accuracy_study": false,
+  "camera_images_saved": false,
+  "camera_data_used_for_training_or_calibration": false,
+  "notes": [
+    "The existing test split is reused for regression; it is not a fresh deployment estimate.",
+    "Matched validation BPCER increased from10.12% to13.58%; test BPCER decreased from29.30% to11.33%.",
+    "Glasses-specific improvement has not yet been demonstrated.",
+    "Second glasses trial:20scoredcrops,baseline15passed,candidate20passed;220framesnotdetected. This is not100%accuracy or an independent glasses study.",
+    "New default is a prototype selected from validation-calibrated models with test regression and limited webcam evidence; broader screen/print trials remain necessary."
+  ],
+  "selected_runtime_checkpoint": "results/liveness_camera_matched/best_model.pt",
+  "selected_runtime_sha256": "fdbb5efc65a1df89c984a49afbada3734945523a6f0ef0b233e9391cf024cd2d",
+  "matched_glasses_trial": "results/liveness_camera_matched/webcam_glasses.json",
+  "software_tests": {
+    "passed": 105,
+    "total": 105,
+    "seconds": 77.378,
+    "log": "results/app_check_20261027/liveness_glasses_final_tests.log"
+  },
+  "rollback_command": "python -m attendance_app.gui --liveness-checkpoint results/liveness_lcc/best_model.pt",
+  "real_gui_camera_start_verified": true,
+  "real_gui_glasses_liveness_pass_observed": true,
+  "real_gui_existing_profile_recognition_observed": true,
+  "profile_enrollment_performed_by_agent": false,
+  "real_gui_uses_user_database": true,
+  "current_model_offline_integration": "results/liveness_camera_matched/attendance_integration.json"
+}

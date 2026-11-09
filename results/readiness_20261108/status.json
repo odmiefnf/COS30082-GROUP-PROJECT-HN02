@@ -1,0 +1,37 @@
+{
+  "review_date": "2026-11-08",
+  "status": "software_verified_human_trials_deferred_by_user",
+  "software_tests": {
+    "passed": 202,
+    "duration_seconds": 71.609,
+    "log": "results/readiness_20261108/full_tests.log"
+  },
+  "runtime_updates": [
+    "Independent expression feedback; PAD still gates identity and writes",
+    "Portable config-relative identity checkpoint",
+    "Single enlarged stable preview with yellow/green recognition outline",
+    "Runtime expression errors visible in UI and diagnostics"
+  ],
+  "real_model_software_checks": {
+    "train_photo_probes": 24,
+    "expression_executed": 24,
+    "PAD_passed": 21,
+    "identity_executed": 21,
+    "production_database_used": false,
+    "camera_activated": false,
+    "scope": "Software integration on training photos, not an accuracy benchmark"
+  },
+  "relocation_check": "results/readiness_20261108/relocation_check.json",
+  "startup_check": "results/readiness_20261108/model_startup.json",
+  "PAD_experiment": "results/liveness_regularized_20261108/experiment_status.json",
+  "PAD_candidate_promoted": false,
+  "human_trials": "User explicitly deferred webcam trials on 2026-11-08",
+  "pending": [
+    "Independent no-glasses, unknown-person, recorded-video and printed-photo trials",
+    "Group and member details",
+    "Continuous 5-10 minute video and accessible link",
+    "Each student individual report and peer evaluation",
+    "Week 12 interview"
+  ],
+  "max_mark_claimed": false
+}

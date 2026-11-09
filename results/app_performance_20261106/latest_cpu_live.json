@@ -1,0 +1,174 @@
+{
+  "schema_version": 1,
+  "status": "completed",
+  "mode": "latest",
+  "created_utc": "2026-11-06T08:57:16.893439+00:00",
+  "purpose": "Performance timings only; no accuracy or liveness efficacy conclusion",
+  "production_database_read_only": true,
+  "images_or_video_saved": false,
+  "camera_embeddings_in_report": false,
+  "thresholds_retuned": false,
+  "profiles_or_attendance_written_to_production": false,
+  "capture_request": {
+    "camera": 0,
+    "seconds": 8.0,
+    "resolution": [
+      960,
+      720
+    ],
+    "warmup_frames_excluded": 8
+  },
+  "runtime": {
+    "device": "cpu",
+    "torch": "2.5.1+cu124",
+    "torch_threads": 4,
+    "opencv": "4.13.0",
+    "opencv_threads": 16,
+    "gpu": null
+  },
+  "setup_seconds": 0.8805581000015081,
+  "model_configuration": {
+    "identity_sha256": "c94e9eaaf4b44424c1744e03aabf53e9da128861c0701948a649af0a1797a815",
+    "identity_threshold": 0.8695402108345607,
+    "identity_margin": 0.05,
+    "liveness_threshold": 0.0021445315221842592,
+    "liveness_threshold_source": "validation"
+  },
+  "gallery_profile_count": 1,
+  "camera_open_ms": 3082.210100001248,
+  "camera_metadata": {
+    "width": 960,
+    "height": 540,
+    "fps": 30.0,
+    "requested_width": 960,
+    "requested_height": 720,
+    "requested_fps": 30.0
+  },
+  "latest_capture": {
+    "frames_captured_in_window": 221,
+    "capture_fps": 27.57989274067705,
+    "analysis_unique_sequences": 217,
+    "analysis_skipped_capture_sequences": 3,
+    "stale_samples_not_analyzed": 0,
+    "duplicate_sequences_analyzed": 0,
+    "note": "Capture FPS is the source/preview availability rate, not measured Tk display FPS. Read/RGB timing inside LatestCamera is not instrumented."
+  },
+  "duration_seconds": 8.013084099999105,
+  "processed_frames": 217,
+  "processing_fps": 27.08070916166027,
+  "simulated_attendance_records": 0,
+  "timings": {
+    "latest_sample_wait": {
+      "calls": 218,
+      "mean_ms": 8.83760688063601,
+      "p50_ms": 7.95280000056664,
+      "p95_ms": 25.693960000899082,
+      "max_ms": 37.67879999941215
+    },
+    "observation_age_at_inference_start": {
+      "calls": 217,
+      "mean_ms": 1.5161290322987027,
+      "p50_ms": 0.0,
+      "p95_ms": 15.99999999962165,
+      "max_ms": 32.00000000288128
+    },
+    "face_detector": {
+      "calls": 217,
+      "mean_ms": 22.533000000021694,
+      "p50_ms": 21.795299999212148,
+      "p95_ms": 24.652960000821622,
+      "max_ms": 183.19469999914872
+    },
+    "liveness_model": {
+      "calls": 136,
+      "mean_ms": 2.8236308822563254,
+      "p50_ms": 2.406250001513399,
+      "p95_ms": 3.332974999466387,
+      "max_ms": 41.15470000033383
+    },
+    "expression_model": {
+      "calls": 136,
+      "mean_ms": 1.4818720588022296,
+      "p50_ms": 1.3923999995313352,
+      "p95_ms": 2.0697749987448333,
+      "max_ms": 2.7555000015127007
+    },
+    "identity_embedding": {
+      "calls": 136,
+      "mean_ms": 1.3170080883088195,
+      "p50_ms": 1.2117000005673617,
+      "p95_ms": 2.0090250018256484,
+      "max_ms": 2.718499999900814
+    },
+    "identity_match": {
+      "calls": 136,
+      "mean_ms": 0.09430441185245667,
+      "p50_ms": 0.08535000051779207,
+      "p95_ms": 0.13624999883177225,
+      "max_ms": 0.2351000002818182
+    },
+    "service_analyze": {
+      "calls": 136,
+      "mean_ms": 5.840779411675398,
+      "p50_ms": 5.384300002333475,
+      "p95_ms": 7.2284749994651065,
+      "max_ms": 43.80440000022645
+    },
+    "frame_processing": {
+      "calls": 217,
+      "mean_ms": 27.629888018582864,
+      "p50_ms": 28.32009999838192,
+      "p95_ms": 33.006579999346286,
+      "max_ms": 197.81520000105957
+    },
+    "observation_age_at_inference_completion": {
+      "calls": 217,
+      "mean_ms": 27.663594470132725,
+      "p50_ms": 30.999999999039574,
+      "p95_ms": 46.19999999849823,
+      "max_ms": 202.9999999977008
+    },
+    "attendance_query": {
+      "calls": 217,
+      "mean_ms": 0.25189723503979217,
+      "p50_ms": 0.2322999971511308,
+      "p95_ms": 0.416079997376073,
+      "max_ms": 0.692400000843918
+    },
+    "loop_total": {
+      "calls": 217,
+      "mean_ms": 36.749383870959264,
+      "p50_ms": 33.30439999990631,
+      "p95_ms": 50.65506000028108,
+      "max_ms": 206.63620000050287
+    },
+    "capture_interval": {
+      "calls": 220,
+      "mean_ms": 36.36363636363637,
+      "p50_ms": 31.000000002677552,
+      "p95_ms": 47.0000000022992,
+      "max_ms": 78.00000000133878
+    },
+    "capture_callback_age": {
+      "calls": 221,
+      "mean_ms": 0.5022624434589311,
+      "p50_ms": 0.0,
+      "p95_ms": 0.0,
+      "max_ms": 16.00000000325963
+    }
+  },
+  "frame_statuses": {
+    "known": 4,
+    "unknown": 132,
+    "no_face": 81
+  },
+  "frame_sizes": [
+    {
+      "width": 960,
+      "height": 540,
+      "frames": 217
+    }
+  ],
+  "timing_note": "Nested stages overlap; sums of stage timings are not a total. Cold first inference is included. GUI drawing is not measured.",
+  "finished_utc": "2026-11-06T08:57:32.045222+00:00"
+}

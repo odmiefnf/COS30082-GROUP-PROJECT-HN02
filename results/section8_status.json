@@ -1,0 +1,27 @@
+{
+  "section": 8,
+  "status": "report_completed_pending_user_review",
+  "language": "English",
+  "group_and_member_details": "left_blank_as_requested",
+  "report": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\reports\\COS30082_Group_Report.docx",
+  "sha256": "37a2208a522e6ce049a1c49bf4d028fffacff7c79e6ab84c608c5f00561ad8ee",
+  "size_bytes": 327270,
+  "pages": 12,
+  "assignment_page_limit": 12,
+  "page_count_includes_title_and_references": true,
+  "all_pages_visually_checked": true,
+  "tables": 9,
+  "inline_images_with_alt_text": 5,
+  "required_sections": [
+    "Methodology",
+    "Results",
+    "Discussion"
+  ],
+  "source_evidence": "tmp/group_report/build_evidence.json",
+  "checkpoints_and_original_pair_file_verified": true,
+  "models_thresholds_and_datasets_modified": false,
+  "physical_webcam_trial_completed": false,
+  "physical_webcam_trial_limitation_disclosed": true,
+  "section9_started": false,
+  "completed_at_utc": "2026-10-27T03:50:44.4592397Z"
+}

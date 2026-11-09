@@ -1,0 +1,92 @@
+{
+  "threshold": 0.0021445315221842592,
+  "threshold_source": "validation",
+  "threshold_calibrated": true,
+  "selection_method": "maximum validation TPR subject to APCER <= baseline validation APCER; lower APCER then higher threshold break ties",
+  "maximum_validation_apcer": 0.3440817931576878,
+  "baseline_validation_metrics": {
+    "accuracy": 0.689280868385346,
+    "APCER": 0.3440817931576878,
+    "BPCER": 0.10123456790123457,
+    "ACER": 0.22265818052946118,
+    "AUC": 0.8295568080861042,
+    "threshold": 0.07299606294461634,
+    "accept_rule": "live_score >= threshold",
+    "sample_count": 2948,
+    "live_count": 405,
+    "spoof_count": 2543,
+    "confusion": {
+      "true_live": 364,
+      "spoof_accepted_live": 875,
+      "true_spoof": 1668,
+      "live_rejected_spoof": 41
+    },
+    "confusion_matrix": [
+      [
+        1668,
+        875
+      ],
+      [
+        41,
+        364
+      ]
+    ],
+    "confusion_matrix_order": {
+      "rows": [
+        "spoof",
+        "live"
+      ],
+      "columns": [
+        "spoof",
+        "live"
+      ]
+    },
+    "score_definition": "softmax(logits)[live_label=1]; higher means more likely live"
+  },
+  "baseline_checkpoint_sha256": "fdf0158c6b628b14a7d49dfe3c4a4e872162e078d397c8a790713be7c10f6a2d",
+  "validation_metrics": {
+    "accuracy": 0.6886024423337856,
+    "APCER": 0.33936295713723946,
+    "BPCER": 0.13580246913580246,
+    "ACER": 0.23758271313652096,
+    "AUC": 0.8745148871508813,
+    "threshold": 0.0021445315221842592,
+    "accept_rule": "live_score >= threshold",
+    "sample_count": 2948,
+    "live_count": 405,
+    "spoof_count": 2543,
+    "confusion": {
+      "true_live": 350,
+      "spoof_accepted_live": 863,
+      "true_spoof": 1680,
+      "live_rejected_spoof": 55
+    },
+    "confusion_matrix": [
+      [
+        1680,
+        863
+      ],
+      [
+        55,
+        350
+      ]
+    ],
+    "confusion_matrix_order": {
+      "rows": [
+        "spoof",
+        "live"
+      ],
+      "columns": [
+        "spoof",
+        "live"
+      ]
+    },
+    "score_definition": "softmax(logits)[live_label=1]; higher means more likely live"
+  },
+  "scope": "validation operating point; not an independent deployment error guarantee",
+  "validation_samples_used": 2948,
+  "validation_batches_capped": false,
+  "test_data_used": false,
+  "camera_data_used": false,
+  "selected_checkpoint": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\liveness_camera_matched\\best_model.pt"
+}

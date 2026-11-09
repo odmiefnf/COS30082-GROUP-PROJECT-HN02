@@ -1,0 +1,106 @@
+{
+  "updated_utc": "2026-10-30T09:48:43.214610+00:00",
+  "report": "reports\\COS30082_Group_Report.docx",
+  "report_sha256": "d28d3fcc05c44076cd25024924fbddb09a7bed59dde8862c736770acfd4401af",
+  "pages": 12,
+  "page_limit": 12,
+  "language": "English",
+  "group_details": "left blank as requested",
+  "tables": 9,
+  "inline_images": 5,
+  "rendered_and_all_pages_visually_reviewed": true,
+  "layout_issues_open": [],
+  "reviewed_pages": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12
+  ],
+  "rendered_page_hashes": [
+    {
+      "page": 1,
+      "sha256": "e9a2d59021357ce93cdd935ef7a464676b692e351e5202af961a71a6295faa83"
+    },
+    {
+      "page": 2,
+      "sha256": "b77f9eed74aa49c5c71871697784f745183a03917b47f1eddfc81babc7aae318"
+    },
+    {
+      "page": 3,
+      "sha256": "65c78965811b7429f495fc4f85d2f9b124c72bf29072e78b1729893523357772"
+    },
+    {
+      "page": 4,
+      "sha256": "ccbebf61c88d91b5e981d5b1264d8aa04f559ced7967ab0571d5d80672e49beb"
+    },
+    {
+      "page": 5,
+      "sha256": "24255499c11bc0ed950ab7a0d58bcc8f0a7d6008000262a19be7857890f8ca1b"
+    },
+    {
+      "page": 6,
+      "sha256": "60293273f780b9ea6cfb0139a59989b3188b41b1b7c58560956153216c5dc766"
+    },
+    {
+      "page": 7,
+      "sha256": "34dea84e43fb7e433779f5d66059528cf74c138d838335200b42206ce97e39fe"
+    },
+    {
+      "page": 8,
+      "sha256": "45f8f4bc0e834c7bee23b87a6d876e00742950a2e8ece310f3c2d65d50e52526"
+    },
+    {
+      "page": 9,
+      "sha256": "9c8de7ab69eae58376c4796410f79e00115ae455323c7be24abc595faf85c3ef"
+    },
+    {
+      "page": 10,
+      "sha256": "ae8998a86b3d866746f71219aeff24ec51094cacb9596d8686a1477b64d26cdd"
+    },
+    {
+      "page": 11,
+      "sha256": "d266f12dba208885e31aa07a6ce88415d9de8903e7073ebb68f5fccffe69ddc8"
+    },
+    {
+      "page": 12,
+      "sha256": "a88f7ad1bba46a1f48cd4ee6845a72d62337769641d8720a1510ad1c8456bc1c"
+    }
+  ],
+  "claims_checked_against_source_jsons": true,
+  "build_evidence": "tmp/group_report/build_evidence.json",
+  "qa_intermediates_delivered": false,
+  "renderer": "Canonical document renderer with existing workspace portable LibreOffice on Windows; bundled LO is not shipped on Windows",
+  "render_log": "results/app_upgrade_20261030/phase5_phone_report_render_final.log",
+  "completed_webcam_conditions": [
+    "glasses",
+    "screen-replay"
+  ],
+  "pending_webcam_conditions": [
+    "no-glasses",
+    "unknown",
+    "print"
+  ],
+  "baseline_preserved": "reports/archive/COS30082_Group_Report_baseline_20261027.docx",
+  "qa_render_directory": "tmp\\group_report\\render_phase5_phone_final",
+  "review_method": "All12phone-enriched pages viewed; final Abstract/Discussion pages1and11 re-viewed; other10 verified pixel-identical to reviewed render",
+  "completed_attack_presentations": [
+    "phone-still-photo"
+  ],
+  "pending_webcam_presentations": [
+    "recorded-video"
+  ],
+  "pad_phone_failure_disclosed_in": [
+    "Abstract",
+    "Integration evidence",
+    "Discussion"
+  ],
+  "previous_glasses_only_report": "reports/archive/COS30082_Group_Report_glasses_only_20261030.docx"
+}

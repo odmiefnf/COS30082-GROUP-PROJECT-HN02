@@ -1,0 +1,25 @@
+Fingerprinting 8093 training and 2948 validation images...
+Caching train/validation tensors in CPU RAM; preprocessing is unchanged.
+Cached 1000/8093 images from train.csv
+Cached 2000/8093 images from train.csv
+Cached 3000/8093 images from train.csv
+Cached 4000/8093 images from train.csv
+Cached 5000/8093 images from train.csv
+Cached 6000/8093 images from train.csv
+Cached 7000/8093 images from train.csv
+Cached 8000/8093 images from train.csv
+Cached 1000/2948 images from val.csv
+Cached 2000/2948 images from val.csv
+Cached tensors occupy 1.548 GiB.
+Training liveness CNN from scratch on cpu; labels: 0=spoof, 1=live.
+Epoch 1/10: train_loss=0.345369, val_loss=0.337442, val_accuracy=0.8592; best epoch=1
+Epoch 2/10: train_loss=0.296943, val_loss=0.366094, val_accuracy=0.8521; best epoch=1
+Epoch 3/10: train_loss=0.260401, val_loss=0.445696, val_accuracy=0.8060; best epoch=1
+Epoch 4/10: train_loss=0.213252, val_loss=0.403101, val_accuracy=0.7934; best epoch=1
+Epoch 5/10: train_loss=0.180129, val_loss=0.437501, val_accuracy=0.8284; best epoch=1
+Epoch 6/10: train_loss=0.145821, val_loss=0.480586, val_accuracy=0.8484; best epoch=1
+Epoch 7/10: train_loss=0.121669, val_loss=0.803045, val_accuracy=0.7863; best epoch=1
+Epoch 8/10: train_loss=0.094644, val_loss=0.848148, val_accuracy=0.7473; best epoch=1
+Epoch 9/10: train_loss=0.077803, val_loss=0.783449, val_accuracy=0.8124; best epoch=1
+Epoch 10/10: train_loss=0.076234, val_loss=0.757990, val_accuracy=0.8243; best epoch=1
+Calibrated threshold 0.072996 on ALL 2948 validation images using best epoch 1; saved C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\results\liveness_lcc\best_model.pt

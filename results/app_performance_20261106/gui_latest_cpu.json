@@ -1,0 +1,136 @@
+{
+  "schema_version": 1,
+  "status": "completed",
+  "created_utc": "2026-11-06T09:02:06.792066+00:00",
+  "scope": "Actual visible AttendanceWindow, CameraWorker, LatestCamera and Tk rendering; performance only",
+  "device_requested": "cpu",
+  "camera_requested": 0,
+  "duration_requested_seconds": 30.0,
+  "production_database_read_only": true,
+  "images_or_video_saved": false,
+  "camera_embeddings_in_report": false,
+  "profiles_or_attendance_written_to_production": false,
+  "thresholds_retuned": false,
+  "automatic_actions": [
+    "Start camera after model setup",
+    "Close after requested measurement duration"
+  ],
+  "registration_or_profile_actions_invoked": false,
+  "production_database_sha256_before": "d4da42f01bc08ae881c6efcb4d8da50993e53627d3d4101b9f08d19ed4ddf9eb",
+  "worker_stopped_before_scratch_cleanup": true,
+  "simulated_attendance_records": 1,
+  "control_events": {
+    "component": 11,
+    "ready": 1,
+    "started": 1
+  },
+  "frame_statuses": {
+    "no_face": 127,
+    "unknown": 75,
+    "spoof": 35,
+    "multiple_faces": 26,
+    "known": 86,
+    "attendance_confirmed": 272
+  },
+  "frame_sizes": [
+    {
+      "width": 960,
+      "height": 540,
+      "frames": 901
+    }
+  ],
+  "ended_automatically_after_duration": true,
+  "model_components": {
+    "Runtime": {
+      "status": "Ready",
+      "detail": "Device: cpu; threads: 4"
+    },
+    "Identity": {
+      "status": "Ready",
+      "detail": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\identity_app_config.json"
+    },
+    "Liveness": {
+      "status": "Ready",
+      "detail": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\liveness_camera_matched\\best_model.pt"
+    },
+    "Expression": {
+      "status": "Ready",
+      "detail": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\emotion_fer\\best_model.pt"
+    },
+    "Detector": {
+      "status": "Ready",
+      "detail": "haar"
+    },
+    "Profiles": {
+      "status": "Ready",
+      "detail": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\webcam_trial_veslpxco\\gallery.sqlite3"
+    }
+  },
+  "duration_seconds": 30.0,
+  "startup_to_first_preview_seconds": 6.90599999999904,
+  "preview_render_count": 872,
+  "preview_fps": 29.066666666666666,
+  "captured_frames": 885,
+  "capture_fps": 29.5,
+  "worker_analysis_count": 621,
+  "worker_analysis_fps": 20.7,
+  "displayed_analysis_count": 618,
+  "displayed_analysis_fps": 20.6,
+  "analysis_duplicate_sequences": 0,
+  "preview_duplicate_sequences": 0,
+  "timings": {
+    "tk_preview_render": {
+      "calls": 872,
+      "mean_ms": 7.443807339414063,
+      "p50_ms": 0.0,
+      "p95_ms": 15.99999999962165,
+      "max_ms": 484.00000000037835
+    },
+    "capture_to_preview_completion": {
+      "calls": 872,
+      "mean_ms": 19.480504587148754,
+      "p50_ms": 15.99999999962165,
+      "p95_ms": 31.9999999992433,
+      "max_ms": 484.00000000037835
+    },
+    "worker_processing": {
+      "calls": 621,
+      "mean_ms": 34.007128180286934,
+      "p50_ms": 33.670799999526935,
+      "p95_ms": 44.85470000145142,
+      "max_ms": 638.2006999992882
+    },
+    "capture_to_analysis_publication": {
+      "calls": 621,
+      "mean_ms": 52.54589371982045,
+      "p50_ms": 47.0000000022992,
+      "p95_ms": 78.00000000133878,
+      "max_ms": 655.9999999990396
+    },
+    "tk_analysis_render": {
+      "calls": 618,
+      "mean_ms": 2.885113268601633,
+      "p50_ms": 0.0,
+      "p95_ms": 15.99999999962165,
+      "max_ms": 16.00000000325963
+    },
+    "capture_to_analysis_display": {
+      "calls": 618,
+      "mean_ms": 67.35113268607759,
+      "p50_ms": 62.999999998282874,
+      "p95_ms": 94.00000000096043,
+      "max_ms": 688.0000000019209
+    },
+    "actual_preview_interval": {
+      "calls": 871,
+      "mean_ms": 34.44316877152698,
+      "p50_ms": 31.000000002677552,
+      "p95_ms": 47.0000000022992,
+      "max_ms": 92.99999999711872
+    }
+  },
+  "timing_note": "Actual Tk render calls are measured. Nested timings overlap; capture/read/GPU setup and first inference may be cold. No identity/PAD accuracy claim.",
+  "production_database_sha256_after": "d4da42f01bc08ae881c6efcb4d8da50993e53627d3d4101b9f08d19ed4ddf9eb",
+  "production_database_file_unchanged": true,
+  "finished_utc": "2026-11-06T09:02:44.332032+00:00"
+}

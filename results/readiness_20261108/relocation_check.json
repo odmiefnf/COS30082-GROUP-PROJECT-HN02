@@ -1,0 +1,13 @@
+{
+  "status": "completed",
+  "checked_utc": "2026-11-08T10:18:48.540838+00:00",
+  "different_working_directory": true,
+  "checkpoint_path": "triplet/best_model.pt",
+  "checkpoint_sha256": "c94e9eaaf4b44424c1744e03aabf53e9da128861c0701948a649af0a1797a815",
+  "threshold_unchanged": true,
+  "embedding_dimension": 128,
+  "embedding_finite_unit_length": true,
+  "camera_activated": false,
+  "production_database_used": false,
+  "fresh_dependency_installation": false
+}

@@ -1,0 +1,23 @@
+{
+  "purpose": "Predeclared validation-only PAD experiment for the assignment review",
+  "architecture": "Existing LivenessCNN; random initialization; no pretrained weights",
+  "training_manifest": "data/lcc_fasd_manifests/train.csv",
+  "validation_manifest": "data/lcc_fasd_manifests/val.csv",
+  "test_data_used_for_selection": false,
+  "webcam_data_used_for_training_or_selection": false,
+  "epochs": 20,
+  "learning_rate": 0.0002,
+  "weight_decay": 0.001,
+  "batch_size": 64,
+  "seed": 42,
+  "camera_augmentation": true,
+  "selection": "Minimum validation ACER; validation loss breaks ties",
+  "consideration_criteria": {
+    "validation_ACER_less_than": 0.1933844055091925,
+    "validation_APCER_at_most": 0.33936295713723946,
+    "validation_BPCER_at_most": 0.13580246913580246,
+    "fresh_independent_camera_acceptance_required_before_runtime_promotion": true
+  },
+  "existing_runtime_checkpoint_preserved": true,
+  "limitations": "Validation has already been reused for model development; improvement does not establish phone/print/replay robustness."
+}

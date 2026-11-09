@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "status": "completed",
+  "created_utc": "2026-10-30T09:24:03.406529+00:00",
+  "scope": "One operator-labelled convenience trial; correlated frames are not independent accuracy/FAR/FRR trials",
+  "operator_ground_truth": {
+    "condition": "glasses",
+    "expected_profile": "kiet"
+  },
+  "trial_count": 1,
+  "production_database_read_only": true,
+  "images_or_video_saved": false,
+  "camera_embeddings_in_report": false,
+  "profiles_or_attendance_written_to_production": false,
+  "thresholds_retuned": false,
+  "models": {
+    "identity": {
+      "sha256": "c94e9eaaf4b44424c1744e03aabf53e9da128861c0701948a649af0a1797a815",
+      "threshold": 0.8695402108345607,
+      "ambiguity_margin": 0.05
+    },
+    "liveness": {
+      "sha256": "fdbb5efc65a1df89c984a49afbada3734945523a6f0ef0b233e9391cf024cd2d",
+      "threshold": 0.0021445315221842592
+    },
+    "expression": {
+      "sha256": "903664abcbcb5e4436ddcc5bc60f6a361256511f031661419e427417f84ef278"
+    },
+    "detector": "Current application Haar locator",
+    "device": "cpu",
+    "threads": 4
+  },
+  "gallery_profile_count": 1,
+  "gallery_appearance_counts": [
+    1
+  ],
+  "capture_request": {
+    "camera": 0,
+    "seconds": 15.0,
+    "max_frames": 2000,
+    "warmup_frames_excluded": 8,
+    "requested_resolution": [
+      960,
+      720
+    ]
+  },
+  "counts": {
+    "all_frames": 312,
+    "exactly_one_face": 243,
+    "quality_pass": 243,
+    "pad_scored": 243,
+    "pad_pass": 232,
+    "pad_not_passed": 11,
+    "pad_unavailable": 0,
+    "identity_scored": 232,
+    "identity_known": 175,
+    "identity_unknown": 57,
+    "identity_ambiguous": 0,
+    "identity_correct": 175,
+    "identity_wrong": 0,
+    "unknown_matched": null,
+    "attack_target_matched": null,
+    "attack_any_matched": null,
+    "expression_scored": 232
+  },
+  "frame_statuses": {
+    "multiple_faces": 42,
+    "spoof": 11,
+    "no_face": 27,
+    "unknown": 57,
+    "known": 62,
+    "attendance_confirmed": 113
+  },
+  "frame_sizes": [
+    {
+      "width": 960,
+      "height": 540,
+      "frames": 312
+    }
+  ],
+  "quality_reasons": {},
+  "duration_seconds": 15.0,
+  "rates": {
+    "one_face_per_all_frames": 0.7788461538461539,
+    "quality_pass_per_all_frames": 0.7788461538461539,
+    "pad_pass_per_scored_crop": 0.9547325102880658,
+    "pad_pass_per_all_frames": 0.7435897435897436,
+    "correct_identity_per_scored_probe": 0.7543103448275862,
+    "correct_identity_per_all_frames": 0.5608974358974359,
+    "unknown_match_per_scored_probe": null,
+    "attack_match_per_scored_probe": null
+  },
+  "simulated_attendance": {
+    "scope": "Only in disposable gallery copy; not production attendance",
+    "record_count": 1,
+    "target_record_count": 1,
+    "other_record_count": 0,
+    "correct_record_count": 1,
+    "unknown_accept_record_count": null,
+    "attack_accept_record_count": null,
+    "first_record_seconds": 2.812000000005355
+  }
+}

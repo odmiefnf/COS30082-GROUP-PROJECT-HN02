@@ -1,0 +1,57 @@
+{
+  "status": "completed",
+  "selected_epoch": 6,
+  "completed_epochs": 20,
+  "checkpoint_sha256": "9f402655a4ef1df2c14126b56b477220e4be98a064a47b42733c5947b6fb6bd9",
+  "validation_metrics": {
+    "accuracy": 0.8246268656716418,
+    "APCER": 0.16673220605583955,
+    "BPCER": 0.22962962962962963,
+    "ACER": 0.1981809178427346,
+    "AUC": 0.8438395401562264,
+    "threshold": 0.8717164423376569,
+    "accept_rule": "live_score >= threshold",
+    "sample_count": 2948,
+    "live_count": 405,
+    "spoof_count": 2543,
+    "confusion": {
+      "true_live": 312,
+      "spoof_accepted_live": 424,
+      "true_spoof": 2119,
+      "live_rejected_spoof": 93
+    },
+    "confusion_matrix": [
+      [
+        2119,
+        424
+      ],
+      [
+        93,
+        312
+      ]
+    ],
+    "confusion_matrix_order": {
+      "rows": [
+        "spoof",
+        "live"
+      ],
+      "columns": [
+        "spoof",
+        "live"
+      ]
+    },
+    "score_definition": "softmax(logits)[live_label=1]; higher means more likely live"
+  },
+  "predeclared_checks": {
+    "validation_ACER_improved": false,
+    "validation_APCER_bound": true,
+    "validation_BPCER_bound": false,
+    "fresh_camera_acceptance": false
+  },
+  "promoted_to_runtime": false,
+  "reason": "Candidate failed the predeclared ACER and genuine-rejection criteria; no independent camera trial was run.",
+  "test_evaluation_performed": false,
+  "camera_evaluation_performed": false,
+  "test_or_camera_data_used_for_training_or_selection": false,
+  "runtime_checkpoint_unchanged": true
+}

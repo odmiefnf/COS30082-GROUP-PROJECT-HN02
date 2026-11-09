@@ -1,0 +1,16 @@
+{
+  "checkpoint_sha256": "fdf0158c6b628b14a7d49dfe3c4a4e872162e078d397c8a790713be7c10f6a2d",
+  "cli_matches_batch_evaluation": true,
+  "checks": [
+    {
+      "image_path": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\LCC_FASD\\LCC_FASD_evaluation\\real\\real_0.png",
+      "score_absolute_difference": 3.620834632123149e-08,
+      "same_decision": true
+    },
+    {
+      "image_path": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\LCC_FASD\\LCC_FASD_evaluation\\spoof\\spoof_1000.png",
+      "score_absolute_difference": 1.327974753773109e-08,
+      "same_decision": true
+    }
+  ]
+}
