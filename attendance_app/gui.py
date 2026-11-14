@@ -139,7 +139,7 @@ class CameraWorker(threading.Thread):
             from emotion_recognition.infer import EmotionRecognizer
             from .recognition import FaceRecognizer
             from .store import ProfileStore
-            from .service import AttendanceService
+            from .service import AttendanceService, uses_pad_context
             from .camera import FaceLocator, FrameProcessor
             from .reference_import import ReferenceImporter
             torch.set_num_threads(self.args.num_threads)
@@ -168,7 +168,8 @@ class CameraWorker(threading.Thread):
             store = ProfileStore(self.args.database, recognizer.fingerprint, recognizer.dimension)
             self.service = AttendanceService(store, recognizer, liveness, emotion, self.args.session)
             self.reference_importer = ReferenceImporter(store, recognizer, liveness, locator)
-            processor = FrameProcessor(locator, self.service)
+            crop_options = {"pad_context": True} if uses_pad_context(liveness) else {}
+            processor = FrameProcessor(locator, self.service, **crop_options)
             self.publish(event="component", component="Profiles", status="Ready", detail=str(self.args.database))
             self.publish(event="ready", profiles=len(self.service.profiles), attendance=store.attendance(self.service.session))
             while True:
@@ -332,6 +333,7 @@ class AttendanceWindow:
         self.review_dialog = None
         self.appearance_dialog = None
         self.history_dialog = None
+        self.model_test_dialog = None
         self.profiles_dialog = None
         self.profiles_opening = False
         self.models_ready = False
@@ -394,6 +396,8 @@ class AttendanceWindow:
         self.test_camera_button = ttk.Button(device_bar, text="Test camera", command=self.test_camera)
         self.test_camera_button.pack(side="left", padx=10)
         ttk.Button(device_bar, text="Diagnostics…", command=self.open_diagnostics).pack(side="left")
+        self.model_test_button = ttk.Button(device_bar, text="Model tests…", command=self.open_model_tests)
+        self.model_test_button.pack(side="left", padx=(8, 0))
         self.camera_summary = tk.StringVar(value=f"Camera {args.camera} · Not tested")
         self.label(device_bar, variable=self.camera_summary, size=10, fg=MUTED).pack(side="left", padx=14)
         self.label(outer, "Stored locally · Camera images are not saved · Expressions are display only · Educational prototype", 9, bg=BG, fg=MUTED).pack(side="bottom", anchor="w", pady=(8, 0))
@@ -518,6 +522,8 @@ class AttendanceWindow:
             self.component_status["Identity"] = {"status": "Ready", "detail": "PREVIEW · Example configuration loaded"}
             self.component_status["Liveness"] = {"status": "Error", "detail": "PREVIEW · Example missing checkpoint; no files were read"}
             root.after(300, self.open_diagnostics)
+        elif getattr(args, "preview_model_tests", False):
+            root.after(300, self.open_model_tests)
         if not args.preview:
             self.worker = CameraWorker(args, self.commands, self.updates, self.previews, self.analyses)
             self.worker.start()
@@ -534,7 +540,8 @@ class AttendanceWindow:
         self.refresh_diagnostics()
 
     def device_locked(self):
-        return self.running or self.camera_starting or self.probe_busy or self.closing
+        return (self.running or self.camera_starting or self.probe_busy or self.closing
+                or self.model_test_dialog is not None)
 
     def refresh_device_controls(self):
         locked = self.device_locked()
@@ -543,6 +550,7 @@ class AttendanceWindow:
         self.test_camera_button.configure(state="normal" if not locked and not profiles_busy and not self.args.preview else "disabled")
         self.start_button.configure(state="normal" if self.models_ready and not locked and not profiles_busy else "disabled")
         self.profiles_button.configure(state="normal" if (self.models_ready or self.args.preview) and not locked else "disabled")
+        self.model_test_button.configure(state="normal" if not locked and not profiles_busy else "disabled")
         self.session_entry.configure(state="disabled" if locked else "normal")
 
     def test_camera(self):
@@ -644,9 +652,30 @@ class AttendanceWindow:
     def history_closed(self):
         self.history_dialog = None
 
+    def open_model_tests(self):
+        if self.model_test_dialog is not None:
+            self.model_test_dialog.window.lift()
+            return
+        if (self.device_locked() or self.profiles_dialog is not None or self.profiles_opening
+                or self.appearance_dialog is not None or self.review_dialog is not None):
+            self.feedback.set("Stop the camera and finish any open capture or profile operation before model tests.")
+            return
+        from .model_test_dialog import ModelTestDialog
+        self.model_test_dialog = ModelTestDialog(self.root, PROJECT,
+            getattr(self.args, "liveness_checkpoint", DEFAULT_LIVENESS_CHECKPOINT),
+            camera_index(self.camera_choice.get()), self.model_tests_closed, preview=self.args.preview)
+        self.refresh_device_controls()
+
+    def model_tests_closed(self):
+        self.model_test_dialog = None
+        if not self.closing:
+            self.refresh_device_controls()
+
     def open_profiles(self):
         if self.profiles_dialog is not None:
             self.profiles_dialog.window.lift()
+            return
+        if self.device_locked():
             return
         if self.args.preview:
             from .profiles_dialog import ProfilesDialog
@@ -982,6 +1011,8 @@ class AttendanceWindow:
 
     def close(self):
         self.closing = True
+        if self.model_test_dialog is not None:
+            self.model_test_dialog.close()
         if self.diagnostics_dialog is not None:
             self.diagnostics_dialog.close()
         if self.profiles_dialog is not None:
@@ -1011,7 +1042,7 @@ class AttendanceWindow:
         self.appearance_dialog = None
 
     def await_close(self):
-        if (self.worker is None or not self.worker.is_alive()) and (self.camera_probe is None or not self.camera_probe.is_alive()):
+        if (self.worker is None or not self.worker.is_alive()) and (self.camera_probe is None or not self.camera_probe.is_alive()) and self.model_test_dialog is None:
             self.root.destroy()
         else:
             self.root.after(80, self.await_close)
@@ -1035,10 +1066,11 @@ def main(argv=None):
     parser.add_argument("--preview-history", action="store_true", help="Preview history with fictional rows; never loads models, opens a camera or reads the database.")
     parser.add_argument("--preview-profiles", action="store_true", help="Preview profile management with fictional data; no models, database or camera.")
     parser.add_argument("--preview-diagnostics", action="store_true", help="Preview an example setup error; no models, database or camera.")
+    parser.add_argument("--preview-model-tests", action="store_true", help="Preview model tests; no files, models, database or camera.")
     args = parser.parse_args(argv)
-    if sum((args.preview_review, args.preview_appearance, args.preview_history, args.preview_profiles, args.preview_diagnostics)) > 1:
+    if sum((args.preview_review, args.preview_appearance, args.preview_history, args.preview_profiles, args.preview_diagnostics, args.preview_model_tests)) > 1:
         parser.error("Choose one dialog preview at a time.")
-    if args.preview_review or args.preview_appearance or args.preview_history or args.preview_profiles or args.preview_diagnostics:
+    if args.preview_review or args.preview_appearance or args.preview_history or args.preview_profiles or args.preview_diagnostics or args.preview_model_tests:
         args.preview = True
     if args.num_threads < 1 or not 0 <= args.camera <= 99:
         parser.error("Positive threads and a camera index from 0 to 99 required.")

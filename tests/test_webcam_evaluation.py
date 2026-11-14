@@ -1,17 +1,19 @@
 """Evaluation ground truth, denominators and isolated recording; no webcam use."""
 import hashlib
-from contextlib import closing
+from contextlib import closing, redirect_stdout
+import io
 from pathlib import Path
 import sqlite3
 import tempfile
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import numpy as np
 
 from attendance_app.evaluation import (TrialAccumulator, collect_frames, gallery_snapshot,
                                      report_header, validate_ground_truth, validate_presentation)
 from attendance_app.store import ProfileStore
+from tools.evaluate_webcam_trial import ROOT, main
 
 
 def result(status="unknown", *, identity=None, live=None, quality=True, attendance=False):
@@ -49,6 +51,23 @@ class GroundTruthChecks(unittest.TestCase):
             validate_ground_truth("glasses", "Fixture A", profiles*2)
         with self.assertRaises(ValueError):
             validate_ground_truth("unknown", None, [])
+
+
+class TrialCheckpointChecks(unittest.TestCase):
+    def test_default_and_candidate_are_forwarded_before_any_camera_is_opened(self):
+        with tempfile.TemporaryDirectory(dir=ROOT/"tmp") as temporary:
+            base = Path(temporary)
+            for name, extra, expected in (
+                    ("default", [], ROOT/"results/liveness_camera_matched/best_model.pt"),
+                    ("candidate", ["--liveness-checkpoint", str(base/"candidate.pt")], base/"candidate.pt")):
+                with self.subTest(name=name), \
+                     patch("attendance_app.recognition.FaceRecognizer"), \
+                     patch("anti_spoofing.infer.LivenessDetector", side_effect=RuntimeError("fixture stop before camera")) as load, \
+                     patch("cv2.VideoCapture") as camera, redirect_stdout(io.StringIO()):
+                    code = main(["--condition", "unknown", "--output", str(base/f"{name}.json"), *extra])
+                load.assert_called_once_with(expected, device="cpu")
+                camera.assert_not_called()
+                self.assertEqual(code, 1)
 
 
 class TrialCountChecks(unittest.TestCase):

@@ -1,6 +1,6 @@
 # Phần 8: Báo cáo nhóm
 
-**Bản hiện tại ngày 08/11/2026:** đã cập nhật luồng capture/inference riêng, một màn camera lớn, màu vàng/xanh lá, expression độc lập với PAD, đường dẫn checkpoint di động và **202 kiểm thử đạt**. Thí nghiệm PAD 20 epoch không đạt tiêu chí đặt trước được ghi trong Discussion, không thay mô hình đang dùng. Bản Word vẫn **12 trang**; đã kết xuất và kiểm tra toàn bộ trang. Trạng thái/SHA256 hiện tại: `results/readiness_20261108/report_status.json`; QA nội bộ: `tmp/group_report/render_20261108_final`. Bản trước được giữ tại `reports/archive/COS30082_Group_Report_before_20261108.docx`. Các mốc 30/10 bên dưới là lịch sử.
+**Bản ngày 14/11/2026** bổ sung kết quả tìm kiếm trong danh sách 1:N, thử nghiệm PAD vùng cắt rộng 2× và bằng chứng cho chức năng Model Tests. Nhóm đánh giá trên ảnh dữ liệu và ghi rõ giới hạn đối với webcam và người mới. Trạng thái tài liệu nằm tại `results/readiness_20261114/report_status.json`. Các mốc 30/10 bên dưới là lịch sử.
 
 Đã tạo `reports/COS30082_Group_Report.docx` bằng tiếng Anh theo lựa chọn của người dùng. Bản cuối đã bổ sung ảnh điện thoại, có **12 trang**, gồm cả trang đầu và tài liệu tham khảo, và hoàn tất kiểm tra trực quan toàn bộ trang; đáp ứng giới hạn không quá 12 trang trong đề. Tên nhóm, họ tên và mã sinh viên để trống để điền sau.
 

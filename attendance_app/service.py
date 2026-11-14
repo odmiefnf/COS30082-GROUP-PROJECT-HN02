@@ -11,12 +11,18 @@ from .store import clean_text
 from .review import ManualReview
 
 
+def uses_pad_context(liveness):
+    config = getattr(liveness, "config", None)
+    return isinstance(config, dict) and config.get("context_crop") is True
+
+
 class AttendanceService:
     def __init__(self, store, recognizer, liveness, emotion, session, stable_frames=3):
         if stable_frames < 1:
             raise ValueError("stable_frames must be positive.")
         self.store, self.recognizer = store, recognizer
         self.liveness, self.emotion = liveness, emotion
+        self.pad_context = uses_pad_context(liveness)
         self.session = clean_text(session, "Session")
         self.stable_frames = stable_frames
         self.pending_name = None
@@ -205,7 +211,9 @@ class AttendanceService:
         self.last_person, self.streak = None, 0
         return result
 
-    def analyze(self, crop, now=None, max_observation_age=None):
+    def analyze(self, crop, now=None, max_observation_age=None, *, context_crop=None):
+        if self.pad_context and context_crop is None:
+            raise ValueError("This PAD checkpoint requires a context crop from the original frame.")
         now = self.review.clock(now)
         was_capturing_appearance = self.pending_appearance is not None
         state = self.frame_state(now)
@@ -213,7 +221,7 @@ class AttendanceService:
         if self.last_frame_time is not None and now - self.last_frame_time > 1.5:
             self.reset_tracking()
         self.last_frame_time = now
-        live = self.liveness.predict_crop(crop)
+        live = self.liveness.predict_crop(context_crop if self.pad_context else crop)
         result = {"status": "spoof" if live.get("is_live") is False else "liveness_unavailable",
                   "liveness": live, "identity": None, "expression": None,
                   "registered": False, "attendance_recorded": False, "registration_samples": 0,

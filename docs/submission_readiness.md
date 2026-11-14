@@ -4,6 +4,23 @@ Reviewed on 8 November 2026 against the supplied six-page project brief. This is
 a working checklist of evidence and outstanding tasks, not a predicted mark.
 Group name, member names and student IDs remain blank as requested.
 
+The 14 November update adds a separate [1:N gallery evaluation](identity_open_set.md)
+and a [paired PAD crop study](pad_context_crop.md). The app threshold matched
+2 of 20 known probes correctly and assigned 25 of 300 gallery outsiders to a
+profile. The wide PAD crop lowered genuine rejection on reused LCC-FASD images
+while accepting two additional attack crops. Fresh webcam trials for the wide
+model and identities unseen during encoder training remain open.
+
+**9 November PAD follow-up:** the class-balanced candidate improves validation
+spoof rejection at the same genuine-rejection limit, but fails the predeclared
+matched-point ACER target. An authorized paired glasses trial also rejected
+more genuine crops with the candidate (56/86 passed versus 75/86 for the current
+model). The new phone-photo trial accepted 134/134 crops with the current model
+and 101/134 with the candidate. Neither demonstrates reliable phone-photo
+protection. The candidate was not promoted; the default model is unchanged.
+See [the experiment and paired comparison](pad_balanced_experiment.md).
+The report/package and historical evidence below keep their dated scope.
+
 ## Requirement-to-evidence map
 
 Paths below are relative to `grp_project`.
@@ -17,7 +34,7 @@ Paths below are relative to `grp_project`.
 | 4, 6 | Train a public-data expression model and display real-time results | `emotion_recognition/train.py`, `infer.py`; FER2013 manifests and `results/emotion_fer_test/metrics.json`. Seven visible expression labels; expressions never authorize attendance. |
 | 6 | Webcam recognition, registered name, unknown-person registration and immediate liveness/expression feedback | `attendance_app/gui.py`, `camera.py`, `service.py`, `recognition.py`, `store.py`; GUI, pipeline and capture regression tests. The camera is started explicitly. |
 | 7 | Relevant individual innovative feature, explained and demonstrated | Appearance templates, traceable manual review, profile/reference management, history/CSV and diagnostics exist. Each student must identify their own actual contribution; a feature is not automatically attributed to every member. |
-| 8 | Group report, no more than 12 pages, including Methodology, Results and Discussion | `reports/COS30082_Group_Report.docx`; `tools/build_group_report.py`. The 8 November version has 12 pages, all rendered and reviewed; `results/readiness_20261108/report_status.json` records its hash and QA. Check pagination again after filling member details. |
+| 8 | Group report, no more than 12 pages, including Methodology, Results and Discussion | `reports/COS30082_Group_Report.docx` has 12 pages. `results/readiness_20261114/report_status.json` records the rendered 14 November version. Check pagination again after filling member details. |
 | 9 | One continuous 5-10 minute demonstration; comparable speaking time; speaker faces visible; accessible hosted link | `docs/09_video_checklist.md` gives a rehearsal plan. Recording, access check and submission remain group tasks. |
 | 10 | Each student submits an individual report of at most 5 pages | Outline in `docs/interview_preparation.md`. Personal contribution statements are not filled in on anyone's behalf. |
 | 11 | Source code, group report and video link submitted by one member; individual report and peer evaluation by each member | Final checklist below. The brief does not supply a numeric calendar due date; check Canvas. |
@@ -98,8 +115,7 @@ the copied application and check every model component before recording.
   after adding member details.
 - [ ] Verify the package can load models on a copied path without a private
   gallery, using the documented dependency setup.
-- [x] Full software suite: 202 tests passed in 71.609 seconds, saved in
-  `results/readiness_20261108/full_tests.log`; these are not human recognition trials.
+- [x] Full software suite: 243 tests passed. See `results/readiness_20261114/full_tests.log`.
 - [ ] Complete independent genuine/unknown-person and spoof trials when
   participants and materials are available. Current pending conditions include
   no-glasses, an unregistered live person, recorded video and printed photo.

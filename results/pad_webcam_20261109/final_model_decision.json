@@ -1,0 +1,32 @@
+{
+  "recorded_at_utc": "2026-11-09T04:16:59.489604+00:00",
+  "status": "candidate_rejected",
+  "promoted_to_runtime": false,
+  "baseline_checkpoint_sha256": "fdbb5efc65a1df89c984a49afbada3734945523a6f0ef0b233e9391cf024cd2d",
+  "candidate_checkpoint_sha256": "c1ccfdf8cf7c64baa555dd98947a070649bccc80467e200fc529bf07b43ec725",
+  "offline_decision_sha256": "f9b9d985c6762458e374da8f8c399cbd0644a6b079b3234dca6b94a1d33993fd",
+  "evidence": {
+    "glasses_02.json": "78bcc1445c4f89f717af73244bf1c78690f89f120f6fed308a93e03b841131c3",
+    "phone_photo_01.json": "21e0538af62a15c638d63581193dc6ea1282b60cec10bbd6ba19652f607c32f8"
+  },
+  "reasons": [
+    "Predeclared matched-point validation ACER target failed.",
+    "Reused-test genuine rejection and ACER regressed.",
+    "Paired genuine glasses trial: current model 75/86 passed; candidate 56/86 passed.",
+    "Paired phone-photo trial: current model accepted 134/134; candidate accepted 101/134 attacks."
+  ],
+  "current_model_phone_photo_failure_remains": true,
+  "current_default_preserved_note": "Preserving existing behavior is not an assertion of adequate phone-photo resistance.",
+  "next_work": "Investigate crop/data domain mismatch and evaluate a justified new training method with fresh genuine and attack trials before promotion.",
+  "unperformed_conditions": [
+    "no-glasses",
+    "printed-photo",
+    "recorded-video",
+    "unknown live person"
+  ],
+  "thresholds_retuned": false,
+  "camera_and_preview_released": true,
+  "raw_images_or_video_saved": false,
+  "personal_gallery_or_attendance_used": false,
+  "group_report_and_submission_zip": "Reviewed 8 November snapshot retained; newer experiment evidence documented separately."
+}

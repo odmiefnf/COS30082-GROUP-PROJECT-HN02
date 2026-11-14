@@ -200,6 +200,9 @@ def load_liveness_model(
             raise ValueError(f"Checkpoint config.{field} must be a positive integer.")
     if config.get("crop_mode") not in ("bbox", "full"):
         raise ValueError("Checkpoint config.crop_mode must be bbox or full.")
+    if type(config.get("context_crop", False)) is not bool or (
+            config.get("context_crop") and config["crop_mode"] != "full"):
+        raise ValueError("Context checkpoint requires a boolean context_crop and full input crops.")
     if (type(config.get("live_label")) is not int or type(config.get("spoof_label")) is not int
             or config.get("live_label") != 1 or config.get("spoof_label") != 0):
         raise ValueError("Checkpoint label mapping must be canonical: 1=live, 0=spoof.")

@@ -16,9 +16,9 @@ from typing import Any
 import numpy as np
 import torch
 from torch import nn
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, WeightedRandomSampler
 
-from .data import LivenessDataset, validate_manifest_splits
+from .data import LivenessDataset, _path_key, load_manifest, validate_manifest_splits
 from .evaluate import (
     _device, _has_overlap, _manifest_provenance, _overlap_report, _positive_int,
     _sha256, _write_json, predict_dataset,
@@ -118,6 +118,9 @@ def train(args: argparse.Namespace) -> Path:
         raise ValueError("seed must lie in [0, 2**32 - 1].")
     if args.image_size < 32:
         raise ValueError("image-size must be at least 32 for spatial downsampling.")
+    context_crop = getattr(args, "context_crop", False)
+    if context_crop and args.crop_mode != "full":
+        raise ValueError("Context training expects already prepared 2x crops and --crop-mode full.")
     seed_everything(args.seed)
     device = _device(args.device)
     if device.type == "cpu":
@@ -147,11 +150,29 @@ def train(args: argparse.Namespace) -> Path:
         cache_bytes = training_dataset.cache_in_memory() + validation_dataset.cache_in_memory()
         print(f"Cached tensors occupy {cache_bytes / 1024**3:.3f} GiB.", flush=True)
     loader_generator = torch.Generator().manual_seed(args.seed)
-    training_loader = DataLoader(training_dataset, batch_size=args.batch_size, shuffle=True,
-                                 num_workers=0, generator=loader_generator)
+    oversample_manifest = getattr(args, "oversample_manifest", None)
+    oversample_factor = float(getattr(args, "oversample_factor", 1.))
+    sampler, oversampled = None, 0
+    if oversample_manifest is not None:
+        # Draw a small in-domain subset (e.g. webcam crops) more often without duplicating rows.
+        boosted = {_path_key(record["image_path"]) for record in load_manifest(oversample_manifest)}
+        weights = [oversample_factor if _path_key(record["image_path"]) in boosted else 1.
+                   for record in training_dataset.records]
+        oversampled = sum(weight != 1. for weight in weights)
+        if not oversampled:
+            raise ValueError("No training record matches --oversample-manifest.")
+        sampler = WeightedRandomSampler(weights, num_samples=len(weights), replacement=True,
+                                        generator=loader_generator)
+    training_loader = DataLoader(training_dataset, batch_size=args.batch_size, shuffle=sampler is None,
+                                 sampler=sampler, num_workers=0, generator=loader_generator)
     validation_loader = DataLoader(validation_dataset, batch_size=args.batch_size, shuffle=False, num_workers=0)
     model = LivenessCNN(feature_dim=args.feature_dim).to(device)
-    criterion = nn.CrossEntropyLoss()
+    class_counts = [sum(record["label"] == label for record in training_dataset.records) for label in (0, 1)]
+    balanced_loss = bool(getattr(args, "balanced_loss", False))
+    class_weights = [len(training_dataset) / (2 * count) for count in class_counts] if balanced_loss else None
+    criterion = nn.CrossEntropyLoss(
+        weight=torch.tensor(class_weights, dtype=torch.float32, device=device) if class_weights is not None else None)
+    validation_criterion = nn.CrossEntropyLoss()
     camera_augmentation = bool(getattr(args, "camera_augmentation", False))
     weight_decay = float(getattr(args, "weight_decay", 0.))
     selection = getattr(args, "checkpoint_selection", "val-loss")
@@ -163,6 +184,7 @@ def train(args: argparse.Namespace) -> Path:
                                  eps=1e-8, weight_decay=weight_decay, amsgrad=False)
     model_config = {
         "feature_dim": args.feature_dim, "image_size": args.image_size, "crop_mode": args.crop_mode,
+        "context_crop": context_crop,
         "live_label": 1, "spoof_label": 0,
         "threshold": None, "threshold_source": None, "threshold_calibrated": False,
     }
@@ -180,7 +202,10 @@ def train(args: argparse.Namespace) -> Path:
         "threshold_selection": "maximum validation Youden J (minimum validation ACER)",
         "test_data_read": False,
         "loss": {"name": "CrossEntropyLoss", "input": "raw_logits", "class_order": ["spoof", "live"],
-                 "class_weights": None, "label_smoothing": 0.0, "reduction": "mean"},
+                 "training_class_counts": {"0": class_counts[0], "1": class_counts[1]},
+                 "class_weights": class_weights,
+                 "weights_source": "training_manifest_inverse_frequency" if balanced_loss else None,
+                 "validation_loss_unweighted": True, "label_smoothing": 0.0, "reduction": "mean"},
         "optimizer": {"name": "Adam", "learning_rate": args.learning_rate, "betas": [0.9, 0.999],
                       "eps": 1e-8, "weight_decay": weight_decay, "amsgrad": False},
         "augmentation": {"enabled": camera_augmentation, "training_only": True,
@@ -188,6 +213,9 @@ def train(args: argparse.Namespace) -> Path:
                                         if camera_augmentation else []),
                          "same_distribution_for_live_and_spoof": True,
                          "validation_and_inference_unchanged": True},
+        "oversampling": {"manifest": str(oversample_manifest) if oversample_manifest else None,
+                         "factor": oversample_factor if oversample_manifest else None,
+                         "records": oversampled, "with_replacement": sampler is not None},
         "image_cache": {"enabled": cache_enabled, "bytes": cache_bytes,
                         "location": "CPU RAM", "preprocessing_changed": False},
         "preprocessing": {"image_size": args.image_size, "crop_mode": args.crop_mode,
@@ -218,7 +246,7 @@ def train(args: argparse.Namespace) -> Path:
         writer.writeheader()
         for epoch in range(1, args.epochs + 1):
             training_stats = _epoch(model, training_loader, criterion, device, optimizer, args.max_batches, augment)
-            validation_stats = _epoch(model, validation_loader, criterion, device, None, args.max_batches)
+            validation_stats = _epoch(model, validation_loader, validation_criterion, device, None, args.max_batches)
             operating_metrics = None
             if selection == "val-acer":
                 val_labels, val_scores = predict_dataset(model, validation_dataset, args.batch_size, device)
@@ -289,11 +317,18 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--image-size", type=_positive_int, default=112)
     parser.add_argument("--feature-dim", type=_positive_int, default=128)
     parser.add_argument("--crop-mode", choices=("bbox", "full"), default="bbox")
+    parser.add_argument("--context-crop", action="store_true",
+                        help="Declare prepared 2x context crops used with --crop-mode full.")
     parser.add_argument("--learning-rate", type=_positive_float, default=0.001)
     parser.add_argument("--weight-decay", type=_nonnegative_float, default=0.)
     parser.add_argument("--camera-augmentation", action="store_true",
                         help="Train-only mild lighting and small occlusion augmentation for both labels.")
+    parser.add_argument("--balanced-loss", action="store_true",
+                        help="Weight training cross entropy by inverse training class frequency; validation stays unweighted.")
     parser.add_argument("--checkpoint-selection", choices=("val-loss", "val-acer"), default="val-loss")
+    parser.add_argument("--oversample-manifest", type=Path,
+                        help="Training rows listed here are drawn --oversample-factor times as often.")
+    parser.add_argument("--oversample-factor", type=_positive_float, default=1.)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--device", choices=("auto", "cpu", "cuda"), default="auto")
     parser.add_argument("--num-threads", type=_positive_int, default=4)

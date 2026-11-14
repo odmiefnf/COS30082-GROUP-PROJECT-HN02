@@ -28,7 +28,7 @@ REQUIRED = (
 ) + tuple(f"results/{name}/best_model.pt" for name in MODEL_DIRS)
 RESULT_DIRS = (
     *MODEL_DIRS, "comparison", "liveness_lcc_test", "liveness_camera_aug_test", "emotion_fer_test",
-    "app_upgrade_20261030", "app_performance_20261106", "preview_layout_20261106", "readiness_20261108",
+    "app_upgrade_20261030",
 )
 RESULT_NAMES = {
     "config.json", "history.csv", "train_history.csv", "calibration.json", "classification_test.json",
@@ -46,8 +46,32 @@ ROOT_RESULTS = (
     "attendance_integration.json", "manual_review_integration.json", "gpu_environment.txt",
     "section6_status.json", "section7_status.json", "section8_status.json",
 )
-EVIDENCE_SUFFIXES = {".json", ".log", ".csv", ".txt", ".svg", ".png"}
-REVIEW_DIRS = {"app_performance_20261106", "preview_layout_20261106", "readiness_20261108"}
+EVIDENCE_FILES = (
+    *(f"app_performance_20261106/{name}" for name in (
+        "baseline_cpu.json", "baseline_cpu_live.json", "cuda_4threads_live.json",
+        "full_tests.log", "full_tests_final.log", "gui_latest_cpu.json",
+        "latest_cpu_live.json", "model_device_synthetic.json",
+    )),
+    *(f"preview_layout_20261106/{name}" for name in (
+        "layout_geometry.json", "layout_tests.log", "layout_tests_final.log",
+        "regression_tests.log", "single_view_tests.log",
+    )),
+    *(f"readiness_20261108/{name}" for name in (
+        "attendance_integration.json", "full_tests.log", "layout_geometry.json",
+        "manual_review_integration.json", "model_startup.json", "package_validation.json",
+        "pad_training.log", "relocation_check.json", "report_build.log", "report_render.log",
+        "report_render_final.log", "report_status.json", "status.json",
+    )),
+    "liveness_balanced_20261109/experiment_plan.json",
+    "liveness_balanced_20261109/experiment_status.json",
+    "pad_webcam_20261109/final_model_decision.json",
+    "model_tests_feature_1826ff45/model_testing_final.log",
+    "identity_open_set_20261114/metrics.json",
+    "pad_context_20261114/metrics.json",
+    "readiness_20261114/full_tests.log",
+    "readiness_20261114/model_startup.json",
+    "readiness_20261114/report_status.json",
+)
 CANDIDATE = "results/liveness_regularized_20261108"
 SKIP_PARTS = {"__pycache__", "backup", "backups", "archive", "archives"}
 
@@ -63,6 +87,7 @@ def submission_files(root):
                         if not SKIP_PARTS.intersection(path.relative_to(root).parts))
     selected.update((root/"docs").glob("*.md"))
     selected.update(root/"results"/name for name in ROOT_RESULTS if (root/"results"/name).is_file())
+    selected.update(root/"results"/name for name in EVIDENCE_FILES if (root/"results"/name).is_file())
     for directory in RESULT_DIRS:
         for path in (root/"results"/directory).rglob("*"):
             relative = path.relative_to(root/"results"/directory)
@@ -70,8 +95,7 @@ def submission_files(root):
                 continue
             if directory != "comparison" and len(relative.parts) != 1:
                 continue
-            if (directory in REVIEW_DIRS and len(relative.parts) == 1 and path.suffix in EVIDENCE_SUFFIXES
-                    or path.name in RESULT_NAMES):
+            if path.name in RESULT_NAMES:
                 selected.add(path)
     trials = root/"results/app_upgrade_20261030/evaluation/trials"
     for name in ("glasses_01.json", "phone_photo_01.json"):

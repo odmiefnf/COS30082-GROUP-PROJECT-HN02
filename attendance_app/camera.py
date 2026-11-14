@@ -74,8 +74,9 @@ class FaceLocator:
 
 
 class FrameProcessor:
-    def __init__(self, locator, service):
+    def __init__(self, locator, service, *, pad_context=False):
         self.locator, self.service = locator, service
+        self.pad_context = pad_context
 
     def _state(self, result):
         result.update(getattr(self.service, "frame_state", lambda: {})())
@@ -98,7 +99,6 @@ class FrameProcessor:
         if width < 80 or height < 80 or min(x, y) < 0 or x + width > frame_w or y + height > frame_h:
             self.service.reset_tracking("The face is too small or outside the frame. Cancel and try again.")
             return self._state({**result, "status": "face_too_small_or_outside"})
-        # All three CNNs receive this exact oriented RGB object.
         crop = crop_liveness_image(rgb, bbox=(x, y, width, height))
         gray = cv2.cvtColor(np.asarray(crop), cv2.COLOR_RGB2GRAY)
         sharpness = float(cv2.Laplacian(gray, cv2.CV_64F).var())
@@ -111,6 +111,10 @@ class FrameProcessor:
             return self._state({**result, "status": "image_quality"})
         # A preview refresh is never a new observation. Async capture supplies
         # the monotonic timestamp of this unique frame, not inference completion.
-        result.update(self.service.analyze(crop) if observed_at is None
-                      else self.service.analyze(crop, now=observed_at, max_observation_age=1.))
+        options = {}
+        if self.pad_context:
+            options["context_crop"] = crop_liveness_image(rgb, (x, y, width, height), context=True)
+        if observed_at is not None:
+            options.update(now=observed_at, max_observation_age=1.)
+        result.update(self.service.analyze(crop, **options))
         return result

@@ -22,9 +22,9 @@ The archive has one `COS30082_Face_Attendance/` folder containing:
   English group report. Its figures are embedded in the DOCX.
 - Best checkpoints for classification, triplet, baseline PAD, augmented PAD,
   camera-matched PAD and expression classification.
-- Allowlisted configurations, histories, calibration, metrics, predictions and
-  ROC files from the reported model directories; recorded integration evidence,
-  two aggregate webcam trials and the fixed readiness/performance/layout folders.
+- Allowlisted model configurations, histories, calibration and figures. This includes
+  historical integration and camera summaries, the newer 1:N and PAD crop
+  aggregate metrics, and the 14 November readiness evidence.
 - The isolated `liveness_regularized_20261108` candidate only when its
   `experiment_status.json` declares `status: completed`. Inclusion does not
   promote it to the default application model.
@@ -35,9 +35,9 @@ The archive has one `COS30082_Face_Attendance/` folder containing:
 Raw datasets, downloads, caches, virtual environments, temporary files, personal
 gallery/attendance databases, backups, archived reports and credential files are
 excluded. The result-directory allowlist is in `tools/package_submission.py`;
-do not put private files in the fixed readiness/performance evidence folders.
-Those folders permit only JSON, logs, CSV/text and generated PNG/SVG evidence.
-There are no camera images or videos in the recorded evaluation evidence.
+readiness/performance evidence uses exact reviewed filenames. Full recent
+camera reports and per-probe outputs stay local. The archive shares aggregate
+decisions and excludes privately trained webcam checkpoints and captured images.
 
 After extracting, create a Python environment, install the documented
 requirements and run `python -m attendance_app.gui`. The personal gallery is

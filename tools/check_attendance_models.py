@@ -13,7 +13,7 @@ import torch
 from anti_spoofing.infer import LivenessDetector
 from emotion_recognition.infer import EmotionRecognizer
 from attendance_app.recognition import FaceRecognizer
-from attendance_app.service import AttendanceService
+from attendance_app.service import AttendanceService, uses_pad_context
 from attendance_app.store import ProfileStore
 from face_verification.data import _discover_images
 from face_verification.image_cache import sha256
@@ -27,6 +27,8 @@ def check(project, output, liveness_checkpoint=None):
     liveness_path = Path(liveness_checkpoint).resolve() if liveness_checkpoint else project / "results/liveness_lcc/best_model.pt"
     emotion_path = project / "results/emotion_fer/best_model.pt"
     live = LivenessDetector(liveness_path)
+    if uses_pad_context(live):
+        raise ValueError("This check uses already-cropped face photos. Use tools.evaluate_webcam_trial for context PAD.")
     emotion = EmotionRecognizer(emotion_path)
     _, images = _discover_images(project / "data/face_recognition/classification_data/train_data")
     subjects = list(images)[:4]
@@ -85,7 +87,10 @@ def main(argv=None):
     parser.add_argument("--liveness-checkpoint", type=Path,
                         help="Optional current app model; default preserves the original baseline integration protocol.")
     args = parser.parse_args(argv)
-    check(args.project, args.output, args.liveness_checkpoint)
+    try:
+        check(args.project, args.output, args.liveness_checkpoint)
+    except ValueError as exc:
+        parser.exit(1, f"Attendance check failed: {exc}\n")
     return 0
 
 

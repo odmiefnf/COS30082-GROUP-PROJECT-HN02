@@ -140,6 +140,17 @@ class ReferenceImportChecks(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.commit(checked)
 
+    def test_context_pad_import_preserves_tight_identity_crop(self):
+        self.live.config = {"context_crop": True}
+        self.importer = ReferenceImporter(self.store, self.recognizer, self.live, self.locator)
+        self.assertTrue(self.prepare()["valid"])
+        with Image.open(self.files[0]) as image:
+            pixels = np.asarray(image)
+        pad_crop = self.live.predict_crop.call_args_list[0].args[0]
+        identity_crop = self.recognizer.embed.call_args_list[0].args[0]
+        np.testing.assert_array_equal(np.asarray(pad_crop), pixels)
+        np.testing.assert_array_equal(np.asarray(identity_crop), pixels[20:140, 20:140])
+
     def test_new_person_and_duplicate_existing_identity_handling(self):
         checked = self.prepare(person_id=None, name="New person")
         result = self.commit(checked)

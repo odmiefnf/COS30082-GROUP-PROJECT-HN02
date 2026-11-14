@@ -1,0 +1,12 @@
+{
+  "status": "completed",
+  "date": "2026-11-14",
+  "pages": 12,
+  "page_limit": 12,
+  "sha256": "aef95aa460dc960bc8487eb236737fd2538a6b626f63e7513d8a16100b64c8d1",
+  "all_pages_rendered_and_visually_reviewed": true,
+  "group_details": "blank as requested",
+  "full_tests_passed": 243,
+  "gallery_metrics_sha256": "b3e4a1c48746990dd0d7f255dfff2011721186b3241eeac8acb0d74f0bcab934",
+  "pad_metrics_sha256": "9985e7ce6414dd6a78ebe06e2429fc8c6d7a8d7e12ffcfb434564a3fd313bb93"
+}

@@ -25,6 +25,8 @@ def main(argv=None):
     parser.add_argument("--notes", help="Operator-supplied notes; no conditions are inferred from camera images")
     parser.add_argument("--distance-cm", type=float, help="Operator-measured camera distance, if known")
     parser.add_argument("--database", type=Path, default=ROOT/"data/attendance/profiles.sqlite3")
+    parser.add_argument("--liveness-checkpoint", type=Path,
+                        default=ROOT/"results/liveness_camera_matched/best_model.pt")
     parser.add_argument("--camera", type=int, default=0)
     parser.add_argument("--seconds", type=float, default=15.)
     parser.add_argument("--max-frames", type=int, default=300)
@@ -58,10 +60,10 @@ def main(argv=None):
         from face_verification.image_cache import sha256
         from attendance_app.camera import FaceLocator, FrameProcessor
         from attendance_app.recognition import FaceRecognizer
-        from attendance_app.service import AttendanceService
+        from attendance_app.service import AttendanceService, uses_pad_context
         torch.set_num_threads(4)
         recognizer = FaceRecognizer(ROOT/"results/identity_app_config.json", "cpu")
-        liveness = LivenessDetector(ROOT/"results/liveness_camera_matched/best_model.pt", device="cpu")
+        liveness = LivenessDetector(args.liveness_checkpoint, device="cpu")
         emotion = EmotionRecognizer(ROOT/"results/emotion_fer/best_model.pt", "cpu")
         if liveness.threshold is None:
             raise ValueError("A calibrated liveness threshold is required.")
@@ -69,10 +71,11 @@ def main(argv=None):
             training = metadata.get("training", {})
             if training.get("smoke_test") is not False or training.get("initialization") != "random_from_scratch":
                 raise ValueError(f"{name} requires completed from-scratch training.")
+        pad_context = uses_pad_context(liveness)
         report["models"] = {
             "identity": {"sha256": recognizer.fingerprint, "threshold": recognizer.threshold, "ambiguity_margin": recognizer.margin},
             "liveness": {"sha256": sha256(liveness.checkpoint), "threshold": liveness.threshold,
-                         "threshold_source": liveness.threshold_source},
+                         "threshold_source": liveness.threshold_source, "context_crop": pad_context},
             "expression": {"sha256": sha256(emotion.checkpoint)},
             "detector": "Current application Haar locator", "device": "cpu", "threads": 4}
         stage = "Gallery snapshot and ground truth"
@@ -80,7 +83,8 @@ def main(argv=None):
             expected_id = validate_ground_truth(args.condition, args.expected_profile, store.profiles())
             accumulator = TrialAccumulator(args.condition, expected_id)
             service = AttendanceService(store, recognizer, liveness, emotion, session)
-            processor = FrameProcessor(FaceLocator(), service)
+            crop_options = {"pad_context": True} if pad_context else {}
+            processor = FrameProcessor(FaceLocator(), service, **crop_options)
             report["gallery_profile_count"] = len(service.profiles)
             report["gallery_appearance_counts"] = [len(person["appearances"]) for person in service.profiles]
             report["capture_request"] = {"camera": args.camera, "seconds": args.seconds, "max_frames": args.max_frames,

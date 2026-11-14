@@ -186,6 +186,23 @@ class Fixture(unittest.TestCase):
         np.testing.assert_array_equal(np.asarray(self.live.predict_crop.call_args.args[0]), frame[20:120, 30:130])
         self.assertFalse(self.store.attendance("COS30082-01"))
 
+    def test_context_checkpoint_requires_and_uses_context_only_for_pad(self):
+        self.live.config = {"context_crop": True}
+        service = AttendanceService(self.store, self.recognizer, self.live, self.emotion, "context-fixture")
+        with self.assertRaisesRegex(ValueError, "requires a context crop"):
+            service.analyze(Image.new("RGB", (100, 100)))
+        self.live.predict_crop.assert_not_called()
+        frame = np.random.default_rng(42).integers(0, 256, (160, 200, 3), dtype=np.uint8)
+        locator = Mock()
+        locator.detect.return_value = [(30, 20, 100, 100)]
+        result = FrameProcessor(locator, service, pad_context=True).process(frame)
+        self.assertEqual(result["status"], "unknown")
+        np.testing.assert_array_equal(np.asarray(self.live.predict_crop.call_args.args[0]), frame[:, :180])
+        tight = frame[20:120, 30:130]
+        np.testing.assert_array_equal(np.asarray(self.recognizer.embed.call_args.args[0]), tight)
+        np.testing.assert_array_equal(np.asarray(self.emotion.predict_crop.call_args.args[0]), tight)
+        np.testing.assert_array_equal(np.asarray(service.review.latest.crop), tight)
+
     def test_camera_read_failure_and_stop_release_device_without_using_a_real_camera(self):
         for fail_read in (True, False):
             with self.subTest(fail_read=fail_read):

@@ -1,0 +1,152 @@
+{
+  "status": "completed",
+  "scope": "Paired development comparison on a subset of reused LCC-FASD images.",
+  "limits_per_class": {
+    "train": 720,
+    "val": 250,
+    "test": 250
+  },
+  "seed": 42,
+  "epochs": 10,
+  "image_size": 112,
+  "protocol": "Same source images, detector, face quality gate, training recipe and seed. Each arm calibrates on validation.",
+  "limitations": [
+    "The source images are already cropped; no missing scene pixels were added.",
+    "Evaluation subject IDs and attack types are unavailable for this LCC split.",
+    "No fresh webcam or device-held-out results were measured."
+  ],
+  "inventory": {
+    "train": {
+      "manifest_sha256": "c1d8d036a2cca90e5f8f87c49d2a791447915399de84c0458e46f8ad34835d82",
+      "selected": 1440,
+      "scored_per_arm": {
+        "live": 443,
+        "spoof": 382
+      },
+      "excluded_before_training_or_scoring": {
+        "image_quality": 530,
+        "multiple_faces": 51,
+        "no_face": 34
+      }
+    },
+    "val": {
+      "manifest_sha256": "5e346c59325d6f8d9e69951a453419a7c19b1cad322030647856eaa0ec926de9",
+      "selected": 500,
+      "scored_per_arm": {
+        "live": 162,
+        "spoof": 143
+      },
+      "excluded_before_training_or_scoring": {
+        "image_quality": 181,
+        "multiple_faces": 12,
+        "no_face": 2
+      }
+    },
+    "test": {
+      "manifest_sha256": "0dac9878296e400640e5916a2a05daba82ced79532fd0a91464119356af90782",
+      "selected": 500,
+      "scored_per_arm": {
+        "live": 137,
+        "spoof": 134
+      },
+      "excluded_before_training_or_scoring": {
+        "image_quality": 204,
+        "multiple_faces": 18,
+        "no_face": 7
+      }
+    }
+  },
+  "arms": {
+    "tight": {
+      "checkpoint_sha256": "83e3be4ee46a893381259984ffe0f0e08635ff76372df3fe2dca424b303ddcd8",
+      "threshold": 0.7363934461962357,
+      "threshold_source": "validation",
+      "test": {
+        "accuracy": 0.6826568265682657,
+        "APCER": 0.16417910447761194,
+        "BPCER": 0.46715328467153283,
+        "ACER": 0.3156661945745724,
+        "AUC": 0.7741584050550169,
+        "threshold": 0.7363934461962357,
+        "accept_rule": "live_score >= threshold",
+        "sample_count": 271,
+        "live_count": 137,
+        "spoof_count": 134,
+        "confusion": {
+          "true_live": 73,
+          "spoof_accepted_live": 22,
+          "true_spoof": 112,
+          "live_rejected_spoof": 64
+        },
+        "confusion_matrix": [
+          [
+            112,
+            22
+          ],
+          [
+            64,
+            73
+          ]
+        ],
+        "confusion_matrix_order": {
+          "rows": [
+            "spoof",
+            "live"
+          ],
+          "columns": [
+            "spoof",
+            "live"
+          ]
+        },
+        "score_definition": "softmax(logits)[live_label=1]; higher means more likely live"
+      },
+      "scope": "held-out evaluation by image path/content; evaluation subject separation cannot be verified"
+    },
+    "context-2x": {
+      "checkpoint_sha256": "60ab7495100eb74d4c53c3a4b783bea29519b3519c8f190dedfadcd50a574425",
+      "threshold": 0.9554214268201378,
+      "threshold_source": "validation",
+      "test": {
+        "accuracy": 0.7232472324723247,
+        "APCER": 0.1791044776119403,
+        "BPCER": 0.3722627737226277,
+        "ACER": 0.275683625667284,
+        "AUC": 0.8088571739840941,
+        "threshold": 0.9554214268201378,
+        "accept_rule": "live_score >= threshold",
+        "sample_count": 271,
+        "live_count": 137,
+        "spoof_count": 134,
+        "confusion": {
+          "true_live": 86,
+          "spoof_accepted_live": 24,
+          "true_spoof": 110,
+          "live_rejected_spoof": 51
+        },
+        "confusion_matrix": [
+          [
+            110,
+            24
+          ],
+          [
+            51,
+            86
+          ]
+        ],
+        "confusion_matrix_order": {
+          "rows": [
+            "spoof",
+            "live"
+          ],
+          "columns": [
+            "spoof",
+            "live"
+          ]
+        },
+        "score_definition": "softmax(logits)[live_label=1]; higher means more likely live"
+      },
+      "scope": "held-out evaluation by image path/content; evaluation subject separation cannot be verified"
+    }
+  },
+  "candidate_promoted": false
+}

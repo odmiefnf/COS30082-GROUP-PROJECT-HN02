@@ -1,5 +1,14 @@
 # Bước 5: Kết quả đánh giá hiện có
 
+**Bổ sung ngày 09/11/2026:** đã so sánh PAD hiện tại với bản huấn luyện cân bằng
+lớp trên cùng crop, không dùng gallery/identity/điểm danh. Lượt đeo kính có màn
+hình căn mặt: bản hiện tại đạt 75/86, bản mới 56/86. Lượt ảnh tĩnh trên điện thoại:
+bản hiện tại cho qua 134/134, bản mới cho qua 101/134 và chặn 33/134. Có 117 khung
+nhiều mặt bị loại trước PAD, không được tính là PAD chặn ảnh giả. Bản mới không
+được đưa vào app; lỗi ảnh điện thoại vẫn chưa được khắc phục. Xem
+[thực nghiệm và bằng chứng mới](pad_balanced_experiment.md). Phần dưới giữ nguyên
+phạm vi lịch sử của các lượt chạy toàn bộ pipeline ngày 30/10/2026.
+
 Cập nhật **30/10/2026**. Chỉ ghi kết quả từ JSON `completed`. Đã có **một lượt đeo kính và một lượt ảnh tĩnh trên điện thoại**, với nhãn do người tham gia xác nhận; mỗi điều kiện có n=1 lượt. Các khung liên tiếp tương quan, không phải ước lượng accuracy/FAR/FRR độc lập. Các tình huống còn chờ không được tính là đạt hoặc không có lỗi.
 
 | Điều kiện | Lượt hoàn tất | Khung hình | Một mặt | PAD đạt / đã chấm | Identity đúng / đã chạy | Identity khớp ảnh giả / đã chạy | Điểm danh đúng tạm | Điểm danh ảnh giả tạm |

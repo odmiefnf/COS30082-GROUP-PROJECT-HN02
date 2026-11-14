@@ -1,0 +1,27 @@
+{
+  "purpose": "Controlled class-balanced PAD experiment; prepare a candidate before an explicitly requested webcam trial",
+  "architecture": "Existing LivenessCNN, RGB112, full crop, random initialization; no pretrained weights",
+  "training_manifest": "data/lcc_fasd_manifests/train.csv",
+  "validation_manifest": "data/lcc_fasd_manifests/val.csv",
+  "training_counts": {"spoof": 6900, "live": 1193},
+  "change_from_camera_aug_recipe": "Training CrossEntropyLoss uses inverse-frequency class weights N/(2*n_class); validation loss stays unweighted",
+  "unchanged_recipe": {
+    "epochs": 10, "batch_size": 64, "learning_rate": 0.0005,
+    "weight_decay": 0.0001, "seed": 42, "camera_augmentation": true,
+    "checkpoint_selection": "minimum validation ACER; unweighted validation loss breaks ties"
+  },
+  "operating_point": "After weight selection, minimize validation APCER subject to BPCER <= current runtime validation BPCER. Use no test or camera scores.",
+  "consideration_criteria": {
+    "validation_APCER_less_than": 0.33936295713723946,
+    "validation_BPCER_at_most": 0.13580246913580246,
+    "validation_ACER_less_than": 0.1933844055091925,
+    "fresh_independent_camera_acceptance_required_before_runtime_promotion": true
+  },
+  "baseline_checkpoint": "results/liveness_camera_matched/best_model.pt",
+  "baseline_checkpoint_sha256": "fdbb5efc65a1df89c984a49afbada3734945523a6f0ef0b233e9391cf024cd2d",
+  "existing_runtime_checkpoint_preserved": true,
+  "test_data_used_for_selection": false,
+  "webcam_data_used_for_training_or_selection": false,
+  "limitations": "Validation has been reused during development. An improvement is not an independent phone/print/replay result. Resolution-label confounding was not established: full train/validation resolution medians are similar across classes.",
+  "command": ".venv-gpu/Scripts/python.exe -m anti_spoofing.train --train-manifest data/lcc_fasd_manifests/train.csv --val-manifest data/lcc_fasd_manifests/val.csv --output-dir results/liveness_balanced_20261109 --crop-mode full --epochs 10 --batch-size 64 --learning-rate 0.0005 --weight-decay 0.0001 --camera-augmentation --balanced-loss --checkpoint-selection val-acer --device cuda --num-threads 4 --seed 42 --cache-images"
+}

@@ -121,15 +121,12 @@ def camera_trial_text():
 
 
 def software_evidence():
-    """Only describe a suite after its saved count agrees with a successful log."""
-    suite = read_json("results/readiness_20261108/status.json")["software_tests"]
-    assert suite["passed"] > 0
-    log = (ROOT/suite["log"]).read_text(encoding="utf-8-sig")
+    """Report the completed suite from its saved log."""
+    path = "results/readiness_20261114/full_tests.log"
+    log = (ROOT/path).read_text(encoding="utf-8-sig")
     match = re.search(r"Ran (\d+) tests in ([\d.]+)s", log)
     assert match and log.rstrip().endswith("OK")
-    assert int(match[1]) == suite["passed"] and np.isclose(float(match[2]), suite["duration_seconds"])
-    return {"passed": suite["passed"], "total": suite["passed"],
-            "seconds": suite["duration_seconds"], "log": suite["log"]}
+    return {"passed": int(match[1]), "total": int(match[1]), "seconds": float(match[2]), "log": path}
 
 
 def evidence():
@@ -421,13 +418,24 @@ def build():
     operating = figures(identity, app, expression)
     live_m, exp_m, current_live_m = live["metrics"], expression["metrics"], current_live["metrics"]
     software = software_evidence()
+    gallery_path = "results/identity_open_set_20261114/metrics.json"
+    context_path = "results/pad_context_20261114/metrics.json"
+    gallery = read_json(gallery_path)
+    assert gallery["checkpoint_sha256"] == app["checkpoint_sha256"]
+    gallery_test = gallery["splits"]["test"]
+    gapp = gallery_test["current_app_threshold"]
+    gcal = gallery_test["gallery_calibrated_threshold"]
+    pad = read_json(context_path)
+    assert pad["status"] == "completed" and pad["candidate_promoted"] is False
+    tight, context = (pad["arms"][policy]["test"] for policy in ("tight", "context-2x"))
+    assert tight["sample_count"] == context["sample_count"]
     report = Report()
     P, H, T = report.p, report.head, report.table
 
     # Page 1
     P("Facial recognition attendance with expression and liveness", "Title")
     P("COS30082 Applied Machine Learning Group Report", "Subtitle")
-    P("8 November 2026", size=10)
+    P("14 November 2026", size=10)
     P("Group name or number   __________________________________________")
     P("Members and student IDs   ________________________________________")
     P("______________________________________________________________")
@@ -526,7 +534,7 @@ def build():
     H("Human review with recorded provenance", level=3)
     P("For an uncertain live face, review requires an explicit profile choice, reviewer name, reason and confirmation; none is preselected. A ticket expires after 30 seconds and needs a live observation within 1.5 seconds, the same session and embedding continuity. Lost, multiple or poor quality faces, failed PAD or changed embeddings invalidate it. Automatic recording pauses while review remains open. Attendance and audit metadata commit atomically, preserving scores and existing automatic provenance. Manual decisions do not update the encoder or templates; older unaudited rows retain unknown source.")
     P("One enlarged preview uses yellow outlines for unrecognised faces and green for a known live profile; fixed result slots prevent resizing. Camera analyses older than one second are discarded before enrolment or automatic attendance writes. History and CSV retain sources; camera testing and Diagnostics support setup recovery. Guidance separates face, quality and PAD failures.")
-    P("Expression is display only. The app saves no camera images, review crops or expression labels. Names, embeddings and attendance metadata remain sensitive. Reviewer names are freely entered; authentication, operator roles and tamper resistant audit storage are not implemented.")
+    P("Expression is display only. The attendance workflow stores names, embeddings and attendance metadata. A separate operator-run research tool can capture labelled samples for training. Reviewer names are freely entered. Production operation would require authentication, operator roles and protected audit storage.")
 
     # Page 8
     H("Results", level=1, page=True)
@@ -539,7 +547,8 @@ def build():
     ], [2.15, 1.35, 1.65, 1.7], 6, "Verification on all 8,805 original validation pairs")
     report.picture("identity_roc.png", "Figure 2  Identity ROC curves and the application's low FPR operating region", "Triplet AUC is 0.859969 and classification AUC is 0.825601; the selected triplet point has TPR 9.73 percent at pair FPR 0.98 percent.")
     P("Triplet improves validation AUC by 0.034368 over classification under this protocol. Cosine and negative Euclidean AUC coincide as expected from unit embedding geometry. Triplet is selected for the app; the corresponding cosine threshold is 0.869540211. At that point, 420 of 4,315 same identity pairs are accepted and 44 of 4,490 different identity pairs are falsely accepted: TPR 9.73%, FPR 0.98% and false rejection 90.27%. Classification reaches TPR 8.23% at FPR 0.96% under the same constraint.")
-    P("The classification head, restored from epoch 9, achieves 39.4625% closed set test accuracy on 8,000 images. Its validation loss was 3.221723 at selection. This measures recognition among 4,000 training identities and is distinct from verification AUC or new person recognition. Neither the AUC nor the strict operating point is an unbiased independent test: both model comparison and calibration use verification validation, with the known train pixel overlap.")
+    P("The classification head reaches 39.46% closed set accuracy on 8,000 images of training identities. Pair comparison and calibration use verification validation, which includes exact training pixel overlap.")
+    P(f"A separate gallery search test enrolled {gapp['known_probes']} identities with a different image for each probe. The app threshold correctly identified {gapp['known_correct']}/{gapp['known_probes']} known probes and misidentified {gapp['unknown_false_identifications']}/{gapp['unknown_probes']} gallery outsiders. A threshold selected on separate calibration identities to limit outsider false matches to 1% accepted {gcal['known_correct']}/{gcal['known_probes']} known and {gcal['unknown_false_identifications']}/{gcal['unknown_probes']} outsider probes. All identities had appeared in encoder training. Exact duplicate test pixels were excluded.")
 
     # Page 9
     H("Liveness and expression results", page=True)
@@ -569,7 +578,7 @@ def build():
         ["Manual review integration", "Unknown before and after review", "Human decision stored separately"],
         ["Device and setup checks", "Camera 0 returned 640 by 480; setup retry recovered", "One-frame device check, not PAD accuracy"]
     ], [2.0, 2.15, 2.7], 9, "Implementation evidence and its scope")
-    P("Historical offline integration used 24 training photos and labelled scratch profiles: 21 passed PAD, two unregistered probes matched the gallery, and one scratch attendance row was created. These are not held out accuracy results. Reference import creates templates without attendance in a separate temporary-database check.")
+    P("The Model Tests dialog scores two checkpoints on paired webcam frames and exports aggregate reports. Each model uses its saved threshold and crop policy. The separate sample capture tool cancels during framing before creating images or appending a manifest.")
     P("Scripted review records provenance for ID n000003 at cosine 0.842151, below threshold 0.869540. The model remains unknown, checkpoint hashes remain unchanged and failed PAD blocks review. The actor is a software fixture; no human-review accuracy or productivity gain is claimed.")
     P(camera_trial_text())
     P("Expression-only CPU timing used four threads, ten warmups and 100 calls: median 1.11 ms, 95th percentile 1.37 ms. Capture, localisation, PAD, identity and display are excluded; this is not end to end webcam FPS.")
@@ -579,7 +588,7 @@ def build():
     H("Model selection and deployment limits")
     P("The evidence supports selecting triplet as the stronger of the two tested identity baselines by validation ranking and the low FPR operating point. It does not support calling the system 86% accurate in deployment. At the chosen threshold, most positive verification pairs are rejected. Random triplet loss reduction alone does not establish separation among difficult impostors. Hard triplet mining and stronger augmentation remain untested [3].")
     P("The comparison controls architecture, input resolution, initial seed and anchor epochs. It does not equalise compute, and it uses one run per method. No uncertainty intervals or repeated seed estimates are available. Verification validation is used for model choice and threshold calibration, and contains exact training pixel duplicates. Future work should retain the required original result and add an explicitly separate cleaned training protocol and an independent gallery test, rather than silently filtering the assignment's pair list.")
-    P("Current PAD regression APCER/BPCER are 19.10%/11.33% on reused test data, with validation genuine rejection worse than the baseline. In the historical phone still-photo trial, all 237 scored attack crops passed PAD; identity returned unknown and prevented scratch attendance, so zero attendance does not show effective PAD. A 20-epoch regularised PAD run selected epoch 6 by validation ACER; APCER/BPCER/ACER were 16.67%/22.96%/19.82%, failing predeclared ACER below 19.34% and BPCER at most 13.58% limits. It was not promoted; no candidate test or camera evaluation informed selection. Separate participant, device and printed/displayed attack tests remain necessary; crop-domain shift and dependent errors prevent extrapolating offline scores to webcam security.")
+    P(f"Two PAD models trained from scratch for ten epochs on the same LCC FASD images. One used the detected box. The other used a clipped square with twice the longer side of that box [9]. With validation thresholds frozen, the wider crop reduced ACER from {tight['ACER']:.2%} to {context['ACER']:.2%} on {context['sample_count']} reused evaluation images. Genuine rejection fell from {tight['BPCER']:.2%} to {context['BPCER']:.2%}, while attack acceptance rose from {tight['APCER']:.2%} to {context['APCER']:.2%}. Source images were already cropped. Attack-type labels and subject separation were unavailable for evaluation. The default checkpoint's phone photo failure requires fresh trials across materials and devices.")
     P("Expression classification is strongest for happy and weak for fear and disgust. Test support and class confusion must accompany aggregate accuracy. The model has not been validated for internal feelings, mental health, work attitude or student engagement. Keeping expression output outside the attendance rule avoids introducing an unsupported condition for presence recording.")
     H("Practical improvements and compliance", level=3)
     P("Manual review makes uncertain decisions explicit and traceable without disguising them as correct model predictions. Its current freely entered reviewer name is not authentication. Production use would need operator access control, protected logs, data retention rules and a study of reviewer error and effort. Embeddings remain biometric data, even though camera images are not saved. The default project database is in a OneDrive folder and may be synchronised by that service; a different database path can be configured.")
@@ -597,8 +606,9 @@ def build():
     report.reference(6, "Goodfellow, I. J. et al. (2013). Challenges in Representation Learning: A report on three machine learning contests. arXiv 1307.0414.", "https://arxiv.org/abs/1307.0414")
     report.reference(7, "Kaggle contributor msambare. FER2013 dataset distribution, version 1. Accessed 27 October 2026.", "https://www.kaggle.com/datasets/msambare/fer2013")
     report.reference(8, "OpenCV. Cascade Classifier. OpenCV 4.13.0 documentation. Accessed 27 October 2026.", "https://docs.opencv.org/4.13.0/db/d28/tutorial_cascade_classifier.html")
+    report.reference(9, "FaceGuard AI. Anti-spoofing input crop design. GitHub commit a2266a9. Accessed 14 November 2026.", "https://github.com/henryhoang207/Facial-Recognition---COS30082/blob/a2266a909adbffc3657d7e1275c30db83e650d1e/README.md#L106-L120")
     H("Reproduction evidence", level=3)
-    P("Configurations, hashes and split audits accompany the checkpoints. Main evidence is in comparison/comparison.json, identity_app_config.json, liveness_lcc_test/metrics.json, liveness_camera_matched/test_regression_metrics.json and calibration.json, emotion_fer_test/metrics.json, and readiness_20261108/status.json. Historical webcam trials remain under app_upgrade_20261030/evaluation. Paths are relative to results. The README records preparation, training and evaluation commands.", size=10)
+    P("The results directory contains the original verification, PAD and expression evaluations. The new comparisons are in identity_open_set_20261114/metrics.json and pad_context_20261114/metrics.json. The current suite is recorded in readiness_20261114/full_tests.log. Historical webcam trials remain under app_upgrade_20261030/evaluation. The README links the reproduction commands.", size=10)
 
     OUTPUT.parent.mkdir(exist_ok=True)
     report.doc.save(OUTPUT)
@@ -609,7 +619,7 @@ def build():
                     "results/emotion_fer_test/metrics.json", "results/manual_review_integration.json",
                     "results/liveness_app_config.json", "results/liveness_camera_matched/test_regression_metrics.json",
                     "results/liveness_camera_matched/calibration.json", "results/app_upgrade_20261030/phase4_status.json"]}}
-    additional_sources = ["results/readiness_20261108/status.json", software["log"],
+    additional_sources = ["results/readiness_20261108/status.json", software["log"], gallery_path, context_path,
                           "results/readiness_20261108/attendance_integration.json",
                           "results/readiness_20261108/model_startup.json",
                           "results/readiness_20261108/relocation_check.json",

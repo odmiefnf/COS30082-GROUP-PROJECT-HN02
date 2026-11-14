@@ -12,7 +12,7 @@ from PIL import Image
 from pypdf import PdfReader
 
 ROOT = Path(__file__).resolve().parents[1]
-SKILL = Path("C:/Users/kiet1/.codex/plugins/cache/openai-primary-runtime/documents/26.1105.12137/skills/documents")
+SKILL = Path("C:/Users/kiet1/.codex/plugins/cache/openai-primary-runtime/documents/26.1112.11217/skills/documents")
 
 
 def main():

@@ -1,0 +1,17 @@
+{
+  "status": "completed",
+  "copied_runtime_ready": true,
+  "component_status": {
+    "Runtime": "Ready",
+    "Identity": "Ready",
+    "Liveness": "Ready",
+    "Expression": "Ready",
+    "Detector": "Ready",
+    "Profiles": "Ready"
+  },
+  "profiles": 0,
+  "camera_activated": false,
+  "production_database_used": false,
+  "fresh_dependency_installation": false,
+  "scope": "Copied application, included models and empty temporary SQLite gallery."
+}

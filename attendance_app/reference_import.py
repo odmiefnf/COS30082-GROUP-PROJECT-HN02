@@ -10,12 +10,15 @@ import cv2
 import numpy as np
 from PIL import Image, ImageOps
 
+from anti_spoofing.data import crop_liveness_image
+from .service import uses_pad_context
 from .store import clean_text
 
 
 class ReferenceImporter:
     def __init__(self, store, recognizer, liveness, locator):
         self.store, self.recognizer, self.liveness, self.locator = store, recognizer, liveness, locator
+        self.pad_context = uses_pad_context(liveness)
         self.pending = None
         self._check_encoder()
 
@@ -70,7 +73,8 @@ class ReferenceImporter:
         gray = cv2.cvtColor(np.asarray(crop), cv2.COLOR_RGB2GRAY)
         if cv2.Laplacian(gray, cv2.CV_64F).var() < 20 or not 20 <= gray.mean() <= 235:
             raise ValueError("The face is too blurry, dark or bright.")
-        live = self.liveness.predict_crop(crop)
+        pad_crop = crop_liveness_image(rgb, (x, y, width, height), context=True) if self.pad_context else crop
+        live = self.liveness.predict_crop(pad_crop)
         if live.get("is_live") is not True:
             raise ValueError("PAD model check not passed. This does not establish live presence from a photo.")
         return self.recognizer.embed(crop), digest

@@ -9,17 +9,36 @@ environment, then run `python -m attendance_app.gui`; a new local gallery starts
 empty. See [submission readiness](docs/submission_readiness.md) for the setup,
 results and remaining demonstration tasks.
 
+**Cập nhật 14/11/2026.** Đã thêm phép đo tìm người trong 20 hồ sơ. Ngưỡng
+app nhận đúng 2/20 lượt người đã đăng ký và gán nhầm 25/300 lượt người ngoài
+danh sách. Thử nghiệm PAD trên cùng 271 ảnh LCC-FASD cho thấy cắt rộng 2×
+giảm từ chối người thật, với mức lọt ảnh giả tăng nhẹ. Xem
+[đánh giá nhận diện 1:N](docs/identity_open_set.md) và
+[thử nghiệm vùng cắt PAD](docs/pad_context_crop.md). Nhấn Q/Esc trong màn
+căn mặt của công cụ thu mẫu sẽ hủy trước khi ghi ảnh.
+
+**PAD update, 9 November 2026:** a completed class-balanced candidate reduces
+validation spoof acceptance from 33.94% to 29.85% at the same 13.58% genuine
+rejection. It still fails the stricter predeclared ACER target. A subsequent
+paired glasses trial passed 75/86 crops with the current model versus 56/86 with
+the candidate. In the phone-photo trial, the current model accepted 134/134 crops;
+the candidate accepted 101/134. The candidate is rejected for promotion and the
+app default is unchanged. Reliable phone-photo protection remains unresolved.
+See the [experiment and paired camera results](docs/pad_balanced_experiment.md).
+
 **Rà soát theo đề ngày 08/11/2026:** đã đối chiếu đủ 12 mục của đề; **202 kiểm thử đạt**, cấu hình identity chạy được khi chuyển thư mục, và ba CNN thật khởi tạo đầy đủ với database demo rỗng. Cảm xúc hiện được hiển thị trên crop đạt chất lượng dù PAD không đạt; identity, đăng ký và điểm danh vẫn yêu cầu PAD đạt. Camera chỉ có một màn lớn, khung vàng khi chưa nhận ra người/PAD chưa đạt và xanh lá khi nhận diện hợp lệ. [Bảng yêu cầu và việc còn thiếu](docs/submission_readiness.md), [chuẩn bị phỏng vấn và dàn ý báo cáo cá nhân](docs/interview_preparation.md), [đóng gói mã để chấm](docs/submission_package.md).
 
 Đã chạy thêm một thí nghiệm PAD 20 epoch nhưng không đạt tiêu chí validation đặt trước, nên **không thay mô hình đang dùng**. Thử webcam mới được để lại theo yêu cầu người dùng. Lỗi ảnh điện thoại vượt PAD trong phép thử cũ vẫn là giới hạn thực tế; xem [thí nghiệm PAD](docs/pad_regularization_experiment.md). Các số đo và mốc kiểm thử tháng 10 bên dưới là lịch sử, không phải kết quả đánh giá mới.
 
-Dự án COS30082 được thực hiện từng phần. **Báo cáo nhóm tiếng Anh cập nhật ngày 08/11/2026 có 12 trang, đã kiểm tra trực quan toàn bộ trang**, khớp luồng app hiện tại và giữ riêng kết quả lịch sử của một lượt đeo kính, một lượt ảnh tĩnh trên điện thoại. Abstract và Discussion nêu rõ PAD không chặn được mẫu ảnh điện thoại dù identity đã ngăn điểm danh; thí nghiệm PAD bổ sung không được chọn vào app. Thông tin nhóm/thành viên để trống theo yêu cầu. [Tệp Word báo cáo nhóm](reports/COS30082_Group_Report.docx), [ghi chú phần 8](docs/08_group_report.md) và [checklist video](docs/09_video_checklist.md). Chưa quay/nộp video phần 9.
+**Báo cáo nhóm tiếng Anh ngày 14/11/2026** có 12 trang. Bản này bổ sung phép đo 1:N và thử nghiệm vùng cắt PAD. Thông tin nhóm và thành viên vẫn chờ điền. [Báo cáo Word](reports/COS30082_Group_Report.docx) · [Ghi chú phần 8](docs/08_group_report.md) · [Checklist video](docs/09_video_checklist.md)
 
 **Lộ trình app ngày 30/10/2026:** [kế hoạch năm giai đoạn](docs/app_upgrade_roadmap.md). Bước 1–4 đã hoàn tất: lấy mẫu/Add appearance, **History / CSV**, **Profiles…**/nhập ảnh như Lab 7 và **Camera index / Test camera / Diagnostics…**. Bước 5 có **171/171 kiểm thử**, một lượt đeo kính và một lượt ảnh tĩnh trên điện thoại, mỗi điều kiện n=1 với gallery một người/một appearance. **PAD cho qua 237/237 crop ảnh điện thoại; identity trả unknown nên không có điểm danh tạm. Đây là lỗi chặn ảnh giả của PAD, dù luồng điểm danh chưa chấp nhận mẫu này.** Còn chờ không kính/người chưa đăng ký/video ghi sẵn/ảnh in. [Kết quả hiện có](docs/phase5_evaluation_results.md), [quy trình đánh giá](docs/phase5_evaluation_protocol.md), [camera/chẩn đoán](docs/camera_diagnostics.md), [hồ sơ/nhập ảnh](docs/profile_management.md), [lịch sử/CSV](docs/attendance_history.md). Không lưu ảnh/video, không sửa gallery/điểm danh người dùng hoặc đổi mô hình/ngưỡng trong các lượt đo này; không coi tỷ lệ frame là FAR/FRR độc lập.
 
 **Trạng thái ngày 27/10/2026:** hai identity CNN khởi tạo từ đầu đã chạy đủ 10 epoch trên 380.638 ảnh / 4.000 ID, RGB 64×64. AUC trên đủ 8.805 cặp gốc: classification **0,825601**, triplet **0,859969**. App dùng triplet. Có 667 ảnh verification validation trùng train; đây không phải test verification độc lập. Ở ngưỡng FPR cặp gần 1%, TPR chỉ **9,73%**, còn bỏ sót nhiều. [Kết quả và giới hạn](docs/06_identity_training_results.md). Phần 3 có AUC=0,823907/ACER=26,05%; phần 4 accuracy=58,36%/macro-F1=0,4984 trên các tập đã lọc. Đã kiểm tra offline ba mô hình thật và mở webcam để quan sát bắt mặt/liveness; chưa xác nhận trọn luồng đăng ký, điểm danh và đối chiếu thủ công với người thật. Downloader CelebA-Spoof đã hủy, không tự chạy lại.
 
 **Mở demo:** nhấp đúp `start_attendance.cmd`, hoặc chạy `.\.venv-gpu\Scripts\python.exe -m attendance_app.gui` tại `grp_project`, rồi bấm **Start camera**. Giao diện hiện dùng tiếng Anh; hướng dẫn giải thích bằng tiếng Việt. [Hướng dẫn đăng ký và chạy phần 6](docs/06_user_interface.md). Camera không tự bật khi mở cửa sổ. Hồ sơ mặc định ở `data/attendance/profiles.sqlite3`; không lưu ảnh/video camera, biểu cảm không quyết định ghi nhận.
+
+**Model tests…:** khi camera điểm danh đã dừng, so sánh model PAD hiện tại với checkpoint thử nghiệm trên cùng crop của người thật, ảnh điện thoại, video ghi sẵn hoặc ảnh in. Có xác nhận sẵn sàng, hủy phép thử, xem báo cáo cũ và xuất JSON/CSV; giữ ngưỡng validation, không đổi model mặc định hoặc ghi điểm danh. Các khung trong một lượt không phải những mẫu độc lập. [Cách dùng và giới hạn](docs/model_tests.md).
 
 **Phần 7:** khi liveness đạt nhưng identity là unknown/ambiguous, nút **Manual review** cho người vận hành tự chọn hồ sơ, nhập tên/lý do và xác nhận trong 30 giây. Bảng điểm danh có cột **Source**, hiển thị **Automatic**/**Manual**; nhấp đúp để xem chi tiết. Điểm số, checkpoint và AUC/TPR của mô hình giữ nguyên. [Cách dùng và giới hạn](docs/07_innovative_feature.md). Xem bố cục không dùng camera bằng `python -m attendance_app.gui --preview-review`.
 

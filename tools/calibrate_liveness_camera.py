@@ -1,4 +1,4 @@
-"""Match a trained candidate to the baseline VALIDATION spoof-acceptance bound."""
+"""Match a candidate to a baseline error bound using VALIDATION scores only."""
 from __future__ import annotations
 
 import argparse
@@ -21,11 +21,31 @@ def select_at_apcer(labels, scores, maximum_apcer):
         raise ValueError("APCER bound must be finite and in [0,1].")
     liveness_metrics(labels, scores, .5)  # Validate class support, labels and scores.
     fpr, tpr, thresholds = compute_roc(labels, scores)
+    if thresholds[1] < 1.:  # A finite threshold of 1 also rejects all when no score equals 1.
+        thresholds[0] = 1.
     eligible = np.flatnonzero(np.isfinite(thresholds) & (thresholds >= 0) & (thresholds <= 1)
                               & (fpr <= maximum_apcer+1e-12))
     if not len(eligible):
         raise ValueError("No finite threshold meets the validation APCER bound.")
     chosen = max(eligible, key=lambda i: (tpr[i], -fpr[i], thresholds[i]))
+    threshold = float(thresholds[chosen])
+    return threshold, liveness_metrics(labels, scores, threshold)
+
+
+def select_at_bpcer(labels, scores, maximum_bpcer):
+    """Minimize spoof acceptance without exceeding a genuine-rejection bound."""
+    maximum_bpcer = float(maximum_bpcer)
+    if not np.isfinite(maximum_bpcer) or not 0 <= maximum_bpcer <= 1:
+        raise ValueError("BPCER bound must be finite and in [0,1].")
+    liveness_metrics(labels, scores, .5)
+    fpr, tpr, thresholds = compute_roc(labels, scores)
+    if thresholds[1] < 1.:
+        thresholds[0] = 1.
+    eligible = np.flatnonzero(np.isfinite(thresholds) & (thresholds >= 0) & (thresholds <= 1)
+                              & (1-tpr <= maximum_bpcer+1e-12))
+    if not len(eligible):
+        raise ValueError("No finite threshold meets the validation BPCER bound.")
+    chosen = min(eligible, key=lambda i: (fpr[i], 1-tpr[i], -thresholds[i]))
     threshold = float(thresholds[chosen])
     return threshold, liveness_metrics(labels, scores, threshold)
 
@@ -36,7 +56,11 @@ def main():
     parser.add_argument("--candidate", type=Path, required=True)
     parser.add_argument("--validation", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument("--match-rate", choices=("apcer", "bpcer"), default="apcer",
+                        help="Keep the baseline spoof-acceptance or genuine-rejection bound.")
     args = parser.parse_args()
+    if any((args.output_dir/name).exists() for name in ("best_model.pt", "calibration.json")):
+        raise ValueError("Calibration output already exists; use a new output directory.")
     torch.set_num_threads(4)
     baseline = torch.load(args.baseline, map_location="cpu", weights_only=True)
     payload = torch.load(args.candidate, map_location="cpu", weights_only=True)
@@ -45,22 +69,29 @@ def main():
             or baseline["config"]["calibration_manifest_sha256"] != expected):
         raise ValueError("Both models must use this exact original validation manifest.")
     baseline_stats = baseline["training"]["calibration"]["validation_metrics"]
-    maximum = baseline_stats["APCER"]
+    rate = args.match_rate.upper()
+    maximum = baseline_stats[rate]
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model, config = load_liveness_model(args.candidate, device=device)
     dataset = LivenessDataset(args.validation, image_size=config["image_size"], crop_mode=config["crop_mode"])
     labels, scores = predict_dataset(model, dataset, 128, device)
-    threshold, metrics = select_at_apcer(labels, scores, maximum)
+    select = select_at_apcer if rate == "APCER" else select_at_bpcer
+    threshold, metrics = select(labels, scores, maximum)
     args.output_dir.mkdir(parents=True, exist_ok=True)
     output = args.output_dir/"best_model.pt"
     calibration = {
         "threshold": threshold, "threshold_source": "validation", "threshold_calibrated": True,
-        "selection_method": "maximum validation TPR subject to APCER <= baseline validation APCER; lower APCER then higher threshold break ties",
-        "maximum_validation_apcer": maximum, "baseline_validation_metrics": baseline_stats,
+        "selection_method": (
+            "maximum validation TPR subject to APCER <= baseline validation APCER; lower APCER then higher threshold break ties"
+            if rate == "APCER" else
+            "minimum validation APCER subject to BPCER <= baseline validation BPCER; lower BPCER then higher threshold break ties"),
+        f"maximum_validation_{rate.lower()}": maximum, "baseline_validation_metrics": baseline_stats,
         "baseline_checkpoint_sha256": _sha256(args.baseline), "validation_metrics": metrics,
         "scope": "validation operating point; not an independent deployment error guarantee",
         "validation_samples_used": len(dataset), "validation_batches_capped": False,
         "test_data_used": False, "camera_data_used": False, "selected_checkpoint": str(output.resolve()),
+        "calibration_manifest_sha256": expected,
+        "candidate_checkpoint_sha256": _sha256(args.candidate),
     }
     payload["config"] = {**payload["config"], "threshold": threshold}
     payload["training"] = {**payload["training"], "calibration": calibration,

@@ -1,0 +1,245 @@
+{
+  "status": "offline_completed_pending_camera",
+  "recorded_at_utc": "2026-11-09T02:38:04.726524+00:00",
+  "selected_epoch": 10,
+  "completed_epochs": 10,
+  "source_checkpoint_sha256": "96ba9bd3d0405d5409c9a3305168078ac341e073bbfbcd9abd3548f8ad8f9e59",
+  "matched_checkpoint_sha256": "c1ccfdf8cf7c64baa555dd98947a070649bccc80467e200fc529bf07b43ec725",
+  "plan_sha256": "d4f22fe2dea47cb12b13febc14a47e88dd5e002c1a98bbf464c95e9b94f7ff8d",
+  "minimum_ACER_validation_metrics": {
+    "accuracy": 0.8697421981004071,
+    "APCER": 0.1108926464805348,
+    "BPCER": 0.2518518518518518,
+    "ACER": 0.18137224916619332,
+    "AUC": 0.8836476796628849,
+    "threshold": 0.8448503820911647,
+    "accept_rule": "live_score >= threshold",
+    "sample_count": 2948,
+    "live_count": 405,
+    "spoof_count": 2543,
+    "confusion": {
+      "true_live": 303,
+      "spoof_accepted_live": 282,
+      "true_spoof": 2261,
+      "live_rejected_spoof": 102
+    },
+    "confusion_matrix": [
+      [
+        2261,
+        282
+      ],
+      [
+        102,
+        303
+      ]
+    ],
+    "confusion_matrix_order": {
+      "rows": [
+        "spoof",
+        "live"
+      ],
+      "columns": [
+        "spoof",
+        "live"
+      ]
+    },
+    "score_definition": "softmax(logits)[live_label=1]; higher means more likely live"
+  },
+  "matched_validation_metrics": {
+    "accuracy": 0.7238805970149254,
+    "APCER": 0.2984663782933543,
+    "BPCER": 0.13580246913580246,
+    "ACER": 0.2171344237145784,
+    "AUC": 0.8836476796628848,
+    "threshold": 0.18372472011345659,
+    "accept_rule": "live_score >= threshold",
+    "sample_count": 2948,
+    "live_count": 405,
+    "spoof_count": 2543,
+    "confusion": {
+      "true_live": 350,
+      "spoof_accepted_live": 759,
+      "true_spoof": 1784,
+      "live_rejected_spoof": 55
+    },
+    "confusion_matrix": [
+      [
+        1784,
+        759
+      ],
+      [
+        55,
+        350
+      ]
+    ],
+    "confusion_matrix_order": {
+      "rows": [
+        "spoof",
+        "live"
+      ],
+      "columns": [
+        "spoof",
+        "live"
+      ]
+    },
+    "score_definition": "softmax(logits)[live_label=1]; higher means more likely live"
+  },
+  "baseline_validation_metrics": {
+    "accuracy": 0.6886024423337856,
+    "APCER": 0.33936295713723946,
+    "BPCER": 0.13580246913580246,
+    "ACER": 0.23758271313652096,
+    "AUC": 0.8745148871508813,
+    "threshold": 0.0021445315221842592,
+    "accept_rule": "live_score >= threshold",
+    "sample_count": 2948,
+    "live_count": 405,
+    "spoof_count": 2543,
+    "confusion": {
+      "true_live": 350,
+      "spoof_accepted_live": 863,
+      "true_spoof": 1680,
+      "live_rejected_spoof": 55
+    },
+    "confusion_matrix": [
+      [
+        1680,
+        863
+      ],
+      [
+        55,
+        350
+      ]
+    ],
+    "confusion_matrix_order": {
+      "rows": [
+        "spoof",
+        "live"
+      ],
+      "columns": [
+        "spoof",
+        "live"
+      ]
+    },
+    "score_definition": "softmax(logits)[live_label=1]; higher means more likely live"
+  },
+  "predeclared_checks_at_matched_point": {
+    "validation_APCER_improved": true,
+    "validation_BPCER_bound": true,
+    "validation_ACER_target": false,
+    "fresh_camera_acceptance": false
+  },
+  "all_offline_promotion_criteria_met": false,
+  "promoted_to_runtime": false,
+  "reason": "Matched candidate reduces validation spoof acceptance at the same genuine rejection, but fails the predeclared ACER target. Reused-test genuine rejection and ACER also regress. Stage only for an explicitly authorized paired webcam diagnostic.",
+  "reused_test_regression": {
+    "scope": "Reused filtered test set; not an independent new evaluation. Threshold locked before inference; subject separation cannot be verified.",
+    "candidate_metrics": {
+      "accuracy": 0.8251794735442701,
+      "APCER": 0.17561244150839528,
+      "BPCER": 0.15234375,
+      "ACER": 0.16397809575419764,
+      "AUC": 0.9127088064271952,
+      "threshold": 0.18372472011345659,
+      "accept_rule": "live_score >= threshold",
+      "sample_count": 7522,
+      "live_count": 256,
+      "spoof_count": 7266,
+      "confusion": {
+        "true_live": 217,
+        "spoof_accepted_live": 1276,
+        "true_spoof": 5990,
+        "live_rejected_spoof": 39
+      },
+      "confusion_matrix": [
+        [
+          5990,
+          1276
+        ],
+        [
+          39,
+          217
+        ]
+      ],
+      "confusion_matrix_order": {
+        "rows": [
+          "spoof",
+          "live"
+        ],
+        "columns": [
+          "spoof",
+          "live"
+        ]
+      },
+      "score_definition": "softmax(logits)[live_label=1]; higher means more likely live"
+    },
+    "baseline_metrics": {
+      "accuracy": 0.811619250199415,
+      "APCER": 0.19102669969721991,
+      "BPCER": 0.11328125,
+      "ACER": 0.15215397484860996,
+      "AUC": 0.9290843053261767,
+      "threshold": 0.0021445315221842592,
+      "accept_rule": "live_score >= threshold",
+      "sample_count": 7522,
+      "live_count": 256,
+      "spoof_count": 7266,
+      "confusion": {
+        "true_live": 227,
+        "spoof_accepted_live": 1388,
+        "true_spoof": 5878,
+        "live_rejected_spoof": 29
+      },
+      "confusion_matrix": [
+        [
+          5878,
+          1388
+        ],
+        [
+          29,
+          227
+        ]
+      ],
+      "confusion_matrix_order": {
+        "rows": [
+          "spoof",
+          "live"
+        ],
+        "columns": [
+          "spoof",
+          "live"
+        ]
+      },
+      "score_definition": "softmax(logits)[live_label=1]; higher means more likely live"
+    },
+    "metrics_sha256": "9e005d2b2ba19c9bf1c9768b1942dcb4c1f5f18e078a31fdde20c93fc6a4e1a6",
+    "threshold_retuned_on_test": false
+  },
+  "software_tests": {
+    "full_tests": {
+      "tests": 207,
+      "sha256": "1ae52402404b2a22defd147f6659fb27834d8722e69a783f9d46e41d7a3c0456"
+    },
+    "paired_camera_tests": {
+      "tests": 4,
+      "sha256": "45c745e656a1fd43b79fca45812f18a754afd33272743b0b7e6b792e1dc15149"
+    }
+  },
+  "distinct_tests_passed": 211,
+  "integration_report_sha256": "95f433d3f98e327e307e4e634daa39d75b1a2f5d11b5687f6f768780eb010450",
+  "source_code_sha256": {
+    "anti_spoofing/train.py": "768c3ff7267fbc54405f75900a0555c5957997ca8e712775dae6682e0d12aa18",
+    "anti_spoofing/augmentation.py": "60756882bb87619ac01175e7cd4bf44d3321bf987619292b8bdb84e075874790",
+    "anti_spoofing/model.py": "f2222b6942d8b7a7309e078101bf96b07e9e1c4a04a610182f3f47161bb0714a",
+    "face_verification/model.py": "b1dd65165215e0947eee421ee002a25d45d852ae9a64f710866e2bf02a346f9f",
+    "tools/calibrate_liveness_camera.py": "62b3fa15a6cde75c831d990f0019cb68ceb0f50ac14bcef5f9b9dd5945471dd2",
+    "tools/evaluate_webcam_trial.py": "73a02d37419348edf6f6dc39864c56be68f79c15b8b208cf3974d7f8301c82cf",
+    "tools/check_liveness_camera.py": "0f76b7f8733ae44bf9ae39f143cfa6260794c61d00d05647a45a8226e2c52cf1"
+  },
+  "runtime_checkpoint_unchanged": true,
+  "camera_evaluation_performed": false,
+  "test_or_camera_data_used_for_training_or_selection": false,
+  "images_or_video_recorded": false,
+  "production_gallery_or_attendance_used": false,
+  "historical_phone_photo_failure_resolved": false
+}

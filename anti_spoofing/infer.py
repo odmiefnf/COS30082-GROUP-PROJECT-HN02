@@ -65,7 +65,7 @@ class LivenessDetector:
             if bbox is None and not is_face_crop and self.config["crop_mode"] == "bbox":
                 raise ValueError("A camera/image-array input needs a pixel bbox or is_face_crop=True.")
             rgb = image
-        return crop_liveness_image(rgb, bbox=bbox)
+        return crop_liveness_image(rgb, bbox=bbox, context=self.config.get("context_crop", False) and not is_face_crop)
 
     def predict_crop(self, face_crop: Image.Image | np.ndarray) -> dict:
         """Predict an explicitly prepared face crop; score is softmax P(live)."""

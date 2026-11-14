@@ -200,6 +200,7 @@ def read_celeba_bbox(
 
 def crop_liveness_image(
     image: Image.Image | np.ndarray, bbox: tuple[float, float, float, float] | None = None,
+    *, context: bool = False,
 ) -> Image.Image:
     """Return the RGB face crop used by both liveness and identity inference.
 
@@ -215,6 +216,8 @@ def crop_liveness_image(
     image = image.convert("RGB")
     if image.width < 1 or image.height < 1:
         raise ValueError("Image dimensions must be positive.")
+    if context and bbox is None:
+        raise ValueError("Context cropping requires a box in the original image.")
     if bbox is not None:
         try:
             values = tuple(float(value) for value in bbox)
@@ -225,6 +228,10 @@ def crop_liveness_image(
         x, y, width, height = values
         if width <= 0 or height <= 0:
             raise ValueError("bbox width and height must be positive.")
+        if context:
+            side = 2 * max(width, height)
+            x, y = x + (width - side) / 2, y + (height - side) / 2
+            width = height = side
         left, top = max(0, math.floor(x)), max(0, math.floor(y))
         right, bottom = min(image.width, math.ceil(x + width)), min(image.height, math.ceil(y + height))
         if right <= left or bottom <= top:
