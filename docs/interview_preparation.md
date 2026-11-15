@@ -2,7 +2,7 @@
 
 Use this guide to explain the actual implementation and evidence. It is not a
 completed individual report or a script claiming that every member wrote every
-component. Names, student IDs, group details and contribution assignments remain
+component. Group HN02, names and student IDs are recorded in the group report; individual contribution assignments remain
 blank until the group supplies them.
 
 ## Questions every member should be able to answer

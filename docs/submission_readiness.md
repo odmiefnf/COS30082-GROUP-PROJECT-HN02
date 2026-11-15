@@ -2,7 +2,7 @@
 
 Reviewed on 8 November 2026 against the supplied six-page project brief. This is
 a working checklist of evidence and outstanding tasks, not a predicted mark.
-Group name, member names and student IDs remain blank as requested.
+The group report now identifies Group HN02 and the six supplied member names and student IDs.
 
 The 14 November update adds a separate [1:N gallery evaluation](identity_open_set.md)
 and a [paired PAD crop study](pad_context_crop.md). The app threshold matched
@@ -108,7 +108,7 @@ the copied application and check every model component before recording.
 
 ## Final handover checklist
 
-- [ ] Fill group/member names and student IDs in the group report.
+- [x] Add Group HN02, member names and student IDs to the group report; render it again after any later content change.
 - [ ] Confirm actual contributions with each member; map an implemented feature
   and relevant evidence to each person's explanation.
 - [x] Rebuilt/rendered the 8 November report and reviewed all 12 pages. Recheck

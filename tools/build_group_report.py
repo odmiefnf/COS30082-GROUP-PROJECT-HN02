@@ -436,9 +436,10 @@ def build():
     P("Facial recognition attendance with expression and liveness", "Title")
     P("COS30082 Applied Machine Learning Group Report", "Subtitle")
     P("14 November 2026", size=10)
-    P("Group name or number   __________________________________________")
-    P("Members and student IDs   ________________________________________")
-    P("______________________________________________________________")
+    P("Group HN02", size=11)
+    P("Nguyen Van Tuan Kiet - 104772099     Huynh Quoc Hieu - 104848408", size=8)
+    P("Nguyen Phuc Lam - 105006540     Bùi Minh Hiếu - 105006582", size=8)
+    P("Nguyễn Huy Hoàng Viêt - 104992509     Vũ Bá Hiển - 104995634", size=8)
     H("Abstract")
     P("We developed an attendance prototype that combines face verification, passive liveness detection and facial expression classification. Two compact identity CNNs were trained from scratch using classification and triplet metric learning, then compared on the original 8,805 verification pairs. Triplet achieved the higher validation AUC, 0.859969 versus 0.825601, and supplies the application's embeddings. The current liveness model achieved AUC 0.929084 and ACER 15.22% in regression on reused LCC FASD test predictions. Expression classification achieved 58.36% accuracy and macro F1 0.4984 on filtered FER2013 PrivateTest.")
     P("The English webcam interface supports registration, separate appearance templates and manual review with recorded provenance. Identity validation includes 667 training pixel duplicates and TPR is only 9.73% near a 1% pair FPR. An operator-labelled phone still photo passed PAD on all 237 scored crops; identity rejection prevented attendance in that trial. Convenience camera trials, a single-person gallery and passing software tests do not establish deployment accuracy or security; independent gallery and human-review studies remain pending.")
@@ -612,7 +613,7 @@ def build():
 
     OUTPUT.parent.mkdir(exist_ok=True)
     report.doc.save(OUTPUT)
-    metadata = {"output": str(OUTPUT), "language": "English", "group_details": "left blank as requested",
+    metadata = {"output": str(OUTPUT), "language": "English", "group_details": "Group HN02 with six supplied members",
                 "page_limit": 12, "intended_pages": 12, "operating_points": operating,
                 "source_files": {p: digest(ROOT/p) for p in ["results/comparison/comparison.json",
                     "results/identity_app_config.json", "results/liveness_lcc_test/metrics.json",
