@@ -12,13 +12,19 @@ from .review import ManualReview
 
 
 class AttendanceService:
-    def __init__(self, store, recognizer, liveness, emotion, session, stable_frames=3):
+    def __init__(self, store, recognizer, liveness, emotion, session, stable_frames=3,
+                 liveness_window=3, liveness_window_seconds=0.6):
         if stable_frames < 1:
             raise ValueError("stable_frames must be positive.")
+        if liveness_window < 1 or liveness_window_seconds <= 0:
+            raise ValueError("liveness_window and liveness_window_seconds must be positive.")
         self.store, self.recognizer = store, recognizer
         self.liveness, self.emotion = liveness, emotion
         self.session = clean_text(session, "Session")
         self.stable_frames = stable_frames
+        self.liveness_window = int(liveness_window)
+        self.liveness_window_seconds = float(liveness_window_seconds)
+        self.liveness_history = []
         self.pending_name = None
         self.pending_appearance = None
         self.appearance_dialog_open = False
@@ -43,9 +49,44 @@ class AttendanceService:
             self.appearance_request = None
             self.appearance_request_reason = reason
         self.last_person, self.streak, self.last_frame_time = None, 0, None
+        self.liveness_history.clear()
         self.enrollment_samples.clear()
         self.enrollment_hashes.clear()
         self.last_sample_time = float("-inf")
+
+    def _smooth_liveness(self, live, now):
+        """Average recent calibrated PAD scores across consecutive frames.
+
+        Smoothing suppresses single-frame glasses glare or bounding-box jitter
+        while clearing immediately whenever face tracking is reset or expires.
+        """
+        if not isinstance(live, dict):
+            self.liveness_history.clear()
+            return live
+        score = live.get("live_score")
+        threshold = live.get("threshold")
+        if (self.liveness_window <= 1 or isinstance(score, bool) or not isinstance(score, (int, float))
+                or isinstance(threshold, bool) or not isinstance(threshold, (int, float))
+                or not (np.isfinite(score) and np.isfinite(threshold))):
+            self.liveness_history.clear()
+            return live
+        self.liveness_history = [(t, s) for t, s in self.liveness_history
+                                 if 0 <= now - t <= self.liveness_window_seconds]
+        self.liveness_history.append((now, float(score)))
+        if len(self.liveness_history) > self.liveness_window:
+            self.liveness_history = self.liveness_history[-self.liveness_window:]
+        smoothed_score = float(sum(s for _, s in self.liveness_history) / len(self.liveness_history))
+        is_live = bool(smoothed_score >= float(threshold))
+        smoothed = dict(live)
+        smoothed.update(
+            raw_live_score=float(score),
+            live_score=smoothed_score,
+            spoof_score=1.0 - smoothed_score,
+            is_live=is_live,
+            status="live" if is_live else "spoof",
+            smoothed_frames=len(self.liveness_history),
+        )
+        return smoothed
 
     def frame_state(self, now=None):
         """Lifecycle checks also run on frames rejected before CNN inference."""
@@ -213,7 +254,7 @@ class AttendanceService:
         if self.last_frame_time is not None and now - self.last_frame_time > 1.5:
             self.reset_tracking()
         self.last_frame_time = now
-        live = self.liveness.predict_crop(crop)
+        live = self._smooth_liveness(self.liveness.predict_crop(crop), now)
         result = {"status": "spoof" if live.get("is_live") is False else "liveness_unavailable",
                   "liveness": live, "identity": None, "expression": None,
                   "registered": False, "attendance_recorded": False, "registration_samples": 0,

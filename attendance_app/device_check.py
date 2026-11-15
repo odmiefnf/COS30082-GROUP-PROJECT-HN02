@@ -1,7 +1,12 @@
 """A selected-camera probe: no models, database, attendance or image persistence."""
 from __future__ import annotations
 
+import os
 import numpy as np
+
+from .video_stream import resolve_camera_backend
+
+os.environ.setdefault("OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS", "0")
 
 
 CAMERA_HELP = "Close other camera apps, check the selected index and Windows camera access, then try again."
@@ -17,7 +22,7 @@ def camera_index(value):
     return parsed
 
 
-def probe_camera(index):
+def probe_camera(index, backend=None):
     """Read one frame and always release; return metadata, never the frame.
 
     Run off the Tk thread. A camera driver's open/read calls may block; no
@@ -27,7 +32,8 @@ def probe_camera(index):
     try:
         import cv2
         index = camera_index(index)
-        camera = cv2.VideoCapture(index)
+        api = resolve_camera_backend(backend)
+        camera = cv2.VideoCapture(index) if api is None else cv2.VideoCapture(index, api)
         if not camera.isOpened():
             raise RuntimeError("The selected camera could not be opened.")
         success, frame = camera.read()

@@ -1,5 +1,6 @@
 @echo off
 setlocal
+set OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS=0
 cd /d "%~dp0"
 if exist ".venv-gpu\Scripts\pythonw.exe" (
   start "" ".venv-gpu\Scripts\pythonw.exe" -m attendance_app.gui

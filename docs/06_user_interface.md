@@ -1,5 +1,10 @@
 # Phần 6: Webcam, đăng ký và giao diện điểm danh
 
+**Cập nhật ngày 14/11/2026:**
+- **Mở camera nhanh hơn trên Windows:** tắt hardware-transform probing của MSMF (`OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS=0`), hỗ trợ tham số `--camera-backend auto|dshow|msmf` và warmup sẵn hai bộ Haar cascade ngay khi nạp ứng dụng.
+- **Hiển thị icon kèm nhãn cảm xúc:** thẻ `EXPRESSION` hiển thị cả biểu tượng cảm xúc, nhãn và độ tự tin (`😊 Happy`, `😠 Angry`, `😢 Sad`, `😮 Surprise`, `😨 Fear`, `🤢 Disgust`, `😐 Neutral`) theo mục 4 của đề bài.
+- **Làm mượt điểm Liveness & lọc box lồng nhau:** `AttendanceService` lấy trung bình trượt tối đa 3 khung liên tiếp trong 0,6 giây (`_smooth_liveness`) cho điểm `live_score` đã hiệu chỉnh, đồng thời `FaceLocator._deduplicate` loại bỏ khung con lồng bên trong khung chính trên cùng một khuôn mặt (`overlap / smaller >= 0,75`), giúp trạng thái `Passed` ổn định và không bị nhấp nháy do lóa kính 1 frame.
+
 **Bổ sung giai đoạn 4 ngày 30/10/2026:** chọn **Camera index** khi dừng, **Test camera** thử một frame, **Diagnostics…** chỉ rõ lỗi từng thành phần và **Retry model setup** sau khi sửa cấu hình. Hướng dẫn phân biệt tối/chói/mờ và bước chưa kiểm tra. [Hướng dẫn camera và chẩn đoán](camera_diagnostics.md).
 
 **Bổ sung giai đoạn 3 ngày 30/10/2026:** khi camera tắt, **Profiles…** cho tìm/đổi tên hồ sơ, bỏ nhóm mẫu sau sao lưu và nhập ba ảnh tham chiếu cho người mới hoặc thêm appearance. [Hướng dẫn quản lý hồ sơ và nhập ảnh](profile_management.md).
@@ -93,13 +98,13 @@ Webcam BGR -> RGB -> định vị một mặt -> kiểm tra kích thước/độ
             -> cùng tên qua ba khung liên tiếp: ghi một lần / người / buổi
 ```
 
-Biểu cảm chỉ mô tả nhãn FER2013 nhìn thấy; không suy luận trạng thái tâm lý, không thay đổi kết quả ghi nhận và không được lưu vào bảng điểm danh. Từ ngày 08/11/2026, biểu cảm được phân loại trên crop đạt chất lượng cả khi PAD không đạt; identity, đăng ký và điểm danh vẫn bị PAD chặn. Khi CNN biểu cảm lỗi, GUI hiển thị **Unavailable** và Diagnostics ghi nguyên nhân; identity/liveness vẫn hoạt động.
+Biểu cảm chỉ mô tả nhãn FER2013 nhìn thấy kèm icon trực quan (`😊`, `😠`, `😢`, `😮`, `😨`, `🤢`, `😐`); không suy luận trạng thái tâm lý, không thay đổi kết quả ghi nhận và không được lưu vào bảng điểm danh. Từ ngày 08/11/2026, biểu cảm được phân loại trên crop đạt chất lượng cả khi PAD không đạt; identity, đăng ký và điểm danh vẫn bị PAD chặn. Khi CNN biểu cảm lỗi, GUI hiển thị **Unavailable** và Diagnostics ghi nguyên nhân; identity/liveness vẫn hoạt động.
 
 ## Định vị mặt
 
 Mặc định dùng **Haar cascade cổ điển có sẵn trong OpenCV** để tạo bounding box. Đây là thành phần định vị có trọng số được cung cấp sẵn; không dùng nó để tính embedding, phân loại danh tính, liveness hay biểu cảm. Ba CNN của bài được khởi tạo và huấn luyện từ đầu. Cần trình bày rõ sự khác biệt này trong báo cáo; không ghi rằng toàn bộ thành phần định vị cũng tự huấn luyện.
 
-Bản cập nhật kết hợp cascade `default` trên ảnh cân bằng histogram với cascade `alt2` trên ảnh CLAHE, xét ảnh rộng tối đa 800 pixel, `scaleFactor=1.08`, `minNeighbors=4`, và kích thước mặt tối thiểu tương ứng khoảng 80 pixel trên khung gốc. Các phát hiện chồng lấp có IoU từ 0,55 được gộp để tránh đếm cùng mặt hai lần; không giữ khung mặt cũ khi khung hiện tại không phát hiện. CNN vẫn nhận crop RGB gốc, không nhận ảnh tăng tương phản dành cho detector. Riêng bước chỉnh detector giữ nguyên ngưỡng chất lượng, liveness, identity và checkpoint; việc đổi liveness mặc định sau đó được giải thích trong ghi chú đầu tài liệu.
+Bản cập nhật kết hợp cascade `default` trên ảnh cân bằng histogram với cascade `alt2` trên ảnh CLAHE, xét ảnh rộng tối đa 800 pixel, `scaleFactor=1.08`, `minNeighbors=4`, và kích thước mặt tối thiểu tương ứng khoảng 80 pixel trên khung gốc. Các phát hiện chồng lấp có IoU từ 0,55 hoặc khung con nằm gọn trong khung lớn (`overlap / smaller >= 0,75`) được gộp để tránh đếm cùng mặt hai lần; không giữ khung mặt cũ khi khung hiện tại không phát hiện. CNN vẫn nhận crop RGB gốc, không nhận ảnh tăng tương phản dành cho detector. Riêng bước chỉnh detector giữ nguyên ngưỡng chất lượng, liveness, identity và checkpoint; việc đổi liveness mặc định sau đó được giải thích trong ghi chú đầu tài liệu.
 
 Nếu cách hiểu quy định của giảng viên không cho dùng cả detector có sẵn, chế độ ROI tránh thành phần đó nhưng người dùng phải tự căn mặt và hệ thống không phát hiện được nhiều mặt ngoài ROI:
 

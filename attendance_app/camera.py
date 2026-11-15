@@ -25,6 +25,9 @@ class FaceLocator:
             self.contrast = cv2.createCLAHE(clipLimit=2., tileGridSize=(8, 8))
             if self.cascade.empty() or self.alternate.empty():
                 raise RuntimeError("OpenCV Haar face localization data is missing.")
+            warmup = np.zeros((32, 32), dtype=np.uint8)
+            self.cascade.detectMultiScale(warmup, scaleFactor=1.08, minNeighbors=4, minSize=(24, 24))
+            self.alternate.detectMultiScale(warmup, scaleFactor=1.08, minNeighbors=4, minSize=(24, 24))
 
     @staticmethod
     def _deduplicate(boxes):
@@ -43,7 +46,8 @@ class FaceLocator:
             for a, b, w, h in kept:
                 overlap = max(0, min(x+width, a+w)-max(x, a)) * max(0, min(y+height, b+h)-max(y, b))
                 union = width*height + w*h - overlap
-                if overlap / union >= .55:
+                smaller = min(width*height, w*h)
+                if overlap / union >= .55 or overlap / smaller >= .75:
                     duplicate = True
                     break
             if not duplicate:

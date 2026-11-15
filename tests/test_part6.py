@@ -168,6 +168,25 @@ class Fixture(unittest.TestCase):
         self.assertEqual(self.service.analyze(crop, 2.2)["stable_frames"], 1)
         self.assertFalse(self.store.attendance("COS30082-01"))
 
+    def test_liveness_temporal_smoothing_absorbs_single_frame_glare_dip_and_rejects_sustained_spoof(self):
+        crop = Image.new("RGB", (100, 100))
+        scores = [(0.00, 0.45), (0.04, 0.42), (0.08, 0.0005)]
+        for now, score in scores:
+            self.live.predict_crop.return_value = {
+                "live_score": score, "threshold": 0.00214, "is_live": score >= 0.00214
+            }
+            result = self.service.analyze(crop, now)
+            self.assertTrue(result["liveness"]["is_live"])
+        self.assertEqual(result["liveness"]["smoothed_frames"], 3)
+        self.assertAlmostEqual(result["liveness"]["raw_live_score"], 0.0005)
+        for now in (0.12, 0.16, 0.20):
+            self.live.predict_crop.return_value = {
+                "live_score": 0.0001, "threshold": 0.00214, "is_live": False
+            }
+            result = self.service.analyze(crop, now)
+        self.assertFalse(result["liveness"]["is_live"])
+        self.assertEqual(result["status"], "spoof")
+
     def test_no_face_multiple_faces_or_quality_failure_skip_all_models(self):
         locator = Mock()
         processor = FrameProcessor(locator, self.service)

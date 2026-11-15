@@ -20,6 +20,24 @@ PROJECT = Path(__file__).resolve().parents[1]
 DEFAULT_LIVENESS_CHECKPOINT = PROJECT/"results/liveness_camera_matched/best_model.pt"
 BG, CARD, INK, MUTED, BLUE = "#eef3f8", "#ffffff", "#172b45", "#61748b", "#1765d1"
 FACE_PENDING, FACE_RECOGNIZED = "#fbbf24", "#4ade80"
+EXPRESSION_ICONS = {
+    "angry": "😠",
+    "disgust": "🤢",
+    "fear": "😨",
+    "happy": "😊",
+    "sad": "😢",
+    "surprise": "😮",
+    "neutral": "😐",
+}
+
+
+def format_expression(expression, error=None):
+    """Format an expression dictionary with its icon, label and confidence."""
+    if expression is None:
+        return "Unavailable" if error else "—"
+    label = str(expression.get("label", "")).strip()
+    icon = EXPRESSION_ICONS.get(label.lower(), "🙂")
+    return f"{icon} {label.title()} · {expression['confidence']:.0%}"
 
 MESSAGES = {
     "no_face": "Face the camera and keep your face in view",
@@ -195,8 +213,10 @@ class CameraWorker(threading.Thread):
                         self.stop_camera()
                         self.service.session = session
                         stream_id = self.stream_id
+                        backend = getattr(self.args, "camera_backend", None)
                         self.camera = LatestCamera(selected_camera,
-                            on_preview=lambda sample, token=stream_id: self.preview(sample, token))
+                            on_preview=lambda sample, token=stream_id: self.preview(sample, token),
+                            backend=backend)
                         self.camera.open()
                         self.publish(event="started", camera=selected_camera, stream_id=stream_id,
                                      attendance=store.attendance(session))
@@ -557,7 +577,7 @@ class AttendanceWindow:
         self.refresh_diagnostics()
 
         def check():
-            report = probe_camera(index)
+            report = probe_camera(index, backend=getattr(self.args, "camera_backend", None))
             self.updates.put_nowait({"event": "camera_probe", "report": report})
 
         self.camera_probe = threading.Thread(target=check, daemon=True)
@@ -770,8 +790,7 @@ class AttendanceWindow:
         self.live_text.set("Not checked" if live is None else "Passed" if live.get("is_live") is True
                            else "Unavailable" if live.get("is_live") is None else "Not passed")
         expression = result.get("expression")
-        self.expression_text.set(("Unavailable" if result.get("expression_error") else "—") if expression is None
-                                 else f"{expression['label'].title()} · {expression['confidence']:.0%}")
+        self.expression_text.set(format_expression(expression, result.get("expression_error")))
         self.profile_count.set(f"{update['profiles']} registered profiles")
         self.render_attendance(update["attendance"])
         capture_pending = update.get("capture_pending", False)
@@ -996,6 +1015,7 @@ class AttendanceWindow:
             self.appearance_dialog = None
         self.send("quit")
         self.state_text.set("Closing camera…")
+        self._close_deadline = time.monotonic() + 1.2
         self.await_close()
 
     def cancel_review_dialog(self, token):
@@ -1011,8 +1031,16 @@ class AttendanceWindow:
         self.appearance_dialog = None
 
     def await_close(self):
-        if (self.worker is None or not self.worker.is_alive()) and (self.camera_probe is None or not self.camera_probe.is_alive()):
-            self.root.destroy()
+        timed_out = hasattr(self, "_close_deadline") and time.monotonic() > self._close_deadline
+        if timed_out or ((self.worker is None or not self.worker.is_alive()) and (self.camera_probe is None or not self.camera_probe.is_alive())):
+            try:
+                self.root.quit()
+            except Exception:
+                pass
+            try:
+                self.root.destroy()
+            except Exception:
+                pass
         else:
             self.root.after(80, self.await_close)
 
@@ -1025,6 +1053,8 @@ def main(argv=None):
     parser.add_argument("--database", type=Path, default=PROJECT/"data/attendance/profiles.sqlite3")
     parser.add_argument("--session", default=datetime.now().astimezone().strftime("%Y-%m-%d"))
     parser.add_argument("--camera", type=int, default=0)
+    parser.add_argument("--camera-backend", choices=("auto", "dshow", "msmf"), default="auto",
+                        help="OpenCV video backend preference (auto uses fast MSMF on Windows).")
     parser.add_argument("--detector", choices=("haar", "roi"), default="haar")
     parser.add_argument("--roi", type=int, nargs=4, metavar=("X", "Y", "W", "H"))
     parser.add_argument("--device", choices=("cpu", "auto", "cuda"), default="cpu")
@@ -1053,5 +1083,22 @@ def main(argv=None):
     return 0
 
 
+def force_exit(code=0):
+    try:
+        import sys
+        if sys.platform == "win32":
+            import ctypes
+            from ctypes import wintypes
+            kernel32 = ctypes.windll.kernel32
+            kernel32.GetCurrentProcess.restype = wintypes.HANDLE
+            kernel32.TerminateProcess.argtypes = [wintypes.HANDLE, wintypes.UINT]
+            kernel32.TerminateProcess(kernel32.GetCurrentProcess(), int(code or 0))
+    except Exception:
+        pass
+    import os
+    os._exit(int(code or 0))
+
+
 if __name__ == "__main__":
-    raise SystemExit(main())
+    code = main()
+    force_exit(code or 0)

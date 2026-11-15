@@ -207,7 +207,8 @@ class LatestCameraChecks(unittest.TestCase):
     def test_validation_and_read_before_open(self):
         for fields in ({"index": True}, {"index": -1}, {"index": 100},
                        {"index": 0, "width": 0}, {"index": 0, "height": 1.5},
-                       {"index": 0, "fps": float("nan")}, {"index": 0, "fps": 0}):
+                       {"index": 0, "fps": float("nan")}, {"index": 0, "fps": 0},
+                       {"index": 0, "backend": "invalid"}):
             with self.subTest(fields=fields), self.assertRaises(ValueError):
                 LatestCamera(**fields)
         stream = LatestCamera(0)
@@ -218,6 +219,13 @@ class LatestCameraChecks(unittest.TestCase):
             with self.subTest(fields=fields), self.assertRaises(ValueError):
                 stream.read_latest(**fields)
         stream.close()
+
+    def test_explicit_backend_passes_opencv_api_preference(self):
+        camera = FakeCamera()
+        with patch("attendance_app.video_stream.cv2.VideoCapture", return_value=camera) as opened:
+            stream = LatestCamera(2, backend="dshow").open()
+            stream.close()
+        opened.assert_called_once_with(2, getattr(cv2, "CAP_DSHOW", 700))
 
     def test_release_failure_is_reported_without_releasing_handle_twice(self):
         camera = FakeCamera()

@@ -7,12 +7,37 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import math
+import os
 import queue
 import threading
 import time
 
+# Disable slow Windows Media Foundation hardware-transform probing before cv2 loads.
+os.environ.setdefault("OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS", "0")
+
 import cv2
 import numpy as np
+
+
+CAMERA_BACKENDS = {
+    None: None,
+    "auto": None,
+    "dshow": getattr(cv2, "CAP_DSHOW", 700),
+    "msmf": getattr(cv2, "CAP_MSMF", 1400),
+}
+
+
+def resolve_camera_backend(backend=None):
+    """Return an OpenCV backend constant or ``None`` for the default API."""
+    if isinstance(backend, str):
+        key = backend.strip().lower()
+        if key in CAMERA_BACKENDS:
+            return CAMERA_BACKENDS[key]
+    elif backend is None:
+        return None
+    elif not isinstance(backend, bool) and isinstance(backend, int) and backend >= 0:
+        return backend
+    raise ValueError("Camera backend must be auto, dshow, msmf or None.")
 
 
 @dataclass(frozen=True)
@@ -50,7 +75,7 @@ class LatestCamera:
     if a device driver blocks inside open/read/release.
     """
 
-    def __init__(self, index, on_preview=None, width=960, height=720, fps=30):
+    def __init__(self, index, on_preview=None, width=960, height=720, fps=30, backend=None):
         if isinstance(index, bool) or not isinstance(index, int) or not 0 <= index <= 99:
             raise ValueError("Camera index must be an integer from 0 to 99.")
         for name, value in (("width", width), ("height", height)):
@@ -60,6 +85,7 @@ class LatestCamera:
             raise ValueError("Camera FPS must be positive and finite.")
         if on_preview is not None and not callable(on_preview):
             raise ValueError("Preview callback must be callable.")
+        self.backend = resolve_camera_backend(backend)
         self.index, self.width, self.height, self.fps = index, width, height, float(fps)
         self.on_preview = on_preview
         self._condition = threading.Condition()
@@ -144,7 +170,7 @@ class LatestCamera:
             self._condition.notify_all()
             thread = self._thread
         if thread is not None and thread is not threading.current_thread():
-            thread.join()
+            thread.join(timeout=1.0)
         if not already_closed and self._release_error is not None:
             raise RuntimeError(self._release_error)
 
@@ -154,15 +180,16 @@ class LatestCamera:
         camera = None
         stage = "Camera open"
         try:
-            camera = cv2.VideoCapture(self.index)
+            camera = (cv2.VideoCapture(self.index) if self.backend is None
+                      else cv2.VideoCapture(self.index, self.backend))
             if not camera.isOpened():
                 raise RuntimeError(f"Cannot open camera {self.index}.")
-            camera.set(cv2.CAP_PROP_FRAME_WIDTH, self.width)
-            camera.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
-            camera.set(cv2.CAP_PROP_FPS, self.fps)
             # Some backends ignore this property. Latest-frame capture still
             # drains the device while inference runs on its separate worker.
             camera.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+            camera.set(cv2.CAP_PROP_FRAME_WIDTH, self.width)
+            camera.set(cv2.CAP_PROP_FRAME_HEIGHT, self.height)
+            camera.set(cv2.CAP_PROP_FPS, self.fps)
             try:
                 driver_fps = float(camera.get(cv2.CAP_PROP_FPS))
             except (TypeError, ValueError, cv2.error):

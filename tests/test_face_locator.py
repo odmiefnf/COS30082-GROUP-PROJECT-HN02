@@ -48,6 +48,11 @@ class FaceLocatorChecks(unittest.TestCase):
         service.analyze.assert_not_called()
         service.reset_tracking.assert_called_once()
 
+    def test_nested_inner_cascade_box_on_same_face_is_deduplicated(self):
+        locator = self.locator([(30, 30, 180, 180)], [(60, 60, 120, 120)])
+        rgb = np.zeros((240, 320, 3), dtype=np.uint8)
+        self.assertEqual(locator.detect(rgb), [(30, 30, 180, 180)])
+
     def test_missing_detection_resets_tracking_instead_of_reusing_old_box(self):
         locator = self.locator([(40, 30, 120, 120)], [])
         service = Mock()

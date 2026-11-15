@@ -10,13 +10,13 @@ Hoàn tất ngày **30/10/2026**. Thêm lựa chọn camera khi dừng, thử m�
 4. Bấm **Start camera** sau khi các mô hình sẵn sàng. Muốn chuyển thiết bị, bấm **Stop** trước; lựa chọn và nút thử bị khóa khi đang mở/chạy camera hoặc thử thiết bị. Quản lý Profiles cũng cần camera tắt.
 5. Nếu lỗi, đọc thông báo hoặc mở **Diagnostics…**. Đóng ứng dụng khác đang giữ webcam, kiểm tra chỉ số và quyền camera Windows rồi thử lại. App không tự đổi quyền hệ thống.
 
-Menu có chỉ số `0–9` và giá trị khởi động. Nếu cần chỉ số khác trong `0–99`, mở app bằng tham số, ví dụ:
+Menu có chỉ số `0–9` và giá trị khởi động. Nếu cần chỉ số khác trong `0–99` hoặc chọn rõ backend OpenCV (`auto`, `dshow`, `msmf`), mở app bằng tham số, ví dụ:
 
 ```powershell
-.\.venv-gpu\Scripts\python.exe -m attendance_app.gui --camera 10
+.\.venv-gpu\Scripts\python.exe -m attendance_app.gui --camera 10 --camera-backend dshow
 ```
 
-Lựa chọn áp dụng cho lần chạy hiện tại; chưa lưu thành thiết lập cho lần mở sau. Test camera chạy ngoài luồng Tk để cửa sổ vẫn phản hồi. OpenCV/driver có thể chậm ở lệnh mở/đọc; chưa có bảo đảm timeout ở mức driver. Đóng app trong lúc thử sẽ chờ tác vụ nhả thiết bị.
+Mặc định ứng dụng đã tắt hardware-transform probing của Windows Media Foundation (`OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS=0`) trước khi nạp OpenCV để tăng tốc độ mở camera trên Windows. Lựa chọn áp dụng cho lần chạy hiện tại; chưa lưu thành thiết lập cho lần mở sau. Test camera chạy ngoài luồng Tk để cửa sổ vẫn phản hồi. OpenCV/driver có thể chậm ở lệnh mở/đọc; chưa có bảo đảm timeout ở mức driver. Đóng app trong lúc thử sẽ chờ tác vụ nhả thiết bị.
 
 ## Đọc Diagnostics
 

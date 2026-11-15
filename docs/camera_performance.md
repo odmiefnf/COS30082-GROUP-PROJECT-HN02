@@ -1,4 +1,10 @@
-# Webcam performance and stable layout — 8 November 2026
+# Webcam performance and stable layout — 14 November 2026
+
+Update on 14 November 2026:
+- **Fast camera open on Windows:** `OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS=0` is set before importing OpenCV in `start_attendance.cmd`, `attendance_app/video_stream.py`, `attendance_app/device_check.py` and `emotion_recognition/webcam.py`, avoiding the 2.4–3.1 second Media Foundation hardware-transform probing stall. An explicit `--camera-backend auto|dshow|msmf` flag is also supported, and `CAP_PROP_BUFFERSIZE = 1` is configured immediately on open.
+- **Haar locator warmup:** `FaceLocator.__init__` warms up both Haar cascades (`default` and `alt2`) on a 32×32 zero frame during startup so the first live camera frame does not incur the ~306 ms cold-call spike.
+- **Nested cascade deduplication & temporal PAD smoothing:** `FaceLocator._deduplicate` suppresses inner boxes with `overlap / smaller >= 0.75` alongside `IoU >= 0.55`, and `AttendanceService._smooth_liveness` averages up to 3 calibrated `live_score` observations within 0.6 seconds to prevent 1-frame glasses-glare flicker between `Passed` and `Not passed`.
+- **Emotion icons:** The `EXPRESSION` card displays icons alongside emotion labels and confidence (`😊 Happy`, `😠 Angry`, `😢 Sad`, `😮 Surprise`, `😨 Fear`, `🤢 Disgust`, `😐 Neutral`). The full suite now passes **206 tests**.
 
 Update on 8 November 2026: the default window is now up to 1440 by 960,
 clamped to the available screen. Compact header/toolbar spacing gives more
