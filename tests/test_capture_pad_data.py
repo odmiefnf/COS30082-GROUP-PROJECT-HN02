@@ -21,7 +21,7 @@ def rows(session, label, count=3):
 
 
 class CapturePadDataChecks(unittest.TestCase):
-    def capture_with_key(self, root, key, setup_seconds, context=False):
+    def capture_with_key(self, root, key, setup_seconds, context=False, extra=()):
         checkerboard = (50 + 150 * (np.indices((160, 160)).sum(axis=0) % 2)).astype(np.uint8)
         frame = np.repeat(checkerboard[:, :, None], 3, axis=2)
         camera = Mock()
@@ -41,7 +41,7 @@ class CapturePadDataChecks(unittest.TestCase):
             destroy_windows = stack.enter_context(patch("cv2.destroyAllWindows"))
             args = ["--root", str(root), "capture", "--presentation", "live-person",
                     "--setup-seconds", str(setup_seconds), "--every", "1"]
-            main(args + (["--context-crop"] if context else []))
+            main(args + (["--context-crop"] if context else []) + list(extra))
         camera.release.assert_called_once()
         destroy_windows.assert_called_once()
         return output.getvalue(), locator
@@ -125,6 +125,58 @@ class CapturePadDataChecks(unittest.TestCase):
                     self.assertTrue(all(Path(row["image_path"]).is_absolute() for row in split_rows
                                         if row["subject_id"] != "base_fixture"))
             self.assertEqual(manifest.read_bytes(), original)
+
+    def test_scaled_capture_saves_the_app_pad_crop_and_labels_it(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            self.capture_with_key(root, ord("q"), setup_seconds=0, extra=["--crop-scale", "1.4"])
+            with (root / "manifest.csv").open(encoding="utf-8", newline="") as handle:
+                image_path = Path(next(csv.DictReader(handle))["image_path"])
+            with Image.open(image_path) as image:
+                self.assertEqual(image.size, (140, 140))  # 1.4 x the 100 px face box
+            metadata = json.loads((image_path.parent / "session.json").read_text(encoding="utf-8"))
+            self.assertEqual(metadata["crop_policy"], "scale-1.4x")
+
+    def test_scaled_split_holds_out_test_and_val_sessions_and_adds_lcc(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            webcam = []
+            for presentation, label in (("live-person", "1"), ("phone-still-photo", "0")):
+                for hour in ("10", "11", "12", "13"):
+                    session = f"cam_{presentation}_20261121_{hour}0000"
+                    directory = root / session
+                    directory.mkdir()
+                    (directory / "session.json").write_text(json.dumps({"crop_policy": "scale-1.4x"}), encoding="utf-8")
+                    row = rows(session, label, count=1)[0]
+                    row["image_path"] = str(directory / "crop.png")
+                    webcam.append(row)
+            excluded = root / "cam_phone-still-photo_20261121_140000"  # newest, but reviewer-excluded
+            excluded.mkdir()
+            (excluded / "session.json").write_text(json.dumps({"crop_policy": "scale-1.4x", "excluded": "real face"}),
+                                                  encoding="utf-8")
+            webcam += [{**rows(excluded.name, "0", count=1)[0], "image_path": str(excluded / "crop.png")}]
+            legacy = root / "cam_live-person_20261113_090000"  # tight session from an older run
+            legacy.mkdir()
+            webcam += [{**rows(legacy.name, "1", count=1)[0], "image_path": str(legacy / "crop.png")}]
+            for path, entries in ((root / "manifest.csv", webcam), (root / "base.csv", rows("lcc_train", "1", 1)),
+                                  (root / "base_val.csv", rows("lcc_val", "0", 1))):
+                with path.open("w", encoding="utf-8", newline="") as handle:
+                    writer = csv.DictWriter(handle, fieldnames=COLUMNS)
+                    writer.writeheader()
+                    writer.writerows(entries)
+            with redirect_stdout(io.StringIO()):
+                main(["--root", str(root), "split", "--crop-scale", "1.4", "--base-train", str(root / "base.csv"),
+                      "--base-val", str(root / "base_val.csv")])
+
+            def sessions(name):
+                with (root / "splits/scale-1.4x" / name).open(encoding="utf-8", newline="") as handle:
+                    return {row["subject_id"] for row in csv.DictReader(handle)}
+            both = ("live-person", "phone-still-photo")
+            self.assertEqual(sessions("test.csv"), {f"cam_{p}_20261121_130000" for p in both})
+            self.assertEqual(sessions("webcam_val.csv"), {f"cam_{p}_20261121_120000" for p in both})
+            self.assertEqual(sessions("val.csv"), sessions("webcam_val.csv") | {"lcc_val"})
+            self.assertEqual(sessions("train.csv"),
+                             {f"cam_{p}_20261121_{h}0000" for p in both for h in ("10", "11")} | {"lcc_train"})
 
     def test_latest_session_per_presentation_is_held_out(self):
         data = (rows("cam_live-person_20261113_100000", "1") + rows("cam_live-person_20261113_110000", "1")

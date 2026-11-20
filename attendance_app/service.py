@@ -62,6 +62,7 @@ class AttendanceService:
         self.review_open = False
         self.review_id = None
         self.guided_shots = []
+        self.multi_streaks = {}  # person_id -> consecutive multi-face frames seen live and recognized
 
     def set_liveness_smooth_window(self, window):
         if window < 1:
@@ -355,9 +356,59 @@ class AttendanceService:
             "used_shots": len(embeddings),
         }
 
+    def analyze_faces(self, faces, now=None):
+        """Score several faces of one frame; ``faces`` is [(crop, context_crop)], largest first.
+
+        Only the main (largest) face gets PAD, expression and attendance: it is
+        recorded after ``stable_frames`` consecutive live, recognized frames. Other
+        faces are only identified for display, never recorded, because they have no
+        liveness check; they are recorded once they become the main face.
+        Registration, appearance and manual review stay single-person: while one
+        of them is active this returns ``None`` and the caller keeps the one-face rule.
+        """
+        now = self.review.clock(now)
+        if (self.pending_name is not None or self.pending_appearance is not None
+                or self.review_open or self.appearance_dialog_open):
+            return None
+        if self.last_frame_time is not None and now - self.last_frame_time > 1.5:
+            self.multi_streaks = {}
+        # Single-face state (smoothing, streak, review observation) must not carry across.
+        self.reset_tracking("Several faces are in view. Keep one person in front of the camera.")
+        self.last_frame_time = now
+        results, seen = [], {}
+        for index, (crop, context_crop) in enumerate(faces):
+            if index > 0:  # bystanders: name only, no PAD, never recorded
+                identity = self.recognizer.match(self.recognizer.embed(crop), self.profiles)
+                results.append({"status": identity["status"], "liveness": None, "identity": identity,
+                                "expression": None, "attendance_recorded": False})
+                continue
+            if self.pad_context and context_crop is None:
+                raise ValueError("This PAD checkpoint requires a context crop from the original frame.")
+            live = dict(self.liveness.predict_crop(context_crop if self.pad_context else crop))
+            face = {"status": "spoof" if live.get("is_live") is False else "liveness_unavailable",
+                    "liveness": live, "identity": None, "expression": None, "attendance_recorded": False}
+            try:
+                face["expression"] = self.emotion.predict_crop(crop)
+            except (OSError, ValueError, RuntimeError) as exc:
+                face["expression_error"] = str(exc)
+            if live.get("is_live") is True:
+                identity = self.recognizer.match(self.recognizer.embed(crop), self.profiles)
+                face.update(status=identity["status"], identity=identity)
+                if identity["status"] == "known":
+                    person = identity["person_id"]
+                    seen[person] = self.multi_streaks.get(person, 0) + 1
+                    if seen[person] >= self.stable_frames:
+                        face["attendance_recorded"] = self.store.record_attendance(
+                            self.session, person, identity["cosine"], live["live_score"])
+                        face["status"] = "attendance_confirmed"
+            results.append(face)
+        self.multi_streaks = seen  # only the main face builds a streak; a new main face starts again
+        return results
+
     def analyze(self, crop, now=None, max_observation_age=None, *, context_crop=None):
         if self.pad_context and context_crop is None:
             raise ValueError("This PAD checkpoint requires a context crop from the original frame.")
+        self.multi_streaks = {}  # back to one face: multi-face streaks restart next time
         now = self.review.clock(now)
         was_capturing_appearance = self.pending_appearance is not None
         state = self.frame_state(now)

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import unittest
+from types import SimpleNamespace
 from unittest.mock import Mock
 
 import numpy as np
@@ -52,6 +53,31 @@ class FaceLocatorChecks(unittest.TestCase):
         locator = self.locator([(30, 30, 180, 180)], [(60, 60, 120, 120)])
         rgb = np.zeros((240, 320, 3), dtype=np.uint8)
         self.assertEqual(locator.detect(rgb), [(30, 30, 180, 180)])
+
+    def test_multi_face_mode_scores_each_usable_face_largest_first(self):
+        boxes = [(200, 40, 100, 100), (20, 30, 120, 120), (300, 150, 40, 40)]  # third is too small
+        locator = SimpleNamespace(detect=lambda rgb: boxes)
+        service = Mock()
+        service.frame_state.return_value = {}
+        service.analyze_faces.return_value = [
+            {"status": "known", "liveness": {"is_live": True}, "identity": {"status": "known", "name": "Kiet"},
+             "expression": {"label": "happy"}, "attendance_recorded": True},
+            {"status": "spoof", "liveness": {"is_live": False}, "identity": None, "expression": None,
+             "attendance_recorded": False}]
+        rgb = np.random.default_rng(9).integers(0, 256, (220, 400, 3), dtype=np.uint8)
+        result = FrameProcessor(locator, service, multi_face=True).process(rgb)
+        crops = service.analyze_faces.call_args.args[0]
+        np.testing.assert_array_equal(np.asarray(crops[0][0]), rgb[30:150, 20:140])  # largest face first
+        self.assertEqual(len(crops), 2)
+        self.assertEqual((result["status"], result["face_count"], result["attendance_recorded"]), ("known", 3, True))
+        self.assertEqual([(f["box"], f["recognized"], f["name"]) for f in result["faces"]],
+                         [([20, 30, 120, 120], True, "Kiet"), ([200, 40, 100, 100], False, None)])
+        service.analyze.assert_not_called()
+        # Default (tools) and blocked flows keep the one-person rule.
+        service.analyze_faces.return_value = None
+        self.assertEqual(FrameProcessor(locator, service, multi_face=True).process(rgb)["status"], "multiple_faces")
+        self.assertEqual(FrameProcessor(locator, Mock(frame_state=Mock(return_value={}))).process(rgb)["status"],
+                         "multiple_faces")
 
     def test_missing_detection_resets_tracking_instead_of_reusing_old_box(self):
         locator = self.locator([(40, 30, 120, 120)], [])

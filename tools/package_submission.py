@@ -78,6 +78,19 @@ EVIDENCE_FILES = (
     "liveness_mobilenetv3_20261120/best_model.pt",
     "liveness_mobilenetv3_20261120/calibration.json",
     "liveness_mobilenetv3_20261120_test/metrics.json",
+    "triplet_resnet18/best_model.pt",
+    "triplet_resnet18/train_history.csv",
+    "classification_resnet18/best_model.pt",
+    "classification_resnet18/train_history.csv",
+    "classification_resnet18/classification_test.json",
+    "comparison_resnet18/comparison.json",
+    "comparison_resnet18/comparison.csv",
+    "identity_open_set_resnet18_20261120/metrics.json",
+    "identity_open_set_20261120_classification_resnet18/metrics.json",
+    "emotion_fer_mnv3/best_model.pt",
+    "emotion_fer_mnv3/history.csv",
+    "emotion_fer_mnv3_test/metrics.json",
+    "emotion_fer_mnv3_test/confusion_matrix.csv",
 )
 CANDIDATE = "results/liveness_regularized_20261108"
 SKIP_PARTS = {"__pycache__", "backup", "backups", "archive", "archives"}

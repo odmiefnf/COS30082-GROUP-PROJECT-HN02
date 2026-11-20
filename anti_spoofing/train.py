@@ -168,19 +168,20 @@ def train(args: argparse.Namespace) -> Path:
     oversample_factor = float(getattr(args, "oversample_factor", 1.))
     balanced_sampler = bool(getattr(args, "balanced_sampler", False))
     sampler, oversampled = None, 0
-    if oversample_manifest is not None:
-        # Draw a small in-domain subset (e.g. webcam crops) more often without duplicating rows.
-        boosted = {_path_key(record["image_path"]) for record in load_manifest(oversample_manifest)}
-        weights = [oversample_factor if _path_key(record["image_path"]) in boosted else 1.
-                   for record in training_dataset.records]
-        oversampled = sum(weight != 1. for weight in weights)
-        if not oversampled:
-            raise ValueError("No training record matches --oversample-manifest.")
-        sampler = WeightedRandomSampler(weights, num_samples=len(weights), replacement=True,
-                                        generator=loader_generator)
-    elif balanced_sampler:
-        counts = [sum(record["label"] == label for record in training_dataset.records) for label in (0, 1)]
-        weights = [1.0 / counts[record["label"]] for record in training_dataset.records]
+    if oversample_manifest is not None or balanced_sampler:
+        weights = [1.] * len(training_dataset.records)
+        if balanced_sampler:
+            counts = [sum(record["label"] == label for record in training_dataset.records) for label in (0, 1)]
+            weights = [1.0 / counts[record["label"]] for record in training_dataset.records]
+        if oversample_manifest is not None:
+            # Draw a small in-domain subset (e.g. webcam crops) more often without duplicating rows;
+            # with --balanced-sampler the boost applies on top of the class balance.
+            boosted = {_path_key(record["image_path"]) for record in load_manifest(oversample_manifest)}
+            hits = [_path_key(record["image_path"]) in boosted for record in training_dataset.records]
+            oversampled = sum(hits)
+            if not oversampled:
+                raise ValueError("No training record matches --oversample-manifest.")
+            weights = [weight * oversample_factor if hit else weight for weight, hit in zip(weights, hits)]
         sampler = WeightedRandomSampler(weights, num_samples=len(weights), replacement=True,
                                         generator=loader_generator)
     training_loader = DataLoader(training_dataset, batch_size=args.batch_size, shuffle=sampler is None,
@@ -280,7 +281,8 @@ def train(args: argparse.Namespace) -> Path:
     _write_json(output_dir / "config.json", {"model": model_config, "training": recipe})
     best_path, last_path = output_dir / "best_model.pt", output_dir / "last_model.pt"
     best_loss, best_epoch, best_rank = math.inf, 0, (math.inf, math.inf)
-    print(f"Training liveness CNN from scratch on {device}; labels: 0=spoof, 1=live.", flush=True)
+    start = "fine-tuning ImageNet MobileNetV3" if pretrained else "liveness CNN from scratch"
+    print(f"Training {start} on {device}; labels: 0=spoof, 1=live.", flush=True)
     if args.max_batches is not None:
         print(f"Smoke test: training/selection validation capped at {args.max_batches} batches per epoch; "
               "final threshold calibration still uses the complete validation manifest.", flush=True)

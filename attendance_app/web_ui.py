@@ -1558,12 +1558,14 @@ function renderState(s) {
   $("btnRetrySetup").disabled = !s.can_retry_setup;
   $("diagFrame").textContent = s.last_frame_details || "No frame processed in this camera run.";
   const mi = s.model_info || {};
+  const idArch = mi.identity_backbone === "resnet18" ? "ResNet18" : "Compact CNN";
+  const idMethod = mi.identity_method ? mi.identity_method[0].toUpperCase() + mi.identity_method.slice(1) : "Triplet";
   const padName = mi.liveness_arch === "mobilenetv3_large" ? "Anti-Spoofing (MobileNetV3-Large)" : "Anti-Spoofing (PAD CNN)";
   const padCrop = mi.liveness_crop_scale ? ` · crop ${mi.liveness_crop_scale}×` : "";
   $("modelInfoBody").innerHTML = `
-    <tr><td><strong>Identity (Triplet CNN)</strong></td><td>${escapeHtml(mi.identity_checkpoint || "—")}</td><td>Cosine ≥ ${mi.identity_threshold != null ? mi.identity_threshold.toFixed(4) : "—"} · margin ${mi.identity_margin ?? "—"}</td></tr>
+    <tr><td><strong>Identity (${escapeHtml(idArch)} · ${escapeHtml(idMethod)})</strong></td><td>${escapeHtml(mi.identity_checkpoint || "—")}</td><td>Cosine ≥ ${mi.identity_threshold != null ? mi.identity_threshold.toFixed(4) : "—"} · margin ${mi.identity_margin ?? "—"}</td></tr>
     <tr><td><strong>${padName}</strong></td><td>${escapeHtml(mi.liveness_checkpoint || "—")}</td><td>Live score ≥ ${mi.liveness_threshold != null ? mi.liveness_threshold.toFixed(4) : "—"}${padCrop}</td></tr>
-    <tr><td><strong>Expression (FER2013 CNN)</strong></td><td>${escapeHtml(mi.emotion_checkpoint || "—")}</td><td>7 classes · Display only</td></tr>
+    <tr><td><strong>Expression (${mi.emotion_arch === "EmotionMobileNetV3-v1" ? "MobileNetV3" : "FER2013 CNN"})</strong></td><td>${escapeHtml(mi.emotion_checkpoint || "—")}</td><td>7 classes · Display only</td></tr>
     <tr><td><strong>Runtime</strong></td><td>${escapeHtml((mi.device || "auto").toUpperCase())} · ${mi.num_threads || 4} threads</td><td>Auto check-in: ${s.stable_frames_target || 3} frames · Smooth: ${s.liveness_smooth_window || 5}f</td></tr>`;
   $("diagGrid").innerHTML = (s.components || []).map(c => {
     const cls = c.status === "Ready" ? "tag-auto" : c.status === "Error" ? "tag-manual" : "tag-legacy";

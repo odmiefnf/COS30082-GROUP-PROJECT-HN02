@@ -152,6 +152,45 @@ class LocalhostWebServerChecks(unittest.TestCase):
         self.assertIn("created_local", data["profiles"][0])
         controller.running = False
 
+    def test_face_box_survives_slower_analysis_but_not_an_outdated_one(self):
+        import time
+        from attendance_app.video_stream import CameraSample
+        controller = self.controller
+        controller.running, controller.stream_id, controller.mirror_preview = True, 1, False
+        rgb = np.zeros((120, 160, 3), dtype=np.uint8)
+        now = time.monotonic()
+
+        def drawn(analysis_age):
+            controller.last_analysis = {"stream_id": 1, "sequence": 1, "rgb": rgb, "captured_at": now - analysis_age,
+                                        "result": {"boxes": [(40, 20, 60, 60)], "liveness": None, "identity": None}}
+            controller._handle_preview({"stream_id": 1, "sample": CameraSample(2, now, rgb)})
+            frame = np.asarray(Image.open(io.BytesIO(controller.latest_jpeg)))
+            return bool((frame[20:30, 40:50] > 60).any())  # top-left corner bracket
+
+        self.assertTrue(drawn(0.3))   # ~100 ms analysis plus frame wait used to exceed the old 0.2 s limit
+        self.assertFalse(drawn(0.6))  # an outdated result must not mark new pixels
+        controller.running = False
+
+    def test_each_face_gets_its_own_colour_and_recognized_faces_a_name_tag(self):
+        import time
+        from attendance_app.video_stream import CameraSample
+        controller = self.controller
+        controller.running, controller.stream_id, controller.mirror_preview = True, 1, False
+        rgb = np.zeros((240, 400, 3), dtype=np.uint8)
+        now = time.monotonic()
+        faces = [{"box": [40, 80, 100, 100], "recognized": True, "name": "Kiet"},
+                 {"box": [250, 80, 100, 100], "recognized": False, "name": None}]
+        controller.last_analysis = {"stream_id": 1, "sequence": 1, "rgb": rgb, "captured_at": now,
+                                    "result": {"boxes": [f["box"] for f in faces], "faces": faces}}
+        controller._handle_preview({"stream_id": 1, "sample": CameraSample(2, now, rgb)})
+        frame = np.asarray(Image.open(io.BytesIO(controller.latest_jpeg))).astype(int)
+        green, yellow = frame[80:84, 40:60].mean(axis=(0, 1)), frame[80:84, 250:270].mean(axis=(0, 1))
+        self.assertGreater(green[1], green[0] + 60)    # recognized: green corner
+        self.assertGreater(yellow[0], yellow[2] + 100)  # not recognized: yellow corner
+        self.assertGreater(frame[50:75, 45:90].mean(), 60)    # name tag above the recognized face
+        self.assertLess(frame[50:75, 255:300].mean(), 20)     # no tag for the unknown face
+        controller.running = False
+
     def test_csv_export_neutralizes_spreadsheet_formulas(self):
         csv_text = render_csv_bytes([{
             "session": "=SUM(1,2)", "person_id": "p1", "name": "@evil",

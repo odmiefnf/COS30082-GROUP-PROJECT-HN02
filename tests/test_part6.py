@@ -194,6 +194,32 @@ class Fixture(unittest.TestCase):
         self.assertEqual(result["liveness"]["smooth_window"], 1)
         self.assertFalse(result["liveness"]["is_live"])
 
+    def test_multi_face_only_the_live_main_face_is_recorded_and_single_person_flows_block_it(self):
+        a, b = self.enroll("A"), self.store.enroll("B", [[0., 1., 0.]] * 3)
+        self.service.profiles = self.store.profiles()
+        crop_a, crop_b, photo = (Image.new("RGB", (100, 100), color) for color in ("red", "green", "blue"))
+        people = {id(crop_a): (a, "A"), id(crop_b): (b, "B")}
+        self.recognizer.embed.side_effect = lambda crop: crop  # hand the crop itself to match()
+        self.recognizer.match.side_effect = lambda crop, profiles: (
+            {"status": "known", "person_id": people[id(crop)][0], "name": people[id(crop)][1], "cosine": .9}
+            if id(crop) in people else {"status": "unknown", "person_id": None, "name": None, "cosine": .1})
+        self.live.predict_crop.side_effect = lambda crop: (
+            {"is_live": False, "live_score": .01} if crop is photo else {"is_live": True, "live_score": .95})
+        records = lambda: {row["person_id"] for row in self.store.attendance("COS30082-01")}
+        for now in (1.0, 1.1, 1.2):  # A is the main (largest) face for stable_frames=3 frames
+            faces = self.service.analyze_faces([(crop_a, None), (crop_b, None), (photo, None)], now=now)
+        self.assertEqual([f["status"] for f in faces], ["attendance_confirmed", "known", "unknown"])
+        self.assertEqual([f["liveness"] is None for f in faces], [False, True, True])  # PAD for the main face only
+        self.assertEqual(records(), {a})  # B is named but not recorded while a bystander
+        self.assertEqual((self.live.predict_crop.call_count, self.emotion.predict_crop.call_count), (3, 3))
+        for now in (1.3, 1.4, 1.5):  # B steps forward and becomes the main face
+            faces = self.service.analyze_faces([(crop_b, None), (crop_a, None)], now=now)
+        self.assertEqual(records(), {a, b})
+        faces = self.service.analyze_faces([(photo, None), (crop_a, None)], now=1.6)  # a photo as the main face
+        self.assertEqual((faces[0]["status"], faces[0]["identity"]), ("spoof", None))
+        self.service.pending_name = "New person"
+        self.assertIsNone(self.service.analyze_faces([(crop_a, None), (crop_b, None)], now=1.7))
+
     def test_no_face_multiple_faces_or_quality_failure_skip_all_models(self):
         locator = Mock()
         processor = FrameProcessor(locator, self.service)

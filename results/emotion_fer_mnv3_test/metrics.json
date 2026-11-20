@@ -1,0 +1,146 @@
+{
+  "metrics": {
+    "accuracy": 0.6420055029043106,
+    "macro_f1": 0.6284382471885284,
+    "balanced_accuracy": 0.6146652413895521,
+    "sample_count": 3271,
+    "labels": [
+      "angry",
+      "disgust",
+      "fear",
+      "happy",
+      "sad",
+      "surprise",
+      "neutral"
+    ],
+    "confusion_matrix": [
+      [
+        237,
+        4,
+        66,
+        19,
+        78,
+        10,
+        38
+      ],
+      [
+        8,
+        21,
+        2,
+        1,
+        1,
+        1,
+        4
+      ],
+      [
+        64,
+        0,
+        220,
+        19,
+        93,
+        45,
+        38
+      ],
+      [
+        19,
+        0,
+        15,
+        726,
+        36,
+        14,
+        35
+      ],
+      [
+        45,
+        0,
+        96,
+        24,
+        325,
+        6,
+        78
+      ],
+      [
+        8,
+        0,
+        31,
+        11,
+        11,
+        212,
+        14
+      ],
+      [
+        26,
+        1,
+        57,
+        26,
+        114,
+        13,
+        359
+      ]
+    ],
+    "per_class": [
+      {
+        "label": "angry",
+        "precision": 0.5823095823095823,
+        "recall": 0.5243362831858407,
+        "f1": 0.5518044237485449,
+        "support": 452
+      },
+      {
+        "label": "disgust",
+        "precision": 0.8076923076923077,
+        "recall": 0.5526315789473685,
+        "f1": 0.6562500000000001,
+        "support": 38
+      },
+      {
+        "label": "fear",
+        "precision": 0.4517453798767967,
+        "recall": 0.4592901878914405,
+        "f1": 0.4554865424430642,
+        "support": 479
+      },
+      {
+        "label": "happy",
+        "precision": 0.8789346246973365,
+        "recall": 0.8591715976331361,
+        "f1": 0.8689407540394973,
+        "support": 845
+      },
+      {
+        "label": "sad",
+        "precision": 0.4939209726443769,
+        "recall": 0.5662020905923345,
+        "f1": 0.5275974025974026,
+        "support": 574
+      },
+      {
+        "label": "surprise",
+        "precision": 0.7043189368770764,
+        "recall": 0.7386759581881533,
+        "f1": 0.7210884353741497,
+        "support": 287
+      },
+      {
+        "label": "neutral",
+        "precision": 0.6342756183745583,
+        "recall": 0.6023489932885906,
+        "f1": 0.6179001721170395,
+        "support": 596
+      }
+    ],
+    "confusion_order": "rows=true, columns=predicted; fixed FER label order",
+    "zero_division": 0
+  },
+  "checkpoint": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\results\\emotion_fer_mnv3\\best_model.pt",
+  "checkpoint_sha256": "87d93cb0efe37e47386b18300a99782cab5ffcccd45c2903836ea1ce3ab0aac6",
+  "manifest_sha256": "1d08ad78d1097bd05e25b7a3a5e82429016b5b94d417fc11a552c3948e364213",
+  "training_smoke_test": false,
+  "selected_epoch": 11,
+  "evaluation_samples": 3271,
+  "evaluation_scope": "Filtered PrivateTest; disjoint paths and decoded pixels, subject separation unverified",
+  "test_used_for_model_selection": false,
+  "checkpoint_changed": false,
+  "subject_disjoint_verified": false,
+  "device": "cuda"
+}

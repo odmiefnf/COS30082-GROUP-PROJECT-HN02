@@ -23,6 +23,9 @@ PROJECT = Path(__file__).resolve().parents[1]
 DEFAULT_LIVENESS_CHECKPOINT = PROJECT/"results/liveness_mobilenetv3_20261120/best_model.pt"
 BLUE = PRIMARY
 FACE_PENDING, FACE_RECOGNIZED = "#fbbf24", "#4ade80"
+# Newest analysis older than this draws no face box. Detection plus three CNNs take ~100 ms
+# per frame even on GPU, so 0.2 s dropped most boxes; the status text accepts up to 1 s.
+BOX_MAX_AGE = .5
 EXPRESSION_ICONS = {
     "angry": "😠",
     "disgust": "🤢",
@@ -236,22 +239,28 @@ class CameraWorker(threading.Thread):
             scale = pad_crop_scale(liveness)
             crop_options = ({"pad_scale": scale} if scale is not None
                             else {"pad_context": True} if uses_pad_context(liveness) else {})
-            processor = FrameProcessor(locator, self.service, **crop_options)
+            # Recognize several people at once; registration and review stay single-person.
+            processor = FrameProcessor(locator, self.service, multi_face=True, **crop_options)
             self.publish(event="component", component="Profiles", status="Ready", detail=str(self.args.database))
             def _num(val):
                 return float(val) if isinstance(val, (int, float)) else None
             ckpt = getattr(recognizer, "checkpoint", None)
+            rec_cfg = getattr(recognizer, "config", None)
+            rec_cfg = rec_cfg if isinstance(rec_cfg, dict) else {}
             stable = getattr(self.service, "stable_frames", 3)
             model_info = {
                 "identity_threshold": _num(getattr(recognizer, "threshold", None)),
                 "identity_margin": _num(getattr(recognizer, "margin", None)),
                 "identity_dim": int(recognizer.dimension) if isinstance(getattr(recognizer, "dimension", None), int) else 128,
-                "identity_checkpoint": ckpt.name if isinstance(ckpt, Path) else str(ckpt or ""),
+                "identity_backbone": str(rec_cfg.get("backbone", "compact")),
+                "identity_method": str(rec_cfg.get("method", "triplet")),
+                "identity_checkpoint": f"{ckpt.parent.name}/{ckpt.name}" if isinstance(ckpt, Path) else str(ckpt or ""),
                 "liveness_threshold": _num(getattr(liveness, "threshold", None)),
                 "liveness_arch": str((getattr(liveness, "config", None) or {}).get("arch", "liveness_cnn")),
                 "liveness_crop_scale": (getattr(liveness, "config", None) or {}).get("crop_scale"),
                 "liveness_checkpoint": Path(str(getattr(self.args, "liveness_checkpoint", ""))).name,
-                "emotion_checkpoint": Path(str(getattr(self.args, "emotion_checkpoint", ""))).name,
+                "emotion_checkpoint": "/".join(Path(str(getattr(self.args, "emotion_checkpoint", ""))).parts[-2:]),
+                "emotion_arch": str(((getattr(emotion, "payload", None) or {}).get("config") or {}).get("architecture", "")),
                 "stable_frames": int(stable) if isinstance(stable, int) else 3,
                 "device": str(getattr(self.args, "device", "cpu")),
                 "num_threads": int(self.args.num_threads) if isinstance(getattr(self.args, "num_threads", None), int) else 4,
@@ -1311,8 +1320,8 @@ class AttendanceWindow:
         if (analysis is not None and analysis["stream_id"] == update["stream_id"]
                 and analysis["rgb"].shape == sample.rgb.shape
                 and sample.sequence >= analysis["sequence"]
-                and 0 <= sample.captured_at-analysis["captured_at"] <= .2
-                and 0 <= now-analysis["captured_at"] <= .2):
+                and 0 <= sample.captured_at-analysis["captured_at"] <= BOX_MAX_AGE
+                and 0 <= now-analysis["captured_at"] <= BOX_MAX_AGE):
             draw = ImageDraw.Draw(image)
             result = analysis["result"]
             identity = result.get("identity") or {}
@@ -1536,7 +1545,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--identity-config", type=Path, default=PROJECT/"results/identity_app_config.json")
     parser.add_argument("--liveness-checkpoint", type=Path, default=DEFAULT_LIVENESS_CHECKPOINT)
-    parser.add_argument("--emotion-checkpoint", type=Path, default=PROJECT/"results/emotion_fer/best_model.pt")
+    parser.add_argument("--emotion-checkpoint", type=Path, default=PROJECT/"results/emotion_fer_mnv3/best_model.pt")
     parser.add_argument("--database", type=Path, default=PROJECT/"data/attendance/profiles.sqlite3")
     parser.add_argument("--session", default=datetime.now().astimezone().strftime("%Y-%m-%d"))
     parser.add_argument("--camera", type=int, default=0)

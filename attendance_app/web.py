@@ -25,11 +25,11 @@ from urllib.parse import parse_qs, urlparse
 import uuid
 import webbrowser
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 
 from .device_check import camera_index, probe_camera
 from .diagnostics import COMPONENTS, frame_details, frame_guidance
-from .gui import (CameraWorker, DEFAULT_LIVENESS_CHECKPOINT, FACE_PENDING, FACE_RECOGNIZED,
+from .gui import (BOX_MAX_AGE, CameraWorker, DEFAULT_LIVENESS_CHECKPOINT, FACE_PENDING, FACE_RECOGNIZED,
                   MESSAGES, PROJECT, force_exit, format_expression, message_tone, stat_tone)
 from .history import (CSV_COLUMNS, SOURCE_LABELS, filter_attendance, local_timestamp,
                       read_attendance_snapshot, read_profile_names, spreadsheet_text, summarize_attendance)
@@ -108,6 +108,41 @@ def _draw_corners(draw, box, color, width=4):
     arm = max(8, round(min(w, h) * .22))
     for cx, cy, dx, dy in ((x, y, 1, 1), (x + w, y, -1, 1), (x, y + h, 1, -1), (x + w, y + h, -1, -1)):
         draw.line([(cx + dx * arm, cy), (cx, cy), (cx, cy + dy * arm)], fill=color, width=width, joint="curve")
+
+
+_LABEL_FONT = []
+
+
+def _label_font():
+    if not _LABEL_FONT:
+        try:
+            _LABEL_FONT.append(ImageFont.truetype("arial.ttf", 20))  # covers Vietnamese names on Windows
+        except OSError:
+            _LABEL_FONT.append(ImageFont.load_default())
+    return _LABEL_FONT[0]
+
+
+def _draw_label(draw, box, text, color):
+    """Name tag above the face box, or just inside its top edge when there is no room above."""
+    x, y, w, h = box
+    font = _label_font()
+    left, top, right, bottom = draw.textbbox((0, 0), text, font=font)
+    ty = y - (bottom - top) - 12 if y - (bottom - top) - 12 >= 0 else y + 4
+    draw.rectangle((x, ty, x + right - left + 12, ty + bottom - top + 8), fill=color)
+    draw.text((x + 6 - left, ty + 4 - top), text, fill="#0b1220", font=font)
+
+
+def _face_marks(result):
+    """(box, colour, name) per detected face: green when live and recognized, yellow otherwise."""
+    if result.get("faces"):
+        marks = [(f["box"], FACE_RECOGNIZED if f["recognized"] else FACE_PENDING, f["name"]) for f in result["faces"]]
+        scored = [list(f["box"]) for f in result["faces"]]
+        return marks + [(box, FACE_PENDING, None) for box in result["boxes"] if list(box) not in scored]
+    identity = result.get("identity") or {}
+    recognized = (len(result["boxes"]) == 1 and (result.get("liveness") or {}).get("is_live") is True
+                  and identity.get("status") == "known" and identity.get("person_id") is not None)
+    return [(box, FACE_RECOGNIZED if recognized else FACE_PENDING, identity.get("name") if recognized else None)
+            for box in result["boxes"]]
 
 
 def _crop_to_data_url(crop, size=(220, 170), mirror=False):
@@ -513,6 +548,10 @@ class WebController:
                 if self.review_req is not None and not result.get("manual_review_valid"):
                     self.review_req["valid"] = False
                     self.review_req["reason"] = "The face or liveness is no longer valid. Cancel and try again."
+            if result.get("faces"):
+                names = [f["name"] for f in result["faces"] if f["recognized"]]
+                message = (f"{result['face_count']} faces · "
+                           + (f"Recognized: {', '.join(names)}" if names else "No one recognized yet"))
             self.feedback = message
             self.guidance = frame_guidance(result)
             self.last_frame_details = (
@@ -566,16 +605,18 @@ class WebController:
             capture_pending = update.get("capture_pending", False)
             dialog_open = self.appearance_req is not None or self.review_req is not None
             self.capture_pending = capture_pending
-            self.can_register = status == "unknown" and not capture_pending and not dialog_open
+            # Registration, appearance and review stay single-person even in multi-face mode.
+            single = len(result.get("boxes") or []) == 1
+            self.can_register = single and status == "unknown" and not capture_pending and not dialog_open
             # One visible face is enough to take a shot; PAD is checked per shot and filtered on save.
             self.can_capture_shot = (len(result.get("boxes") or []) == 1
                                      and not capture_pending and not dialog_open
                                      and not result.get("manual_review_pending"))
-            self.can_appearance = (status in ("unknown", "known", "attendance_confirmed")
+            self.can_appearance = (single and status in ("unknown", "known", "attendance_confirmed")
                                    and (live or {}).get("is_live") is True and update["profiles"] > 0
                                    and not capture_pending and not dialog_open
                                    and not result.get("manual_review_pending"))
-            self.can_review = (status in ("unknown", "ambiguous") and update["profiles"] > 0
+            self.can_review = (single and status in ("unknown", "ambiguous") and update["profiles"] > 0
                                and not result.get("manual_review_pending") and not capture_pending
                                and not dialog_open)
 
@@ -591,25 +632,22 @@ class WebController:
             mirror = self.mirror_preview
             self.preview_fps = _measured_fps(self.preview_times, now)
         image = Image.fromarray(sample.rgb)
+        if mirror:  # mirror before drawing so name labels read normally
+            image = image.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
         plain = image.copy() if self.plain_viewers else None
         if (analysis is not None and analysis["stream_id"] == update["stream_id"]
                 and analysis["rgb"].shape == sample.rgb.shape
                 and sample.sequence >= analysis["sequence"]
-                and 0 <= sample.captured_at - analysis["captured_at"] <= .2
-                and 0 <= now - analysis["captured_at"] <= .2):
+                and 0 <= sample.captured_at - analysis["captured_at"] <= BOX_MAX_AGE
+                and 0 <= now - analysis["captured_at"] <= BOX_MAX_AGE):
             draw = ImageDraw.Draw(image)
-            result = analysis["result"]
-            identity = result.get("identity") or {}
-            recognized = (len(result["boxes"]) == 1
-                          and (result.get("liveness") or {}).get("is_live") is True
-                          and identity.get("status") == "known"
-                          and identity.get("person_id") is not None)
-            color = FACE_RECOGNIZED if recognized else FACE_PENDING
-            for box in result["boxes"]:
+            for box, color, name in _face_marks(analysis["result"]):
+                x, y, w, h = box
+                box = (image.width - x - w, y, w, h) if mirror else box
                 _draw_corners(draw, box, color)
+                if name:
+                    _draw_label(draw, box, name, color)
         def encode(picture):
-            if mirror:
-                picture = picture.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
             buf = io.BytesIO()
             picture.save(buf, format="JPEG", quality=82)
             return buf.getvalue()
@@ -1253,7 +1291,7 @@ def main(argv=None):
     parser.add_argument("--open", action="store_true", help="Open the localhost URL in the default browser.")
     parser.add_argument("--identity-config", type=Path, default=PROJECT / "results/identity_app_config.json")
     parser.add_argument("--liveness-checkpoint", type=Path, default=DEFAULT_LIVENESS_CHECKPOINT)
-    parser.add_argument("--emotion-checkpoint", type=Path, default=PROJECT / "results/emotion_fer/best_model.pt")
+    parser.add_argument("--emotion-checkpoint", type=Path, default=PROJECT / "results/emotion_fer_mnv3/best_model.pt")
     parser.add_argument("--database", type=Path, default=PROJECT / "data/attendance/profiles.sqlite3")
     parser.add_argument("--session", default=datetime.now().astimezone().strftime("%Y-%m-%d"))
     parser.add_argument("--camera", type=int, default=0)

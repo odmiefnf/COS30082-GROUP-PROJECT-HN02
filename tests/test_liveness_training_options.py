@@ -95,6 +95,42 @@ class CameraTrainingChecks(unittest.TestCase):
             best = min(history, key=lambda row: (float(row["val_acer"]), float(row["val_loss"])))
             self.assertEqual(recipe["epoch"], int(best["epoch"]))
 
+    def test_balanced_sampler_and_oversampling_combine(self):
+        from torch.utils.data import WeightedRandomSampler
+        torch.set_num_threads(2)
+        base = Path(__file__).resolve().parents[1]/"tmp"
+        base.mkdir(exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=base) as temporary:
+            root = Path(temporary)
+            rng = np.random.default_rng(7)
+            for split, count in (("train", 6), ("val", 4)):
+                rows = []
+                for index in range(count):
+                    label = int(index == 5) if split == "train" else index % 2
+                    path = root/f"{split}_{index}.png"
+                    Image.fromarray(rng.integers(0, 256, (32, 32, 3), dtype=np.uint8)).save(path)
+                    rows.append({"image_path": str(path), "label": label,
+                                 "subject_id": f"{split}-{index}", "source_label": 1-label})
+                for name, chosen in ((split, rows), ("boost", rows[4:])):
+                    if name == "boost" and split != "train":
+                        continue
+                    with (root/f"{name}.csv").open("w", newline="", encoding="utf-8") as handle:
+                        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+                        writer.writeheader()
+                        writer.writerows(chosen)
+            args = build_parser().parse_args([
+                "--train-manifest", str(root/"train.csv"), "--val-manifest", str(root/"val.csv"),
+                "--output-dir", str(root/"out"), "--image-size", "32", "--feature-dim", "8",
+                "--epochs", "1", "--batch-size", "2", "--crop-mode", "full", "--device", "cpu",
+                "--num-threads", "2", "--balanced-sampler",
+                "--oversample-manifest", str(root/"boost.csv"), "--oversample-factor", "4",
+            ])
+            with patch("anti_spoofing.train.WeightedRandomSampler", wraps=WeightedRandomSampler) as sampler:
+                train(args)
+            weights = sampler.call_args.args[0]
+            # 5 spoof rows weigh 1/5 and the 1 live row 1, then boosted rows (index 4 and 5) x4.
+            np.testing.assert_allclose(weights, [.2, .2, .2, .2, .8, 4.])
+
 
 if __name__ == "__main__":
     unittest.main()
