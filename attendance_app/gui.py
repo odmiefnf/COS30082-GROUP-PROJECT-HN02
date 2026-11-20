@@ -20,7 +20,7 @@ from .theme import (BG, BORDER, CANVAS, CANVAS_LIVE, CARD, FONT, HEADER_BG, INK,
 from .video_stream import LatestCamera, put_latest
 
 PROJECT = Path(__file__).resolve().parents[1]
-DEFAULT_LIVENESS_CHECKPOINT = PROJECT/"results/liveness_mobilenetv3_20261120/best_model.pt"
+DEFAULT_LIVENESS_CHECKPOINT = PROJECT/"results/liveness_mobilenetv3_webcam_20261120/best_model.pt"
 BLUE = PRIMARY
 FACE_PENDING, FACE_RECOGNIZED = "#fbbf24", "#4ade80"
 # Newest analysis older than this draws no face box. Detection plus three CNNs take ~100 ms
@@ -258,7 +258,7 @@ class CameraWorker(threading.Thread):
                 "liveness_threshold": _num(getattr(liveness, "threshold", None)),
                 "liveness_arch": str((getattr(liveness, "config", None) or {}).get("arch", "liveness_cnn")),
                 "liveness_crop_scale": (getattr(liveness, "config", None) or {}).get("crop_scale"),
-                "liveness_checkpoint": Path(str(getattr(self.args, "liveness_checkpoint", ""))).name,
+                "liveness_checkpoint": "/".join(Path(str(getattr(self.args, "liveness_checkpoint", ""))).parts[-2:]),
                 "emotion_checkpoint": "/".join(Path(str(getattr(self.args, "emotion_checkpoint", ""))).parts[-2:]),
                 "emotion_arch": str(((getattr(emotion, "payload", None) or {}).get("config") or {}).get("architecture", "")),
                 "stable_frames": int(stable) if isinstance(stable, int) else 3,

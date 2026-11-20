@@ -91,6 +91,11 @@ EVIDENCE_FILES = (
     "emotion_fer_mnv3/history.csv",
     "emotion_fer_mnv3_test/metrics.json",
     "emotion_fer_mnv3_test/confusion_matrix.csv",
+    "liveness_mobilenetv3_webcam_20261120/best_model.pt",
+    "liveness_mobilenetv3_webcam_20261120/calibration.json",
+    "liveness_mobilenetv3_webcam_20261120/history.csv",
+    "liveness_mobilenetv3_webcam_20261120_on_test/metrics.json",
+    "liveness_mobilenetv3_webcam_20261120_lcc_test/metrics.json",
 )
 CANDIDATE = "results/liveness_regularized_20261108"
 SKIP_PARTS = {"__pycache__", "backup", "backups", "archive", "archives"}
