@@ -17,6 +17,7 @@ SOURCE_DIRS = ("anti_spoofing", "attendance_app", "emotion_recognition", "face_v
 MODEL_DIRS = ("classification", "triplet", "liveness_lcc", "liveness_camera_aug", "liveness_camera_matched", "emotion_fer")
 REQUIRED = (
     "attendance_pipeline.py", "attendance_app/gui.py", "attendance_app/service.py",
+    "attendance_app/models/face_detection_yunet_2023mar.onnx",
     "attendance_app/store.py", "attendance_app/video_stream.py", "face_verification/train.py",
     "anti_spoofing/train.py", "emotion_recognition/train.py", "README.md",
     "requirements.txt", "requirements-webcam.txt", "start_attendance.cmd",
@@ -71,6 +72,12 @@ EVIDENCE_FILES = (
     "readiness_20261114/full_tests.log",
     "readiness_20261114/model_startup.json",
     "readiness_20261114/report_status.json",
+    "liveness_context_matched_20261120/best_model.pt",
+    "liveness_context_matched_20261120/calibration.json",
+    "liveness_context_matched_20261120_test/metrics.json",
+    "liveness_mobilenetv3_20261120/best_model.pt",
+    "liveness_mobilenetv3_20261120/calibration.json",
+    "liveness_mobilenetv3_20261120_test/metrics.json",
 )
 CANDIDATE = "results/liveness_regularized_20261108"
 SKIP_PARTS = {"__pycache__", "backup", "backups", "archive", "archives"}

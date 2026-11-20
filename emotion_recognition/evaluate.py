@@ -9,16 +9,16 @@ from torch.utils.data import DataLoader
 from anti_spoofing.evaluate import _device,_sha256,_write_json
 from .data import CLASSES,EmotionDataset
 from .metrics import classification_metrics
-from .model import EmotionCNN
+from .model import ARCHITECTURES
 
 def load_model(checkpoint,device="cpu"):
     payload=torch.load(checkpoint,map_location="cpu",weights_only=True)
     if not isinstance(payload,dict) or payload.get("task")!="facial_expression":
         raise ValueError("Expected an emotion checkpoint from this project.")
     config=payload.get("config",{})
-    if config.get("classes")!=list(CLASSES) or config.get("image_size")!=48 or config.get("channels")!=1 or config.get("architecture")!="EmotionCNN-v1":
+    if config.get("classes")!=list(CLASSES) or config.get("image_size")!=48 or config.get("channels")!=1 or config.get("architecture") not in ARCHITECTURES:
         raise ValueError("Checkpoint architecture/preprocessing/label order is incompatible.")
-    model=EmotionCNN(); model.load_state_dict(payload["model_state"],strict=True)
+    model=ARCHITECTURES[config["architecture"]](); model.load_state_dict(payload["model_state"],strict=True)
     model.to(_device(device)).eval()
     return model,payload
 

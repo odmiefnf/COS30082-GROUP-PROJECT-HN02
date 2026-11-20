@@ -171,6 +171,33 @@ class DatasetChecks(unittest.TestCase):
         with torch.inference_mode():
             torch.testing.assert_close(first, loaded(images), rtol=0, atol=0)
 
+    def test_resnet18_backbone_freezes_stem_and_reloads_from_its_checkpoint(self):
+        from face_verification.evaluate import load_encoder
+        from face_verification.model import ResNet18FaceEncoder, build_encoder
+        from face_verification.train import _save_checkpoint
+        torch.manual_seed(23)
+        # pretrained=False keeps the test offline; training passes pretrained=True.
+        encoder = build_encoder("resnet18", 16).eval()
+        self.assertIsInstance(encoder, ResNet18FaceEncoder)
+        frozen = {name for name, p in encoder.named_parameters() if not p.requires_grad}
+        self.assertEqual(frozen, {"features.conv1.weight", "features.bn1.weight", "features.bn1.bias"})
+        images = torch.stack([
+            load_face_image(self.root / "verification_data/unseen_person_0/0.png", 64),
+            load_face_image(self.root / "verification_data/unseen_person_1/0.png", 64),
+        ])
+        with torch.inference_mode():
+            first = encoder(images)
+        self.assertEqual(tuple(first.shape), (2, 16))
+        torch.testing.assert_close(torch.linalg.vector_norm(first, dim=1), torch.ones(2))
+        checkpoint = self.root / "resnet_encoder.pt"
+        config = {"embedding_dim": 16, "image_size": 64, "method": "triplet", "backbone": "resnet18"}
+        _save_checkpoint(checkpoint, encoder, config, {"smoke_test": True})
+        loaded, loaded_config = load_encoder(checkpoint)
+        self.assertIsInstance(loaded, ResNet18FaceEncoder)
+        self.assertEqual(loaded_config["backbone"], "resnet18")
+        with torch.inference_mode():
+            torch.testing.assert_close(first, loaded(images), rtol=0, atol=0)
+
     def test_single_trial_uses_calibrated_direction_and_no_guessed_threshold(self):
         from face_verification.verify import FaceVerifier
         checkpoint = self.root / "pair_encoder.pt"

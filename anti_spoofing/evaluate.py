@@ -20,7 +20,7 @@ from face_verification.metrics import compute_roc
 
 from .data import LivenessDataset, bbox_sidecar_path
 from .metrics import liveness_metrics
-from .model import LivenessCNN
+from .model import LivenessCNN, build_liveness_model
 
 
 def _device(choice: str | torch.device) -> torch.device:
@@ -211,8 +211,9 @@ def load_liveness_model(
         if isinstance(threshold, bool) or not isinstance(threshold, (int, float)) or not math.isfinite(threshold) or not 0 <= threshold <= 1:
             raise ValueError("Checkpoint threshold must be finite and within [0, 1].")
     if not isinstance(payload.get("model_state"), dict):
-        raise ValueError("Checkpoint model_state must be the complete LivenessCNN state dict.")
-    model = LivenessCNN(feature_dim=config["feature_dim"])
+        raise ValueError("Checkpoint model_state must be the complete liveness state dict.")
+    arch = config.get("arch", "liveness_cnn")
+    model = build_liveness_model(arch, feature_dim=config["feature_dim"], pretrained=False, freeze_blocks=0)
     try:
         model.load_state_dict(payload["model_state"], strict=True)
     except (RuntimeError, ValueError, TypeError) as exc:
@@ -310,7 +311,8 @@ def evaluate(args: argparse.Namespace) -> dict:
     checkpoint = args.checkpoint.expanduser().resolve()
     model, config = load_liveness_model(checkpoint, device)
     threshold = _calibrated_threshold(config)
-    dataset = LivenessDataset(args.manifest, image_size=config["image_size"], crop_mode=config["crop_mode"])
+    dataset = LivenessDataset(args.manifest, image_size=config["image_size"], crop_mode=config["crop_mode"],
+                              normalization=config.get("normalization", "minus_one_one"))
     # Validate class support before any expensive network inference.
     liveness_metrics([int(row["label"]) for row in dataset.records], np.zeros(len(dataset)), threshold)
     provenance = _manifest_provenance(args.manifest, dataset.records, config["crop_mode"])

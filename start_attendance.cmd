@@ -1,17 +1,18 @@
 @echo off
 setlocal
+set OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS=0
 cd /d "%~dp0"
-if exist ".venv-gpu\Scripts\pythonw.exe" (
-  start "" ".venv-gpu\Scripts\pythonw.exe" -m attendance_app.gui
-  exit /b 0
+if exist ".venv-gpu\Scripts\python.exe" (
+  ".venv-gpu\Scripts\python.exe" -m attendance_app.web --open %*
+  exit /b %errorlevel%
 )
-if exist ".venv\Scripts\pythonw.exe" (
-  start "" ".venv\Scripts\pythonw.exe" -m attendance_app.gui
-  exit /b 0
+if exist ".venv\Scripts\python.exe" (
+  ".venv\Scripts\python.exe" -m attendance_app.web --open %*
+  exit /b %errorlevel%
 )
-if exist "..\lab4\.venv\Scripts\pythonw.exe" (
-  start "" "..\lab4\.venv\Scripts\pythonw.exe" -m attendance_app.gui
-  exit /b 0
+if exist "..\lab4\.venv\Scripts\python.exe" (
+  "..\lab4\.venv\Scripts\python.exe" -m attendance_app.web --open %*
+  exit /b %errorlevel%
 )
 echo No Python environment found. See docs\06_user_interface.md.
 pause

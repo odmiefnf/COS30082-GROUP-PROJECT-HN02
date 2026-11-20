@@ -1,9 +1,14 @@
 {
-  "checkpoint": "liveness_camera_matched/best_model.pt",
-  "checkpoint_sha256": "fdbb5efc65a1df89c984a49afbada3734945523a6f0ef0b233e9391cf024cd2d",
+  "checkpoint": "liveness_mobilenetv3_20261120/best_model.pt",
+  "checkpoint_sha256": "3b54cb8f3067879959710a9dd4525742166fadb81640945da81c03ab76c7da27",
+  "arch": "mobilenetv3_large",
+  "initialization": "partial_fine_tuning_imagenet",
+  "image_size": 224,
+  "crop_scale": 1.4,
   "threshold_source": "validation",
-  "calibration": "liveness_camera_matched/calibration.json",
-  "selection_report": "liveness_camera_aug/experiment_status.json",
+  "calibration": "liveness_mobilenetv3_20261120/calibration.json",
+  "test_metrics": "liveness_mobilenetv3_20261120_test/metrics.json",
+  "previous_app_checkpoint": "liveness_camera_matched/best_model.pt",
   "baseline_preserved": "liveness_lcc/best_model.pt",
-  "scope": "Experimental classroom demo; no independent eyeglasses/attack validation."
+  "scope": "Experimental classroom demo; LCC-FASD test ACER 5.72%, AUC 0.992. No independent webcam phone-photo/print validation for this checkpoint yet."
 }

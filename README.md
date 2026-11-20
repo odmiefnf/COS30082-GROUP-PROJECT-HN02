@@ -9,6 +9,8 @@ environment, then run `python -m attendance_app.gui`; a new local gallery starts
 empty. See [submission readiness](docs/submission_readiness.md) for the setup,
 results and remaining demonstration tasks.
 
+**Cập nhật 20/11/2026 (đưa cải tiến của Hiếu vào bản hiện tại):** camera mở nhanh hơn trên Windows nhờ đặt `OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS=0` trước khi nạp OpenCV, thêm tùy chọn `--camera-backend auto|dshow|msmf` cho cả `attendance_app.web` và `attendance_app.gui`, và đặt `BUFFERSIZE=1` ngay khi mở camera. Bộ dò mặt được chạy thử lúc khởi động (YuNet mặc định, Haar khi dùng `--detector haar`) nên khung hình đầu không bị chậm. Khung mặt nằm gọn trong khung khác (tỷ lệ chứa ≥ 0,75) được gộp, tránh báo nhầm `multiple_faces` khi đeo kính. Điểm liveness lấy trung bình các frame trong vòng 0,6 giây gần nhất (web: tối đa 5 frame theo Settings; desktop: 3 frame). Thẻ biểu cảm hiện icon kèm nhãn, ví dụ 😊 Happy. Khi đóng, app đợi tối đa 1,2 giây rồi buộc tắt tiến trình để không bị treo vì driver camera. Thêm 5 kiểm thử; toàn bộ **259 kiểm thử đạt**. [Chi tiết](docs/camera_performance.md).
+
 **Cập nhật 14/11/2026.** Đã thêm phép đo tìm người trong 20 hồ sơ. Ngưỡng
 app nhận đúng 2/20 lượt người đã đăng ký và gán nhầm 25/300 lượt người ngoài
 danh sách. Thử nghiệm PAD trên cùng 271 ảnh LCC-FASD cho thấy cắt rộng 2×

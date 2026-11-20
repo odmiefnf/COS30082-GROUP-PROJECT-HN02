@@ -225,6 +225,16 @@ class ProfileStore:
                 self.connection.execute("DELETE FROM appearances WHERE id=? AND person_id=?", (appearance_id, person_id))
         return backup
 
+    def delete_profile(self, person_id):
+        """Delete one person after backup; samples, appearances and attendance cascade."""
+        with self.connection:
+            self.connection.execute("BEGIN IMMEDIATE")
+            if not self.connection.execute("SELECT 1 FROM profiles WHERE id=?", (person_id,)).fetchone():
+                raise ValueError("The selected profile no longer exists.")
+            backup = self._backup_before_change()
+            self.connection.execute("DELETE FROM profiles WHERE id=?", (person_id,))
+        return backup
+
     def record_attendance(self, session, person_id, cosine, live_score):
         return self._record(session, person_id, cosine, live_score, "automatic")
 

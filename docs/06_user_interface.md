@@ -93,7 +93,7 @@ Webcam BGR -> RGB -> định vị một mặt -> kiểm tra kích thước/độ
             -> cùng tên qua ba khung liên tiếp: ghi một lần / người / buổi
 ```
 
-Biểu cảm chỉ mô tả nhãn FER2013 nhìn thấy; không suy luận trạng thái tâm lý, không thay đổi kết quả ghi nhận và không được lưu vào bảng điểm danh. Từ ngày 08/11/2026, biểu cảm được phân loại trên crop đạt chất lượng cả khi PAD không đạt; identity, đăng ký và điểm danh vẫn bị PAD chặn. Khi CNN biểu cảm lỗi, GUI hiển thị **Unavailable** và Diagnostics ghi nguyên nhân; identity/liveness vẫn hoạt động.
+Biểu cảm chỉ mô tả nhãn FER2013 nhìn thấy, hiển thị kèm icon (😊 Happy, 😠 Angry, 😢 Sad, 😮 Surprise, 😨 Fear, 🤢 Disgust, 😐 Neutral); không suy luận trạng thái tâm lý, không thay đổi kết quả ghi nhận và không được lưu vào bảng điểm danh. Từ ngày 08/11/2026, biểu cảm được phân loại trên crop đạt chất lượng cả khi PAD không đạt; identity, đăng ký và điểm danh vẫn bị PAD chặn. Khi CNN biểu cảm lỗi, GUI hiển thị **Unavailable** và Diagnostics ghi nguyên nhân; identity/liveness vẫn hoạt động.
 
 ## Định vị mặt
 

@@ -109,6 +109,28 @@ class CameraComparisonChecks(unittest.TestCase):
         np.testing.assert_array_equal(np.asarray(tight), frame[60:140, 60:140])
         np.testing.assert_array_equal(np.asarray(wide), frame[20:180, 20:180])
 
+    def test_scaled_fine_tuned_checkpoint_gets_its_calibrated_crop_from_the_same_frame(self):
+        from anti_spoofing.data import crop_liveness_image
+        from tools.check_liveness_camera import crop_policy
+        models = {"baseline": trained_model(), "candidate": trained_model()}
+        models["candidate"].config.update(crop_scale=1.4)
+        models["candidate"].config["training"]["initialization"] = "partial_fine_tuning_imagenet"
+        gate = CompareGate(models)
+        frame = np.random.default_rng(7).integers(0, 256, (240, 240, 3), dtype=np.uint8)
+        locator = SimpleNamespace(detect=lambda rgb: [(60, 60, 80, 80)])
+        result = FrameProcessor(locator, gate, pad_scale=1.4).process(frame)
+        self.assertEqual(result["status"], "scored")
+        np.testing.assert_array_equal(np.asarray(models["baseline"].predict_crop.call_args.args[0]), frame[60:140, 60:140])
+        np.testing.assert_array_equal(np.asarray(models["candidate"].predict_crop.call_args.args[0]),
+                                      np.asarray(crop_liveness_image(frame, (60, 60, 80, 80), crop_scale=1.4)))
+        self.assertEqual([crop_policy(m) for m in models.values()], ["tight", "scale-1.4x"])
+        mixed = trained_model()
+        mixed.config["context_crop"] = True
+        with patch("tools.check_liveness_camera.LivenessDetector", side_effect=[models["candidate"], mixed]), \
+             patch("tools.check_liveness_camera.cv2.VideoCapture") as camera, self.assertRaises(ValueError):
+            main(self.arguments(self.root/"mixed.json"))
+        camera.assert_not_called()
+
     def test_declared_screen_presentation_is_saved_and_camera_released(self):
         for presentation in ("phone-still-photo", "recorded-video"):
             camera = Mock()

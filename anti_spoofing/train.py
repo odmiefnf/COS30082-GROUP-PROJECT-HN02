@@ -18,13 +18,13 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader, WeightedRandomSampler
 
-from .data import LivenessDataset, _path_key, load_manifest, validate_manifest_splits
+from .data import IMAGENET_MEAN, IMAGENET_STD, LivenessDataset, _path_key, load_manifest, validate_manifest_splits
 from .evaluate import (
     _device, _has_overlap, _manifest_provenance, _overlap_report, _positive_int,
     _sha256, _write_json, predict_dataset,
 )
 from .metrics import calibrate_threshold
-from .model import LivenessCNN
+from .model import LivenessCNN, build_liveness_model
 
 
 def seed_everything(seed: int) -> None:
@@ -54,16 +54,18 @@ def _nonnegative_float(value: str) -> float:
 
 
 def _epoch(
-    model: LivenessCNN,
+    model: nn.Module,
     loader: DataLoader,
     criterion: nn.Module,
     device: torch.device,
     optimizer: torch.optim.Optimizer | None,
     max_batches: int | None,
     augment=None,
+    scaler=None,
 ) -> dict:
     model.train(optimizer is not None)
     total_loss, correct, count, batches = 0.0, 0, 0, 0
+    use_amp = scaler is not None and device.type == "cuda"
     with torch.set_grad_enabled(optimizer is not None):
         for images, labels in islice(loader, max_batches):
             images, labels = images.to(device), labels.to(device)
@@ -73,17 +75,23 @@ def _epoch(
                 images = augment(images)
             if optimizer is not None:
                 optimizer.zero_grad(set_to_none=True)
-            logits = model(images)
-            if not isinstance(logits, torch.Tensor) or tuple(logits.shape) != (len(labels), 2):
-                raise ValueError("LivenessCNN must return two raw logits per image: [spoof, live].")
-            if not torch.isfinite(logits).all().item():
-                raise RuntimeError("LivenessCNN produced nonfinite logits; check the inputs and learning rate.")
-            loss = criterion(logits, labels)
+            with torch.amp.autocast("cuda", enabled=use_amp):
+                logits = model(images)
+                if not isinstance(logits, torch.Tensor) or tuple(logits.shape) != (len(labels), 2):
+                    raise ValueError("Liveness model must return two raw logits per image: [spoof, live].")
+                if not torch.isfinite(logits).all().item():
+                    raise RuntimeError("Liveness model produced nonfinite logits; check the inputs and learning rate.")
+                loss = criterion(logits, labels)
             if not torch.isfinite(loss).item():
                 raise RuntimeError("Liveness training loss became nonfinite; check the inputs and learning rate.")
             if optimizer is not None:
-                loss.backward()
-                optimizer.step()
+                if use_amp:
+                    scaler.scale(loss).backward()
+                    scaler.step(optimizer)
+                    scaler.update()
+                else:
+                    loss.backward()
+                    optimizer.step()
             batch_count = len(labels)
             total_loss += loss.item() * batch_count
             correct += int((logits.argmax(dim=1) == labels).sum().item())
@@ -118,9 +126,13 @@ def train(args: argparse.Namespace) -> Path:
         raise ValueError("seed must lie in [0, 2**32 - 1].")
     if args.image_size < 32:
         raise ValueError("image-size must be at least 32 for spatial downsampling.")
+    arch = getattr(args, "arch", "liveness_cnn")
+    freeze_blocks = int(getattr(args, "freeze_blocks", 4))
+    crop_scale = getattr(args, "crop_scale", None)
+    normalization = "imagenet" if arch == "mobilenetv3_large" else "minus_one_one"
     context_crop = getattr(args, "context_crop", False)
-    if context_crop and args.crop_mode != "full":
-        raise ValueError("Context training expects already prepared 2x crops and --crop-mode full.")
+    if (context_crop or crop_scale is not None) and args.crop_mode != "full":
+        raise ValueError("Context training expects already prepared crops and --crop-mode full.")
     seed_everything(args.seed)
     device = _device(args.device)
     if device.type == "cpu":
@@ -128,8 +140,10 @@ def train(args: argparse.Namespace) -> Path:
     train_manifest = args.train_manifest.expanduser().resolve()
     val_manifest = args.val_manifest.expanduser().resolve()
     split_validation = validate_manifest_splits(train_manifest, val_manifest)
-    training_dataset = LivenessDataset(train_manifest, image_size=args.image_size, crop_mode=args.crop_mode)
-    validation_dataset = LivenessDataset(val_manifest, image_size=args.image_size, crop_mode=args.crop_mode)
+    training_dataset = LivenessDataset(train_manifest, image_size=args.image_size, crop_mode=args.crop_mode,
+                                       normalization=normalization)
+    validation_dataset = LivenessDataset(val_manifest, image_size=args.image_size, crop_mode=args.crop_mode,
+                                         normalization=normalization)
     print(f"Fingerprinting {len(training_dataset)} training and {len(validation_dataset)} validation images...", flush=True)
     provenance = {
         "train": _manifest_provenance(train_manifest, training_dataset.records, args.crop_mode),
@@ -152,6 +166,7 @@ def train(args: argparse.Namespace) -> Path:
     loader_generator = torch.Generator().manual_seed(args.seed)
     oversample_manifest = getattr(args, "oversample_manifest", None)
     oversample_factor = float(getattr(args, "oversample_factor", 1.))
+    balanced_sampler = bool(getattr(args, "balanced_sampler", False))
     sampler, oversampled = None, 0
     if oversample_manifest is not None:
         # Draw a small in-domain subset (e.g. webcam crops) more often without duplicating rows.
@@ -163,10 +178,17 @@ def train(args: argparse.Namespace) -> Path:
             raise ValueError("No training record matches --oversample-manifest.")
         sampler = WeightedRandomSampler(weights, num_samples=len(weights), replacement=True,
                                         generator=loader_generator)
+    elif balanced_sampler:
+        counts = [sum(record["label"] == label for record in training_dataset.records) for label in (0, 1)]
+        weights = [1.0 / counts[record["label"]] for record in training_dataset.records]
+        sampler = WeightedRandomSampler(weights, num_samples=len(weights), replacement=True,
+                                        generator=loader_generator)
     training_loader = DataLoader(training_dataset, batch_size=args.batch_size, shuffle=sampler is None,
                                  sampler=sampler, num_workers=0, generator=loader_generator)
     validation_loader = DataLoader(validation_dataset, batch_size=args.batch_size, shuffle=False, num_workers=0)
-    model = LivenessCNN(feature_dim=args.feature_dim).to(device)
+    pretrained = arch == "mobilenetv3_large"
+    model = build_liveness_model(arch, feature_dim=args.feature_dim, pretrained=pretrained,
+                                 freeze_blocks=freeze_blocks).to(device)
     class_counts = [sum(record["label"] == label for record in training_dataset.records) for label in (0, 1)]
     balanced_loss = bool(getattr(args, "balanced_loss", False))
     class_weights = [len(training_dataset) / (2 * count) for count in class_counts] if balanced_loss else None
@@ -176,21 +198,43 @@ def train(args: argparse.Namespace) -> Path:
     camera_augmentation = bool(getattr(args, "camera_augmentation", False))
     weight_decay = float(getattr(args, "weight_decay", 0.))
     selection = getattr(args, "checkpoint_selection", "val-loss")
+    cosine_lr = bool(getattr(args, "cosine_lr", False))
     augment = None
     if camera_augmentation:
         from .augmentation import augment_camera_batch
-        augment = augment_camera_batch
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate, betas=(0.9, 0.999),
-                                 eps=1e-8, weight_decay=weight_decay, amsgrad=False)
+        if normalization == "imagenet":
+            mean_t = torch.tensor(IMAGENET_MEAN, device=device).view(1, 3, 1, 1)
+            std_t = torch.tensor(IMAGENET_STD, device=device).view(1, 3, 1, 1)
+            def augment(images: torch.Tensor) -> torch.Tensor:
+                unit = (images * std_t + mean_t).clamp(0.0, 1.0)
+                aug = augment_camera_batch(unit * 2.0 - 1.0)
+                return ((aug + 1.0) * 0.5 - mean_t) / std_t
+        else:
+            augment = augment_camera_batch
+    trainable = [param for param in model.parameters() if param.requires_grad]
+    if cosine_lr or arch == "mobilenetv3_large":
+        optimizer = torch.optim.AdamW(trainable, lr=args.learning_rate, weight_decay=weight_decay)
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.epochs)
+    else:
+        optimizer = torch.optim.Adam(trainable, lr=args.learning_rate, betas=(0.9, 0.999),
+                                     eps=1e-8, weight_decay=weight_decay, amsgrad=False)
+        scheduler = None
+    scaler = torch.amp.GradScaler("cuda") if arch == "mobilenetv3_large" and device.type == "cuda" else None
     model_config = {
+        "arch": arch,
         "feature_dim": args.feature_dim, "image_size": args.image_size, "crop_mode": args.crop_mode,
         "context_crop": context_crop,
+        "crop_scale": float(crop_scale) if crop_scale is not None else None,
+        "normalization": normalization,
         "live_label": 1, "spoof_label": 0,
         "threshold": None, "threshold_source": None, "threshold_calibrated": False,
     }
     recipe = {
         "started_at_utc": datetime.now(timezone.utc).isoformat(),
-        "initialization": "random_from_scratch", "pretrained": False,
+        "initialization": "partial_fine_tuning_imagenet" if pretrained else "random_from_scratch",
+        "pretrained": pretrained, "arch": arch,
+        "frozen_blocks": freeze_blocks if pretrained else 0,
+        "balanced_sampler": balanced_sampler,
         "epochs_requested": args.epochs, "batch_size": args.batch_size, "seed": args.seed,
         "learning_rate": args.learning_rate, "device": str(device), "num_threads": torch.get_num_threads(),
         "max_batches": args.max_batches, "smoke_test": args.max_batches is not None,
@@ -206,7 +250,8 @@ def train(args: argparse.Namespace) -> Path:
                  "class_weights": class_weights,
                  "weights_source": "training_manifest_inverse_frequency" if balanced_loss else None,
                  "validation_loss_unweighted": True, "label_smoothing": 0.0, "reduction": "mean"},
-        "optimizer": {"name": "Adam", "learning_rate": args.learning_rate, "betas": [0.9, 0.999],
+        "optimizer": {"name": "AdamW" if (cosine_lr or arch == "mobilenetv3_large") else "Adam",
+                      "learning_rate": args.learning_rate, "betas": [0.9, 0.999],
                       "eps": 1e-8, "weight_decay": weight_decay, "amsgrad": False},
         "augmentation": {"enabled": camera_augmentation, "training_only": True,
                          "operations": (["horizontal_flip", "moderate_brightness_contrast", "small_upper_face_occlusion"]
@@ -219,7 +264,8 @@ def train(args: argparse.Namespace) -> Path:
         "image_cache": {"enabled": cache_enabled, "bytes": cache_bytes,
                         "location": "CPU RAM", "preprocessing_changed": False},
         "preprocessing": {"image_size": args.image_size, "crop_mode": args.crop_mode,
-                          "channels": "RGB", "normalization": "[-1, 1]"},
+                          "crop_scale": float(crop_scale) if crop_scale is not None else None,
+                          "channels": "RGB", "normalization": normalization},
         "label_definition": {"0": "spoof", "1": "live"},
         "source_label_definition": {"0": "live", "1": "spoof"},
         "source_label_conversion": "canonical_label = 1 - official_source_label",
@@ -245,7 +291,9 @@ def train(args: argparse.Namespace) -> Path:
         writer = csv.DictWriter(handle, fieldnames=columns)
         writer.writeheader()
         for epoch in range(1, args.epochs + 1):
-            training_stats = _epoch(model, training_loader, criterion, device, optimizer, args.max_batches, augment)
+            training_stats = _epoch(model, training_loader, criterion, device, optimizer, args.max_batches, augment, scaler)
+            if scheduler is not None:
+                scheduler.step()
             validation_stats = _epoch(model, validation_loader, validation_criterion, device, None, args.max_batches)
             operating_metrics = None
             if selection == "val-acer":
@@ -312,6 +360,15 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--train-manifest", type=Path, required=True)
     parser.add_argument("--val-manifest", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument("--arch", choices=("liveness_cnn", "mobilenetv3_large"), default="liveness_cnn")
+    parser.add_argument("--freeze-blocks", type=int, default=4,
+                        help="Number of leading feature blocks frozen during partial fine-tuning.")
+    parser.add_argument("--crop-scale", type=_positive_float, default=None,
+                        help="Optional runtime face-box multiplier (e.g. 1.4 to match LCC-FASD framing).")
+    parser.add_argument("--balanced-sampler", action="store_true",
+                        help="Sample live and spoof equally often per epoch via WeightedRandomSampler.")
+    parser.add_argument("--cosine-lr", action="store_true",
+                        help="Use AdamW with CosineAnnealingLR over the requested epochs.")
     parser.add_argument("--epochs", type=_positive_int, default=10)
     parser.add_argument("--batch-size", type=_positive_int, default=32)
     parser.add_argument("--image-size", type=_positive_int, default=112)

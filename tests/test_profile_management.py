@@ -64,6 +64,26 @@ class ProfileManagementChecks(unittest.TestCase):
         with closing(sqlite3.connect(backup)) as source:
             self.assertEqual(source.execute("SELECT COUNT(*) FROM samples").fetchone()[0], 6)
 
+    def test_delete_removes_only_that_person_with_their_attendance_after_backup(self):
+        other = self.store.enroll("Other", [[0., 1., 0.]]*3)
+        self.store.record_attendance("Class", other, .98, .9)
+        self.store.add_appearance(self.person, "Without glasses", [[0., 0., 1.]]*3)
+        backup = self.store.delete_profile(self.person)
+        self.assertEqual([p["id"] for p in self.store.profiles()], [other])
+        self.assertEqual([row["person_id"] for row in self.store.attendance("Class")], [other])
+        tables = ("samples", "appearances", "attendance", "attendance_audit")
+        for table in tables:
+            count = self.store.connection.execute(f"SELECT COUNT(*) FROM {table} WHERE person_id=?", (self.person,))
+            self.assertEqual(count.fetchone()[0], 0, table)
+        with closing(sqlite3.connect(backup)) as source:
+            self.assertEqual(source.execute("SELECT COUNT(*) FROM profiles").fetchone()[0], 2)
+        with self.assertRaises(ValueError):
+            self.store.delete_profile(self.person)
+        with patch.object(self.store, "_backup_before_change", side_effect=OSError("Disk full")):
+            with self.assertRaises(OSError):
+                self.store.delete_profile(other)
+        self.assertEqual(len(self.store.profiles()), 1)
+
     def test_failed_backup_aborts_change(self):
         self.store.add_appearance(self.person, "Other view", [[0., 1., 0.]]*3)
         with patch.object(self.store, "_backup_before_change", side_effect=OSError("Disk full")):

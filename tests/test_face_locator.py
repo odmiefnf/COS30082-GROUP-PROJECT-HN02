@@ -11,7 +11,7 @@ from attendance_app.camera import FaceLocator, FrameProcessor
 
 class FaceLocatorChecks(unittest.TestCase):
     def locator(self, primary, alternate):
-        locator = FaceLocator()
+        locator = FaceLocator("haar")
         locator.cascade = Mock()
         locator.cascade.detectMultiScale.return_value = primary
         locator.alternate = Mock()
@@ -48,6 +48,11 @@ class FaceLocatorChecks(unittest.TestCase):
         service.analyze.assert_not_called()
         service.reset_tracking.assert_called_once()
 
+    def test_nested_inner_cascade_box_on_same_face_is_deduplicated(self):
+        locator = self.locator([(30, 30, 180, 180)], [(60, 60, 120, 120)])
+        rgb = np.zeros((240, 320, 3), dtype=np.uint8)
+        self.assertEqual(locator.detect(rgb), [(30, 30, 180, 180)])
+
     def test_missing_detection_resets_tracking_instead_of_reusing_old_box(self):
         locator = self.locator([(40, 30, 120, 120)], [])
         service = Mock()
@@ -70,6 +75,22 @@ class FaceLocatorChecks(unittest.TestCase):
         image = locator.cascade.detectMultiScale.call_args.args[0]
         self.assertEqual(image.shape, (450, 800))
         self.assertEqual(locator.cascade.detectMultiScale.call_args.kwargs["minSize"], (50, 50))
+
+
+class YuNetLocatorChecks(unittest.TestCase):
+    def test_real_model_loads_and_finds_no_face_in_a_blank_frame(self):
+        self.assertEqual(FaceLocator().detect(np.zeros((480, 640, 3), dtype=np.uint8)), [])
+
+    def test_boxes_become_native_haar_sized_squares_and_small_faces_are_dropped(self):
+        locator = FaceLocator()
+        locator.net = Mock()
+        # x, y, w, h on the 800-wide detector image; 14 trailing landmark/score values.
+        locator.net.detect.return_value = (1, np.array([[100, 50, 80, 100] + [0] * 11,
+                                                        [500, 50, 30, 40] + [0] * 11], dtype=np.float32))
+        boxes = locator.detect(np.zeros((720, 1280, 3), dtype=np.uint8))
+        locator.net.setInputSize.assert_called_once_with((800, 450))
+        side = round(.91 * 160)  # longest side 100 detector px -> 160 native px
+        self.assertEqual(boxes, [(round(224 - side/2), round(160 - side/2), side, side)])
 
 
 if __name__ == "__main__":

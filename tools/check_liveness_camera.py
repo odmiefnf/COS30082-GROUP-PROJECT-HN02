@@ -16,14 +16,20 @@ import torch
 from anti_spoofing.infer import LivenessDetector
 from attendance_app.camera import FaceLocator, FrameProcessor
 from attendance_app.evaluation import PRESENTATIONS, validate_presentation
+from attendance_app.service import pad_crop_scale, uses_pad_context
 from face_verification.image_cache import sha256
+
+
+def crop_policy(model):
+    scale = pad_crop_scale(model)
+    return f"scale-{scale:g}x" if scale is not None else "context-2x" if uses_pad_context(model) else "tight"
 
 
 class CompareGate:
     def __init__(self, models):
         self.models = models
-        self.context = {name: getattr(model, "config", {}).get("context_crop", False) is True
-                        for name, model in models.items()}
+        # Wide-crop models (2x context or a calibrated crop_scale) score the processor's context crop.
+        self.context = {name: uses_pad_context(model) for name, model in models.items()}
         self.scores = {name: [] for name in models}
         self.passed = Counter()
 
@@ -74,11 +80,18 @@ def main(argv=None):
         if model.threshold is None or model.threshold_source != "validation":
             raise ValueError(f"{name} requires a validation-calibrated liveness threshold.")
         training = model.config.get("training", {})
-        if training.get("smoke_test") is not False or training.get("initialization") != "random_from_scratch":
-            raise ValueError(f"{name} requires completed from-scratch training.")
+        if (training.get("smoke_test") is not False
+                or training.get("initialization") not in ("random_from_scratch", "partial_fine_tuning_imagenet")):
+            raise ValueError(f"{name} requires completed training.")
     gate = CompareGate(models)
+    # shortcut: one context crop per frame, so two different wide-crop policies cannot share a trial.
+    wide = {crop_policy(model) for name, model in models.items() if gate.context[name]}
+    if len(wide) > 1:
+        raise ValueError("Both wide-crop models must use the same crop policy in one trial: " + ", ".join(sorted(wide)))
+    scale = next((pad_crop_scale(m) for m in models.values() if pad_crop_scale(m) is not None), None)
     locator = FaceLocator()
-    processor = (FrameProcessor(locator, gate, pad_context=True) if any(gate.context.values())
+    processor = (FrameProcessor(locator, gate, pad_scale=scale) if scale is not None
+                 else FrameProcessor(locator, gate, pad_context=True) if any(gate.context.values())
                  else FrameProcessor(locator, gate))
     if args.cancel_file is not None and args.cancel_file.exists():
         print("Comparison cancelled before opening the camera.", flush=True)
@@ -170,7 +183,7 @@ def main(argv=None):
         report["models"][name] = {
             "checkpoint": str(paths[name].resolve()), "sha256": sha256(paths[name]),
             "threshold": model.threshold, "threshold_source": model.threshold_source,
-            "crop_policy": "context-2x" if gate.context[name] else "tight",
+            "crop_policy": crop_policy(model),
             "scored_crops": len(scores),
             "passed": gate.passed[name], "not_passed": len(scores)-gate.passed[name],
             "mean_live_score": float(np.mean(scores)) if scores else None,

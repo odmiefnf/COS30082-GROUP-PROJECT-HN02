@@ -1,12 +1,15 @@
 """Optional webcam expression demo with a manually aligned, fixed face ROI."""
 from __future__ import annotations
 import argparse
+import os
 from pathlib import Path
 import time
 import numpy as np
 import torch
 from anti_spoofing.data import crop_liveness_image
 from .infer import EmotionRecognizer
+
+os.environ.setdefault("OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS", "0")
 
 def analyze_frame(rgb_frame,roi,recognizer,liveness=None):
     """Display expression and liveness independently on the same RGB crop."""

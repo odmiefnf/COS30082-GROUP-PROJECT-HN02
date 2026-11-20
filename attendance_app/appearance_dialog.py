@@ -6,6 +6,7 @@ from tkinter import ttk
 import time
 
 from .store import clean_text
+from .theme import BG, BORDER, CARD, FONT, INK, MUTED, PRIMARY, SURFACE, TONES, FlatButton, card, entry
 
 
 class AppearanceDialog:
@@ -16,45 +17,55 @@ class AppearanceDialog:
         self.timer = None
         self.window = tk.Toplevel(parent)
         self.window.title("Add appearance · COS30082")
-        self.window.geometry("620x480")
+        self.window.geometry("620x500")
         self.window.resizable(False, False)
         self.window.transient(parent)
-        self.window.configure(bg="white")
+        self.window.configure(bg=BG)
         self.window.protocol("WM_DELETE_WINDOW", self.close)
-        body = tk.Frame(self.window, bg="white", padx=24, pady=20)
+        body = tk.Frame(self.window, bg=BG, padx=22, pady=18)
         body.pack(fill="both", expand=True)
 
-        def label(text, size=10, bold=False, color="#172b45"):
-            widget = tk.Label(body, text=text, bg="white", fg=color, anchor="w", justify="left",
-                              wraplength=565, font=("Segoe UI", size, "bold" if bold else "normal"))
-            widget.pack(fill="x", pady=(0, 9))
-            return widget
+        tk.Label(body, text="Add an appearance to an existing profile", bg=BG, fg=INK, anchor="w",
+                 font=(FONT, 15, "bold")).pack(fill="x")
+        tk.Label(body, text="Use this for a verified person with a different appearance, such as without glasses. "
+                 "Select their existing profile. The camera will capture 3 new live samples.",
+                 bg=BG, fg=MUTED, anchor="w", justify="left", wraplength=565,
+                 font=(FONT, 10)).pack(fill="x", pady=(4, 12))
 
-        label("Add an appearance to an existing profile", 16, True)
-        label("Use this for a verified person with a different appearance, such as without glasses. "
-              "Select their existing profile. The camera will capture 3 new live samples.")
-        self.countdown = label("", bold=True, color="#1765d1")
-        label("Existing profile", bold=True)
-        self.person = ttk.Combobox(body, values=[profile["name"] for profile in self.profiles], state="readonly",
-                                   font=("Segoe UI", 11))
+        form = card(body, padx=18, pady=16)
+        form.pack(fill="both", expand=True)
+
+        soft, accent, info_ink = TONES["info"]
+        banner = tk.Frame(form, bg=soft)
+        banner.pack(fill="x", pady=(0, 12))
+        tk.Frame(banner, bg=accent, width=4).pack(side="left", fill="y")
+        self.countdown = tk.Label(banner, text="", bg=soft, fg=info_ink, anchor="w", justify="left",
+                                  wraplength=510, padx=10, pady=7, font=(FONT, 10, "bold"))
+        self.countdown.pack(fill="x")
+
+        tk.Label(form, text="EXISTING PROFILE", bg=CARD, fg=MUTED, anchor="w",
+                 font=(FONT, 8, "bold")).pack(fill="x", pady=(0, 4))
+        self.person = ttk.Combobox(form, values=[profile["name"] for profile in self.profiles], state="readonly",
+                                   font=(FONT, 11))
         self.person.pack(fill="x", ipady=4, pady=(0, 14))
         self.person.set("")
-        label("Appearance label (for example, Without glasses)", bold=True)
+        tk.Label(form, text="APPEARANCE LABEL (E.G. WITHOUT GLASSES)", bg=CARD, fg=MUTED, anchor="w",
+                 font=(FONT, 8, "bold")).pack(fill="x", pady=(0, 4))
         self.appearance_label = tk.StringVar()
-        tk.Entry(body, textvariable=self.appearance_label, font=("Segoe UI", 11),
-                 relief="solid", bd=1).pack(fill="x", ipady=6, pady=(0, 12))
+        entry(form, self.appearance_label, 11).pack(fill="x", ipady=6, ipadx=6, pady=(0, 12))
         self.confirmed = tk.BooleanVar(value=False)
-        tk.Checkbutton(body, text="I have verified this is the person in the selected profile.",
-                       variable=self.confirmed, bg="white", activebackground="white", fg="#172b45",
-                       font=("Segoe UI", 10), anchor="w", wraplength=550, justify="left").pack(fill="x", pady=(0, 8))
-        self.message = label("", color="#a32b2b")
-        actions = tk.Frame(body, bg="white")
-        actions.pack(side="bottom", fill="x", pady=(6, 0))
-        self.confirm_button = tk.Button(actions, text="Begin capture", command=self.confirm, bg="#1765d1", fg="white",
-                  bd=0, padx=18, pady=10, font=("Segoe UI", 11, "bold"))
+        tk.Checkbutton(form, text="I have verified this is the person in the selected profile.",
+                       variable=self.confirmed, bg=CARD, activebackground=CARD, fg=INK, activeforeground=INK,
+                       selectcolor=SURFACE, font=(FONT, 10), anchor="w", wraplength=520, justify="left").pack(fill="x", pady=(0, 8))
+        self.message = tk.Label(form, text="", bg=CARD, fg="#dc2626", anchor="w", justify="left",
+                                wraplength=520, font=(FONT, 10))
+        self.message.pack(fill="x", pady=(2, 0))
+
+        actions = tk.Frame(body, bg=BG)
+        actions.pack(side="bottom", fill="x", pady=(14, 0))
+        self.confirm_button = FlatButton(actions, "Begin capture", self.confirm, "primary", 10, pady=9)
         self.confirm_button.pack(side="left", fill="x", expand=True, padx=(0, 10))
-        tk.Button(actions, text="Cancel", command=self.close, bg="#e7edf5", fg="#172b45",
-                  bd=0, padx=22, pady=10, font=("Segoe UI", 11)).pack(side="right")
+        FlatButton(actions, "Cancel", self.close, "secondary", 10, padx=22, pady=9).pack(side="right")
         self.window.grab_set()
         self.tick()
 

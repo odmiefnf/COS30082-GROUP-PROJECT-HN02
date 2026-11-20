@@ -5,7 +5,7 @@ from unittest.mock import Mock, patch
 
 import numpy as np
 
-from attendance_app.gui import AttendanceWindow
+from attendance_app.gui import AttendanceWindow, EXPRESSION_ICONS, format_expression
 from attendance_app.video_stream import CameraSample
 
 
@@ -108,6 +108,13 @@ class SinglePreviewChecks(unittest.TestCase):
                 actual = self.render()
                 self.assertEqual({tuple(p) for p in actual.reshape(-1, 3)},
                                  {tuple(self.live_color), color})
+
+    def test_expression_display_includes_icon_label_and_confidence(self):
+        self.assertEqual(format_expression(None), "—")
+        self.assertEqual(format_expression(None, "model error"), "Unavailable")
+        for label, icon in EXPRESSION_ICONS.items():
+            formatted = format_expression({"label": label, "confidence": 0.87})
+            self.assertEqual(formatted, f"{icon} {label.title()} · 87%")
 
 
 if __name__ == "__main__":

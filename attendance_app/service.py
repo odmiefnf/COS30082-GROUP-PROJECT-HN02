@@ -7,24 +7,43 @@ import time
 
 import numpy as np
 
-from .store import clean_text
+from anti_spoofing.data import crop_liveness_image
+
+from .store import clean_text, unit_vector
 from .review import ManualReview
+
+GUIDED_MIN_SHOTS = 3
+GUIDED_MAX_SHOTS = 10
 
 
 def uses_pad_context(liveness):
     config = getattr(liveness, "config", None)
-    return isinstance(config, dict) and config.get("context_crop") is True
+    return isinstance(config, dict) and (config.get("context_crop") is True or config.get("crop_scale") is not None)
+
+
+def pad_crop_scale(liveness):
+    config = getattr(liveness, "config", None)
+    if isinstance(config, dict) and config.get("crop_scale") is not None:
+        return float(config["crop_scale"])
+    return None
 
 
 class AttendanceService:
-    def __init__(self, store, recognizer, liveness, emotion, session, stable_frames=3):
+    def __init__(self, store, recognizer, liveness, emotion, session, stable_frames=3, liveness_smooth_window=1,
+                 liveness_window_seconds=0.6):
         if stable_frames < 1:
             raise ValueError("stable_frames must be positive.")
+        if liveness_smooth_window < 1 or not liveness_window_seconds > 0:
+            raise ValueError("liveness_smooth_window and liveness_window_seconds must be positive.")
         self.store, self.recognizer = store, recognizer
         self.liveness, self.emotion = liveness, emotion
         self.pad_context = uses_pad_context(liveness)
         self.session = clean_text(session, "Session")
         self.stable_frames = stable_frames
+        self.liveness_smooth_window = liveness_smooth_window
+        # Only scores this recent are averaged, so a slow camera never smooths over stale frames.
+        self.liveness_window_seconds = float(liveness_window_seconds)
+        self._live_scores = []  # (observed_at, P(live)) of consecutive frames
         self.pending_name = None
         self.pending_appearance = None
         self.appearance_dialog_open = False
@@ -42,6 +61,13 @@ class AttendanceService:
         self.review = ManualReview(recognizer.dimension, recognizer.threshold)
         self.review_open = False
         self.review_id = None
+        self.guided_shots = []
+
+    def set_liveness_smooth_window(self, window):
+        if window < 1:
+            raise ValueError("liveness_smooth_window must be positive.")
+        self.liveness_smooth_window = int(window)
+        self._live_scores = self._live_scores[-self.liveness_smooth_window:]
 
     def reset_tracking(self, reason="The face observation was interrupted. Cancel and try again."):
         self.review.invalidate()
@@ -49,6 +75,7 @@ class AttendanceService:
             self.appearance_request = None
             self.appearance_request_reason = reason
         self.last_person, self.streak, self.last_frame_time = None, 0, None
+        self._live_scores.clear()
         self.enrollment_samples.clear()
         self.enrollment_hashes.clear()
         self.last_sample_time = float("-inf")
@@ -211,6 +238,123 @@ class AttendanceService:
         self.last_person, self.streak = None, 0
         return result
 
+    def capture_guided_shot(self, rgb, box, slot=None):
+        """Stage one face from the latest frame in RAM for guided multi-angle enrollment.
+
+        Capture needs only one detected face; quality and liveness are not gates here.
+        Each shot records its own single-frame PAD result, and only shots that passed
+        liveness are saved by ``commit_guided_registration``.
+        """
+        if self.pending_name is not None or self.pending_appearance is not None or self.review_open or self.appearance_dialog_open:
+            raise ValueError("Finish or cancel the active capture or review first.")
+        if len(self.guided_shots) >= GUIDED_MAX_SHOTS:
+            raise ValueError(f"All {GUIDED_MAX_SHOTS} shots are captured. Remove one to retake it.")
+        used_slots = {shot["slot"] for shot in self.guided_shots}
+        if slot is None:
+            slot = next(i for i in range(GUIDED_MAX_SHOTS) if i not in used_slots)
+        else:
+            slot = int(slot)
+            if not 0 <= slot < GUIDED_MAX_SHOTS:
+                raise ValueError(f"Shot slot must be between 0 and {GUIDED_MAX_SHOTS - 1}.")
+            if slot in used_slots:
+                raise ValueError("Remove the existing shot in this slot before retaking it.")
+        crop = crop_liveness_image(rgb, bbox=box)
+        digest = hashlib.sha256(np.asarray(crop).tobytes()).hexdigest()
+        if any(shot["digest"] == digest for shot in self.guided_shots):
+            raise ValueError("Wait a moment or adjust your pose slightly before capturing the next shot.")
+        scale = pad_crop_scale(self.liveness)
+        pad_input = (crop_liveness_image(rgb, box, crop_scale=scale) if scale is not None
+                     else crop_liveness_image(rgb, box, context=True) if self.pad_context else crop)
+        live = self.liveness.predict_crop(pad_input)
+        embedding = self.recognizer.embed(crop)
+        if self.guided_shots:
+            anchor = self.guided_shots[0]["embedding"]
+            coherence_thr = min(0.60, float(self.recognizer.threshold) - 0.25)
+            if float(np.dot(anchor, embedding)) < coherence_thr:
+                raise ValueError("Face does not match earlier shots. Keep the same person in view or clear all shots.")
+        shot = {
+            "id": secrets.token_hex(8),
+            "slot": slot,
+            "embedding": embedding.copy(),
+            "crop": crop.copy(),
+            "live_score": float(live["live_score"]),
+            "is_live": live.get("is_live") is True,
+            "digest": digest,
+        }
+        shot["embedding"].setflags(write=False)
+        self.guided_shots.append(shot)
+        self.guided_shots.sort(key=lambda item: item["slot"])
+        return list(self.guided_shots)
+
+    def remove_guided_shot(self, shot_id=None, slot=None):
+        if shot_id is not None:
+            self.guided_shots = [s for s in self.guided_shots if s["id"] != str(shot_id)]
+        elif slot is not None:
+            self.guided_shots = [s for s in self.guided_shots if s["slot"] != int(slot)]
+        return list(self.guided_shots)
+
+    def clear_guided_shots(self):
+        self.guided_shots.clear()
+        return []
+
+    def commit_guided_registration(self, name="", *, force=False, appearance_person_id=None, appearance_label=""):
+        """Commit staged live embeddings as a new profile or as an appearance of an existing profile."""
+        live_shots = [shot for shot in self.guided_shots if shot["is_live"]]
+        if len(live_shots) < GUIDED_MIN_SHOTS:
+            raise ValueError(f"Only {len(live_shots)} of {len(self.guided_shots)} shots passed liveness; "
+                             f"at least {GUIDED_MIN_SHOTS} are needed. Retake the shots marked Not live.")
+        # Shots that failed PAD are never enrolled, so a photo or screen cannot become a template.
+        embeddings = [shot["embedding"] for shot in live_shots]
+        self.profiles = self.store.profiles()
+        if appearance_person_id:
+            label = clean_text(appearance_label, "Appearance label")
+            selected = next((p for p in self.profiles if p["id"] == appearance_person_id), None)
+            if selected is None:
+                raise ValueError("The selected profile no longer exists.")
+            # A new look may not match its own profile yet (e.g. glasses off), but it must
+            # never be attached to one person while clearly matching someone else.
+            centroid = unit_vector(np.mean(embeddings, axis=0), self.recognizer.dimension)
+            match = self.recognizer.match(centroid, self.profiles)
+            if match["status"] == "known" and match["person_id"] != appearance_person_id:
+                raise ValueError(f"These shots match {match['name']}, not {selected['name']}. "
+                                 "Check the selected profile or retake with the right person.")
+            appearance_id = self.store.add_appearance(appearance_person_id, label, embeddings)
+            self.profiles = self.store.profiles()
+            self.guided_shots.clear()
+            self.last_person, self.streak = None, 0
+            return {
+                "mode": "appearance",
+                "person_id": appearance_person_id,
+                "name": selected["name"],
+                "appearance_id": appearance_id,
+                "label": label,
+                "used_shots": len(embeddings),
+            }
+        clean_name = clean_text(name)
+        if any(p["name"].casefold() == clean_name.casefold() for p in self.profiles):
+            raise ValueError("This name is already registered. Add a student ID to distinguish people.")
+        if not force and self.profiles:
+            centroid = unit_vector(np.mean(embeddings, axis=0), self.recognizer.dimension)
+            match = self.recognizer.match(centroid, self.profiles)
+            if match["status"] == "known" and match["person_id"] is not None:
+                return {
+                    "duplicate": {
+                        "person_id": match["person_id"],
+                        "name": match["name"],
+                        "cosine": float(match["cosine"]),
+                    }
+                }
+        person_id = self.store.enroll(clean_name, embeddings)
+        self.profiles = self.store.profiles()
+        self.guided_shots.clear()
+        self.last_person, self.streak = None, 0
+        return {
+            "mode": "new",
+            "person_id": person_id,
+            "name": clean_name,
+            "used_shots": len(embeddings),
+        }
+
     def analyze(self, crop, now=None, max_observation_age=None, *, context_crop=None):
         if self.pad_context and context_crop is None:
             raise ValueError("This PAD checkpoint requires a context crop from the original frame.")
@@ -221,7 +365,19 @@ class AttendanceService:
         if self.last_frame_time is not None and now - self.last_frame_time > 1.5:
             self.reset_tracking()
         self.last_frame_time = now
-        live = self.liveness.predict_crop(context_crop if self.pad_context else crop)
+        live = dict(self.liveness.predict_crop(context_crop if self.pad_context else crop))
+        score, threshold = live.get("live_score"), live.get("threshold")
+        if (self.liveness_smooth_window > 1 and isinstance(score, (int, float)) and isinstance(threshold, (int, float))
+                and np.isfinite([score, threshold]).all()):
+            self._live_scores = [(t, v) for t, v in self._live_scores if 0 <= now - t <= self.liveness_window_seconds]
+            self._live_scores.append((now, float(score)))
+            del self._live_scores[:-self.liveness_smooth_window]
+            avg_score = float(sum(v for _, v in self._live_scores) / len(self._live_scores))
+            passed = avg_score >= float(live["threshold"])
+            live.update(raw_live_score=float(live["live_score"]), live_score=avg_score,
+                        spoof_score=1.0 - avg_score, is_live=passed,
+                        status="live" if passed else "spoof",
+                        smooth_window=len(self._live_scores))
         result = {"status": "spoof" if live.get("is_live") is False else "liveness_unavailable",
                   "liveness": live, "identity": None, "expression": None,
                   "registered": False, "attendance_recorded": False, "registration_samples": 0,

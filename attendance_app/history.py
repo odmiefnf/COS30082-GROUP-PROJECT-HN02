@@ -45,6 +45,23 @@ def read_attendance_snapshot(database):
         connection.close()
 
 
+def read_profile_names(database):
+    """Read-only list of registered profiles for Present/Absent session summaries."""
+    path = Path(database).resolve()
+    if not path.is_file():
+        return []
+    connection = sqlite3.connect(path.as_uri()+"?mode=ro", uri=True, timeout=2.)
+    connection.row_factory = sqlite3.Row
+    try:
+        connection.execute("PRAGMA query_only=ON")
+        rows = connection.execute("SELECT id, name, created_utc FROM profiles ORDER BY name").fetchall()
+        return [dict(row) for row in rows]
+    except sqlite3.Error:
+        return []
+    finally:
+        connection.close()
+
+
 def filter_attendance(rows, session=None, source=None, search=""):
     needle = search.strip().casefold()
     return [dict(row) for row in rows

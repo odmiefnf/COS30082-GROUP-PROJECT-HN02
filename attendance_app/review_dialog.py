@@ -9,6 +9,7 @@ from tkinter import ttk
 from PIL import Image, ImageTk
 
 from .store import clean_text
+from .theme import BG, BORDER, CARD, FONT, INK, MUTED, SURFACE, TONES, FlatButton, card, entry
 
 
 class ReviewDialog:
@@ -18,52 +19,72 @@ class ReviewDialog:
         self.timer = None
         self.window = tk.Toplevel(parent)
         self.window.title("Manual review · COS30082")
-        self.window.geometry("620x680")
+        self.window.geometry("620x710")
         self.window.resizable(False, False)
         self.window.transient(parent)
-        self.window.configure(bg="#ffffff")
+        self.window.configure(bg=BG)
         self.window.protocol("WM_DELETE_WINDOW", self.close)
-        body = tk.Frame(self.window, bg="#ffffff", padx=24, pady=18)
+        body = tk.Frame(self.window, bg=BG, padx=22, pady=18)
         body.pack(fill="both", expand=True)
 
-        def label(text, size=10, bold=False, color="#172b45"):
-            widget = tk.Label(body, text=text, bg="white", fg=color, anchor="w", justify="left",
-                              wraplength=565, font=("Segoe UI", size, "bold" if bold else "normal"))
-            widget.pack(fill="x", pady=(0, 7))
-            return widget
+        tk.Label(body, text="Review the person in view", bg=BG, fg=INK, anchor="w",
+                 font=(FONT, 16, "bold")).pack(fill="x")
+        tk.Label(body, text="Keep one person in front of the camera. Select a profile only after checking it in person; "
+                 "this is an operator decision.", bg=BG, fg=MUTED, anchor="w", justify="left",
+                 wraplength=565, font=(FONT, 10)).pack(fill="x", pady=(4, 12))
 
-        label("Review the person in view", 17, True)
-        label("Keep one person in front of the camera. Select a profile only after checking it in person; this is an operator decision.")
+        form = card(body, padx=18, pady=16)
+        form.pack(fill="both", expand=True)
+
+        top_row = tk.Frame(form, bg=CARD)
+        top_row.pack(fill="x", pady=(0, 12))
         picture = request["crop"].copy()
-        picture.thumbnail((180, 140), Image.Resampling.BILINEAR)
+        picture.thumbnail((160, 125), Image.Resampling.BILINEAR)
         self.photo = ImageTk.PhotoImage(picture)
-        tk.Label(body, image=self.photo, bg="#eef3f8").pack(pady=(0, 5))
+        tk.Label(top_row, image=self.photo, bg=SURFACE, highlightthickness=1,
+                 highlightbackground=BORDER).pack(side="left", padx=(0, 14))
+        meta = tk.Frame(top_row, bg=CARD)
+        meta.pack(side="left", fill="both", expand=True)
         captured = datetime.fromisoformat(request["observed_utc"]).astimezone().strftime("%H:%M:%S")
-        label(f"Face observed at {captured} · Image held temporarily in memory", 9, color="#61748b")
-        self.countdown = label("", 10, True, "#1765d1")
-        label("Profile you checked", 10, True)
-        self.person = ttk.Combobox(body, values=[p["name"] for p in request["profiles"]], state="readonly",
-                                   font=("Segoe UI", 11))
-        self.person.pack(fill="x", ipady=4, pady=(0, 10))
+        tk.Label(meta, text=f"Observed at {captured}", bg=CARD, fg=INK, anchor="w",
+                 font=(FONT, 11, "bold")).pack(fill="x", pady=(4, 2))
+        tk.Label(meta, text="Temporary face crop held in memory only.", bg=CARD, fg=MUTED, anchor="w",
+                 justify="left", wraplength=340, font=(FONT, 9)).pack(fill="x", pady=(0, 10))
+        soft, accent, info_ink = TONES["info"]
+        banner = tk.Frame(meta, bg=soft)
+        banner.pack(fill="x")
+        tk.Frame(banner, bg=accent, width=4).pack(side="left", fill="y")
+        self.countdown = tk.Label(banner, text="", bg=soft, fg=info_ink, anchor="w",
+                                  padx=10, pady=6, font=(FONT, 10, "bold"))
+        self.countdown.pack(fill="x")
+
+        tk.Label(form, text="PROFILE YOU CHECKED", bg=CARD, fg=MUTED, anchor="w",
+                 font=(FONT, 8, "bold")).pack(fill="x", pady=(0, 4))
+        self.person = ttk.Combobox(form, values=[p["name"] for p in request["profiles"]], state="readonly",
+                                   font=(FONT, 11))
+        self.person.pack(fill="x", ipady=4, pady=(0, 12))
         self.person.set("")
-        label("Reviewer name", 10, True)
+        tk.Label(form, text="REVIEWER NAME", bg=CARD, fg=MUTED, anchor="w",
+                 font=(FONT, 8, "bold")).pack(fill="x", pady=(0, 4))
         self.reviewer = tk.StringVar()
-        tk.Entry(body, textvariable=self.reviewer, font=("Segoe UI", 11), relief="solid", bd=1).pack(fill="x", ipady=5, pady=(0, 10))
-        label("Reason for confirmation", 10, True)
+        entry(form, self.reviewer, 11).pack(fill="x", ipady=5, ipadx=6, pady=(0, 12))
+        tk.Label(form, text="REASON FOR CONFIRMATION", bg=CARD, fg=MUTED, anchor="w",
+                 font=(FONT, 8, "bold")).pack(fill="x", pady=(0, 4))
         self.reason = tk.StringVar()
-        tk.Entry(body, textvariable=self.reason, font=("Segoe UI", 11), relief="solid", bd=1).pack(fill="x", ipady=5, pady=(0, 10))
+        entry(form, self.reason, 11).pack(fill="x", ipady=5, ipadx=6, pady=(0, 12))
         self.confirmed = tk.BooleanVar(value=False)
-        tk.Checkbutton(body, text="I have checked the person against the selected profile in person.", variable=self.confirmed,
-                       bg="white", activebackground="white", fg="#172b45", font=("Segoe UI", 10),
-                       anchor="w", wraplength=550, justify="left").pack(fill="x", pady=(0, 5))
-        self.message = label("", 10, color="#a32b2b")
-        actions = tk.Frame(body, bg="white")
-        actions.pack(side="bottom", fill="x", pady=(8, 0))
-        self.confirm_button = tk.Button(actions, text="Record manual attendance", command=self.confirm, bg="#1765d1", fg="white",
-            bd=0, padx=16, pady=10, font=("Segoe UI", 11, "bold"))
+        tk.Checkbutton(form, text="I have checked the person against the selected profile in person.", variable=self.confirmed,
+                       bg=CARD, activebackground=CARD, fg=INK, activeforeground=INK, selectcolor=SURFACE, font=(FONT, 10),
+                       anchor="w", wraplength=520, justify="left").pack(fill="x", pady=(0, 6))
+        self.message = tk.Label(form, text="", bg=CARD, fg="#dc2626", anchor="w", justify="left",
+                                wraplength=520, font=(FONT, 10))
+        self.message.pack(fill="x", pady=(2, 0))
+
+        actions = tk.Frame(body, bg=BG)
+        actions.pack(side="bottom", fill="x", pady=(14, 0))
+        self.confirm_button = FlatButton(actions, "Record manual attendance", self.confirm, "primary", 10, pady=9)
         self.confirm_button.pack(side="left", fill="x", expand=True, padx=(0, 10))
-        tk.Button(actions, text="Cancel", command=self.close, bg="#e7edf5", fg="#172b45", bd=0,
-                  padx=22, pady=10, font=("Segoe UI", 11)).pack(side="right")
+        FlatButton(actions, "Cancel", self.close, "secondary", 10, padx=22, pady=9).pack(side="right")
         self.window.grab_set()
         self.tick()
 

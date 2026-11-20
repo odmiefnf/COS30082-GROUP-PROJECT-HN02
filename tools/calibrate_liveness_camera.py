@@ -73,7 +73,8 @@ def main():
     maximum = baseline_stats[rate]
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model, config = load_liveness_model(args.candidate, device=device)
-    dataset = LivenessDataset(args.validation, image_size=config["image_size"], crop_mode=config["crop_mode"])
+    dataset = LivenessDataset(args.validation, image_size=config["image_size"], crop_mode=config["crop_mode"],
+                              normalization=config.get("normalization", "minus_one_one"))
     labels, scores = predict_dataset(model, dataset, 128, device)
     select = select_at_apcer if rate == "APCER" else select_at_bpcer
     threshold, metrics = select(labels, scores, maximum)
