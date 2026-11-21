@@ -23,7 +23,8 @@ def main():
     root = Path(__file__).resolve().parents[1]
     torch.set_num_threads(4)
     recognizer = FaceRecognizer(root/"results/identity_app_config.json")
-    live = LivenessDetector(root/"results/liveness_camera_matched/best_model.pt")
+    from attendance_app.gui import DEFAULT_LIVENESS_CHECKPOINT
+    live = LivenessDetector(DEFAULT_LIVENESS_CHECKPOINT)
     locator = FaceLocator()
     groups = defaultdict(list)
     with (root/"data/lcc_fasd_manifests/train.csv").open(encoding="utf-8", newline="") as source:

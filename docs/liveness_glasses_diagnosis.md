@@ -1,5 +1,7 @@
 # Liveness khi đeo kính
 
+> **Ghi chú 21/11/2026:** các thư mục kết quả và checkpoint của thí nghiệm này đã bị xoá vì app và báo cáo không dùng. Số liệu bên dưới chỉ giữ để tham khảo lịch sử.
+
 Ngày 27/10/2026, người dùng xác nhận: **vẫn có khung khuôn mặt, nhưng Liveness báo Not passed khi đeo kính**. Vì vậy đây là phản hồi về bộ phân loại liveness sau bước định vị, không phải chỉ do bộ Haar mất mặt.
 
 ## Giả thuyết và giới hạn

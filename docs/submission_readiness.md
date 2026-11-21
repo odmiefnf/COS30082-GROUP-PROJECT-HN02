@@ -5,7 +5,7 @@ a working checklist of evidence and outstanding tasks, not a predicted mark.
 The group report identifies Group HN02 and the six supplied member names and student IDs.
 
 **21 November update:** the app now uses three ImageNet-initialised, fine-tuned
-models: ResNet-18 classification for identity, MobileNetV3 trained on LCC-FASD
+models: ResNet-18 ArcFace for identity, MobileNetV3 trained on LCC-FASD
 plus our own webcam recordings for liveness, and MobileNetV3 for expression. The
 from-scratch models remain in `results/` as baselines. The group report was
 rewritten for these models and rebuilt at 12 pages. Faces are located with
@@ -23,7 +23,7 @@ Paths below are relative to `grp_project`.
 
 | Brief | Required outcome | Existing implementation and evidence |
 | --- | --- | --- |
-| 1, 2.1 | Train a CNN embedding model using classification and metric learning; compare both | `face_verification/train.py`, `model.py`. Four runs, each 10 epochs on 380,638 training images / 4,000 IDs: compact CNN from scratch (`results/classification`, `results/triplet`) and ImageNet ResNet-18 fine-tuned (`results/classification_resnet18`, `results/triplet_resnet18`), both objectives per backbone. |
+| 1, 2.1 | Train a CNN embedding model using classification and metric learning; compare both | `face_verification/train.py`, `model.py`. Four runs, each 10 epochs on 380,638 training images / 4,000 IDs: compact CNN from scratch (`results/classification`, `results/triplet`) and ImageNet ResNet-18 fine-tuned (`results/classification_resnet18`, `results/triplet_resnet18`), both objectives per backbone, plus ResNet-18 ArcFace as an additional approach (`results/arcface_resnet18`, the app model). |
 | 2.2, 5 | ROC/AUC on `verification_pairs_val.txt` | `face_verification/evaluate.py`; `results/comparison_resnet18/comparison.json` compares all four on all 8,805 original pairs (4,315 same-person, 4,490 different-person). The earlier two-model comparison remains in `results/comparison`. |
 | 2.3 | Research and justify the similarity metric; testing both common metrics is encouraged | Both cosine and Euclidean were evaluated. On unit embeddings they give equivalent rankings because squared Euclidean distance is `2 - 2*cosine`. The report explains the choice and cites embedding research. |
 | 3 | Train and integrate an effective anti-spoofing model | `anti_spoofing/train.py`, `infer.py`; app model `results/liveness_mobilenetv3_webcam_20261120` (config in `results/liveness_app_config.json`), held-out webcam test in `..._on_test`, LCC-FASD test in `..._lcc_test`. Webcam data from `tools/capture_pad_data.py` (crop 1.4x, split by session). |
@@ -53,10 +53,10 @@ presentation cannot guarantee a particular mark.
 
 | Item | Result and scope |
 | --- | --- |
-| Identity verification | Cosine AUC on the original pairs: compact classification 0.825601, compact triplet 0.859969, ResNet-18 classification 0.913943, ResNet-18 triplet 0.914668. Cosine and negative-Euclidean AUC agree. |
-| App identity operating point | ResNet-18 classification, cosine threshold 0.618929; validation pair FPR 0.98% and TPR 26.63% (1,149/4,315). The previous compact triplet point was TPR 9.73%. About 73% of same-identity pairs are still rejected. |
-| Classification closed-set test | ResNet-18 60.00%, compact 39.46% on 8,000 images. This is not the same task as pair verification. |
-| 1:N gallery test | 20 known identities, 300 outsiders: 6/20 found and 21/300 outsiders misidentified at the app threshold (previously 2/20 and 25/300). All identities appeared in encoder training. |
+| Identity verification | Cosine AUC on the original pairs (`results/comparison_identity_20261121`): compact classification 0.825601, compact triplet 0.859969, ResNet-18 classification 0.913943, ResNet-18 triplet 0.914668, ResNet-18 ArcFace 0.914747. Cosine and negative-Euclidean AUC agree. |
+| App identity operating point | ResNet-18 ArcFace, cosine threshold 0.509131; validation pair FPR 0.98% and TPR 32.98% (1,423/4,315). ResNet-18 classification gave TPR 26.63% and the first compact triplet 9.73%. About two thirds of same-identity pairs are still rejected. |
+| Classification closed-set test | ArcFace 69.79%, ResNet-18 classification 60.00%, compact 39.46% on 8,000 images. This is not the same task as pair verification. |
+| 1:N gallery test | 20 known identities, 300 outsiders: ArcFace finds 8/20 and misidentifies 25/300 at its threshold (classification 6/20 and 21/300); with thresholds calibrated to 1% outsider matches, 3/20 and 4/300 (classification 4/20 and 5/300). Small samples; all identities appeared in encoder training. |
 | Identity overlap | 667 verification validation images match training pixels. Results follow the assignment pair protocol, but are not an independent verification test. |
 | PAD on LCC-FASD test (7,522) | Scratch baseline ACER 26.05%; MobileNetV3 LCC-only ACER 5.72% (BPCER 10.16%); app model ACER 8.88% (APCER 1.35%, BPCER 16.41%). Thresholds chosen on validation only. |
 | PAD on held-out webcam sessions | App model: 0/52 phone-photo and 0/116 phone-video crops accepted, 96/96 genuine passed. LCC-only model: 29/52, 67/116 and 91/96. One person, room and day; the same photo/video content appears in train and test sessions; frames are correlated. |
@@ -71,7 +71,7 @@ a correctly recognized person.
 
 ## Portable run check
 
-`results/identity_app_config.json` references `classification_resnet18/best_model.pt`
+`results/identity_app_config.json` references `arcface_resnet18/best_model.pt`
 relative to its own directory, with the checkpoint SHA256, threshold and pair-file
 provenance. Keep the configuration and checkpoint in the same relative directory
 structure when copying the app. The checkpoint must match the gallery fingerprint;
@@ -111,9 +111,9 @@ model component before recording.
 - [x] Verify the package can load models on a copied path without a private
   gallery. On 21 November 2026 the 292-file, 172 MB package was extracted into a new
   folder; the web app loaded all three models and YuNet on CPU with an empty database,
-  and 267 tests passed inside the copy (`results/readiness_20261121/package_check.json`).
+  and 267 tests passed inside the copy (`results/readiness_20261121/package_check.json`), before the cleanup below.
   A clean `pip install` on another computer has not been tried.
-- [x] Full software suite: 266 tests passed. See `results/readiness_20261120/full_tests.log`.
+- [x] Full software suite: 266 tests passed after the 21 November cleanup (old liveness experiments, unused results and the temporary LCC launcher removed; one obsolete package test dropped). See `results/readiness_20261121/full_tests.log`.
 - [ ] Re-register profiles for the new identity encoder and try the app live:
   phone photo in a dark room, genuine face with and without glasses, several people in view.
 - [ ] Complete independent spoof trials with more people, other phones and printed

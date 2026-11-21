@@ -49,7 +49,7 @@ phục giới hạn chống ảnh điện thoại của model hiện tại.
 Mỗi lượt tự lưu JSON mới dưới `results/model_tests/<UTC-timestamp>_<id>.json`.
 **Open report…** đọc được báo cáo paired PAD do công cụ
 `python -m tools.check_liveness_camera` tạo trước đây, gồm các lượt trong
-`results/pad_webcam_20261109/`. Đây là ảnh chụp kết quả lịch sử; không tự mở các
+`results/pad_webcam_20261109/` (thư mục này đã xoá 21/11/2026). Đây là ảnh chụp kết quả lịch sử; không tự mở các
 checkpoint khi xem báo cáo.
 Nếu báo cáo cũ chưa có cờ hủy, giao diện ghi **Cancellation not recorded** và CSV
 ghi `not-recorded`; không suy đoán rằng lượt đó đã hoàn tất.

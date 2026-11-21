@@ -15,7 +15,7 @@ remaining demonstration tasks.
 
 | Phần | Model trong app | Kết quả chính | Model trước |
 |---|---|---|---|
-| Nhận diện | ResNet-18 classification (`results/classification_resnet18`), ngưỡng cosine 0,618929 | AUC 0,913943; TPR 26,63% ở FPR cặp 0,98%; tìm 6/20 người quen, nhận nhầm 21/300 người lạ | Compact triplet: AUC 0,859969; TPR 9,73%; 2/20 và 25/300 |
+| Nhận diện | ResNet-18 ArcFace (`results/arcface_resnet18`), ngưỡng cosine 0,509131 | AUC 0,914747; TPR 32,98% ở FPR cặp 0,98%; test phân loại 69,79%; tìm 8/20 người quen, nhận nhầm 25/300 người lạ | ResNet-18 classification: AUC 0,913943; TPR 26,63%; 6/20 và 21/300 |
 | Chống giả mạo | MobileNetV3, train LCC-FASD + 872 crop webcam tự quay (`results/liveness_mobilenetv3_webcam_20261120`), ngưỡng 0,5927 | Lượt webcam giữ riêng: lọt 0/52 ảnh và 0/116 video điện thoại, cho qua 96/96 mặt thật; LCC-FASD ACER 8,88% | MobileNetV3 chỉ LCC: lọt 29/52 và 67/116; ACER 5,72% |
 | Cảm xúc | MobileNetV3 (`results/emotion_fer_mnv3`) | PrivateTest accuracy 64,20%, macro-F1 0,6284 | EmotionCNN: 58,36%, 0,4984 |
 
@@ -60,7 +60,7 @@ See the [experiment and paired camera results](docs/pad_balanced_experiment.md).
 
 **Cập nhật bắt mặt và tiếng Anh:** dùng hai Haar cascade cùng chuẩn hóa tương phản để giảm bỏ sót; riêng lượt chỉnh detector này giữ nguyên mô hình và ngưỡng liveness/identity. Lượt kiểm thử tại mốc đó đạt **97/97 bài trong 70,1 giây**. Trên cùng 90 khung webcam trong một lượt ngắn, số khung bắt được mặt tăng từ 23 lên 51 và số khung liveness đạt tăng từ 11 lên 37; đây là kiểm tra thuận tiện, không phải benchmark độ chính xác. [Chi tiết thay đổi, kiểm tra và giới hạn](docs/app_capture_update.md).
 
-**Liveness mặc định ngày 08/11/2026 (đã thay, xem trạng thái hiện tại ở đầu trang):** app khi đó dùng `results/liveness_camera_matched/best_model.pt`, CNN khởi tạo từ đầu và huấn luyện 10 epoch với tăng cường ánh sáng/che một phần vùng trên khuôn mặt. Ngưỡng được chọn bằng validation, có đối chiếu mức chấp nhận spoof của baseline. Checkpoint cũ `results/liveness_lcc/best_model.pt` vẫn được giữ; các số đo phần 3 ở trên là kết quả baseline lịch sử. Kiểm tra lại tập test cũ và một số crop webcam cho thấy hướng cải thiện nhưng không phải benchmark mới hoặc chứng nhận accuracy với kính. [Chẩn đoán, lựa chọn mô hình/ngưỡng và giới hạn](docs/liveness_glasses_diagnosis.md).
+**Liveness mặc định ngày 08/11/2026 (đã thay, xem trạng thái hiện tại ở đầu trang):** app khi đó dùng `results/liveness_camera_matched/best_model.pt` (đã xoá 21/11/2026), CNN khởi tạo từ đầu và huấn luyện 10 epoch với tăng cường ánh sáng/che một phần vùng trên khuôn mặt. Ngưỡng được chọn bằng validation, có đối chiếu mức chấp nhận spoof của baseline. Checkpoint cũ `results/liveness_lcc/best_model.pt` vẫn được giữ; các số đo phần 3 ở trên là kết quả baseline lịch sử. Kiểm tra lại tập test cũ và một số crop webcam cho thấy hướng cải thiện nhưng không phải benchmark mới hoặc chứng nhận accuracy với kính. [Chẩn đoán, lựa chọn mô hình/ngưỡng và giới hạn](docs/liveness_glasses_diagnosis.md).
 
 - [Phần 1: mục tiêu và phạm vi](docs/01_project_scope.md)
 - [Phần 2: cách triển khai và chạy](docs/02_face_recognition.md)
@@ -122,7 +122,9 @@ Các công cụ phần 5: `face_verification.import_data` nhập ZIP/thư mục 
 $common = "--backbone resnet18 --hflip --cosine-lr --data-root data/face_recognition --epochs 10 --batch-size 256 --image-size 64 --learning-rate 0.0003 --device cuda --image-cache data/identity_cache64"
 Invoke-Expression ".\.venv-gpu\Scripts\python.exe -m face_verification.train --method classification --output-dir results/classification_resnet18 --evaluate-test $common"
 Invoke-Expression ".\.venv-gpu\Scripts\python.exe -m face_verification.train --method triplet --output-dir results/triplet_resnet18 $common"
-.\.venv-gpu\Scripts\python.exe -m face_verification.evaluate --checkpoint results/classification/best_model.pt --checkpoint results/triplet/best_model.pt --checkpoint results/classification_resnet18/best_model.pt --checkpoint results/triplet_resnet18/best_model.pt --data-root data/face_recognition --output-dir results/comparison_resnet18 --device cuda --batch-size 256
+Invoke-Expression ".\.venv-gpu\Scripts\python.exe -m face_verification.train --method arcface --output-dir results/arcface_resnet18 --evaluate-test $common"
+.\.venv-gpu\Scripts\python.exe -m face_verification.evaluate --checkpoint results/classification/best_model.pt --checkpoint results/triplet/best_model.pt --checkpoint results/classification_resnet18/best_model.pt --checkpoint results/triplet_resnet18/best_model.pt --checkpoint results/arcface_resnet18/best_model.pt --data-root data/face_recognition --output-dir results/comparison_identity_20261121 --device cuda --batch-size 256
+.\.venv-gpu\Scripts\python.exe -m tools.calibrate_identity_app --comparison results/comparison_arcface/comparison.json --output results/identity_app_config.json
 .\.venv-gpu\Scripts\python.exe -m emotion_recognition.train --arch mobilenetv3 --train-manifest data/fer2013_manifests/train.csv --val-manifest data/fer2013_manifests/val.csv --output-dir results/emotion_fer_mnv3 --epochs 15 --batch-size 64 --learning-rate 0.0003 --device cuda
 .\.venv-gpu\Scripts\python.exe -m emotion_recognition.evaluate --checkpoint results/emotion_fer_mnv3/best_model.pt --manifest data/fer2013_manifests/test.csv --output-dir results/emotion_fer_mnv3_test --device cuda
 ```

@@ -1,5 +1,7 @@
 # Class-balanced PAD candidate — 9 November 2026
 
+> **Note, 21 November 2026:** this experiment's result folders and checkpoints were deleted because neither the app nor the report uses them. The numbers below are kept as history only.
+
 The offline training change is complete. The new model improves validation
 spoof rejection at the current genuine-rejection limit, but does **not** meet
 every predeclared criterion. The subsequent paired glasses and phone-photo

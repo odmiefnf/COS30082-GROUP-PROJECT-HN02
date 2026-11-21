@@ -20,14 +20,11 @@ The archive has one `COS30082_Face_Attendance/` folder containing:
   `face_verification`, `tools` and `tests`, plus `attendance_pipeline.py`.
 - README, requirements, Windows launcher, Markdown documentation and the final
   English group report. Its figures are embedded in the DOCX.
-- Best checkpoints for classification, triplet, baseline PAD, augmented PAD,
-  camera-matched PAD and expression classification.
+- Best checkpoints for classification, triplet, baseline PAD and expression
+  classification, plus the current app models listed in the README.
 - Allowlisted model configurations, histories, calibration and figures. This includes
   historical integration and camera summaries, the newer 1:N and PAD crop
   aggregate metrics, and the 14 November readiness evidence.
-- The isolated `liveness_regularized_20261108` candidate only when its
-  `experiment_status.json` declares `status: completed`. Inclusion does not
-  promote it to the default application model.
 - `SUBMISSION_MANIFEST.json`, which records the byte count and SHA256 of every
   included file except the manifest itself. The command also prints the ZIP's
   byte count and SHA256.

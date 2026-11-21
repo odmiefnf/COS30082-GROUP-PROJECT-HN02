@@ -31,11 +31,10 @@ Màn hình: hình ROC trong báo cáo, sau đó trang **Settings & Info**.
 
 > "For face verification we implemented both required approaches: classification with cross-entropy over 4,000 training identities, and metric learning with triplet loss, margin 0.2. Each was trained twice: a compact CNN from scratch, and a ResNet-18 fine-tuned from ImageNet. On all 8,805 validation pairs, the cosine AUC is 0.826 and 0.860 for the compact models, and 0.914 and 0.915 for ResNet-18."
 
-> "Cosine similarity and Euclidean distance give the same AUC on unit-length embeddings, because squared Euclidean distance equals two minus two times cosine. We chose ResNet-18 classification for the app, even though triplet's AUC is 0.0007 higher: at a 1% false-positive rate, classification accepts 26.6% of genuine pairs and triplet only 12.4%. The threshold is a cosine of 0.619."
+> "Cosine similarity and Euclidean distance give the same AUC on unit-length embeddings, because squared Euclidean distance equals two minus two times cosine. As an additional approach we trained ArcFace, which adds an angular margin to the classification head. It has the best AUC, 0.915, and at a 1% false-positive rate it accepts 33.0% of genuine pairs, against 26.6% for classification and 12.4% for triplet, so the app uses ArcFace with a cosine threshold of 0.509."
 
-Nếu nhóm đưa ArcFace vào: thêm một câu với kết quả trong `results/comparison_arcface/` (xem README).
 
-> "This is still a weak operating point: about three quarters of genuine validation pairs are rejected, which is why we register many poses per person."
+> "This is still a weak operating point: about two thirds of genuine validation pairs are rejected, which is why we register many poses per person."
 
 ### 3. Người nói 3 — Đăng ký người mới và điểm danh (2:50–4:15)
 

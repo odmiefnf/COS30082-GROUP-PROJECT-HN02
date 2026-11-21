@@ -31,16 +31,22 @@ blank until the group supplies them.
    equal AUC values are expected, not two independent confirmations.
 5. **How were the best identity checkpoints and model selected?**
    Classification epochs are selected by validation loss and triplet epochs by
-   training loss (compact 9 and 10, ResNet-18 8 and 10). On all 8,805 original
-   pairs the AUCs are 0.825601 and 0.859969 (compact) and 0.913943 and 0.914668
-   (ResNet-18). The app uses ResNet-18 classification: the two ResNet AUCs differ
-   by only 0.0007, but at 1% pair FPR classification recognises 26.63% of
-   same-identity pairs and triplet 12.44%. Pair labels did not update weights.
+   training loss (compact 9 and 10, ResNet-18 8 and 10; ArcFace 9). On all 8,805
+   original pairs the AUCs are 0.825601 and 0.859969 (compact) and 0.913943,
+   0.914668 and 0.914747 (ResNet-18 classification, triplet, ArcFace). The app
+   uses ResNet-18 ArcFace: the three ResNet AUCs differ by less than 0.001, but at
+   1% pair FPR ArcFace recognises 32.98% of same-identity pairs, classification
+   26.63% and triplet 12.44%. Pair labels did not update weights.
+5a. **What does ArcFace change?** The same ResNet-18 and classification setup, but
+   the head compares the embedding with 4,000 normalised class weights by cosine,
+   adds an angular margin of 0.3 to the true class and scales by 32 before
+   cross-entropy. Same-person embeddings are pushed into tighter angular clusters,
+   which helps most at strict thresholds. The margin is used only in training.
 6. **Does an AUC of 0.91 mean 91% attendance accuracy?**
    No. AUC summarizes pair-score ranking over thresholds. At the app's cosine
-   threshold 0.618929, validation pair FPR is 0.98% and TPR 26.63%, so about
-   three quarters of genuine validation pairs are still rejected. In the 1:N
-   gallery test the app finds 6 of 20 known people and misidentifies 21 of 300
+   threshold 0.509131, validation pair FPR is 0.98% and TPR 32.98%, so about
+   two thirds of genuine validation pairs are still rejected. In the 1:N
+   gallery test the app finds 8 of 20 known people and misidentifies 25 of 300
    outsiders. Appearance templates and manual review compensate in operation.
 7. **What data leakage or evaluation limits exist?**
    The assignment's original validation protocol contains 667 images matching
@@ -110,8 +116,8 @@ blank until the group supplies them.
 | Topic | Files to explain |
 | --- | --- |
 | Identity data, model and loss | `face_verification/data.py`, `model.py`, `train.py` |
-| ROC, pair counts and threshold | `results/comparison_resnet18/comparison.csv`, `results/identity_app_config.json`, `tools/calibrate_identity_app.py` |
-| 1:N gallery test | `results/identity_open_set_20261120_classification_resnet18/metrics.json`, `tools/evaluate_identity_open_set.py` |
+| ROC, pair counts and threshold | `results/comparison_identity_20261121/comparison.csv`, `results/identity_app_config.json`, `tools/calibrate_identity_app.py` |
+| 1:N gallery test | `results/identity_open_set_20261121_arcface_resnet18/metrics.json`, `tools/evaluate_identity_open_set.py` |
 | PAD training and operating point | `anti_spoofing/train.py`, `results/liveness_app_config.json`, `results/liveness_mobilenetv3_webcam_20261120/calibration.json` |
 | Webcam PAD data and results | `tools/capture_pad_data.py`, `tools/record_pad_sessions.cmd`, `results/liveness_mobilenetv3_webcam_20261120_on_test/metrics.json` |
 | Expression training and per-class errors | `emotion_recognition/model.py`, `train.py`, `results/emotion_fer_mnv3_test/metrics.json` |

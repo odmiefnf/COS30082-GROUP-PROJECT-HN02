@@ -13,6 +13,7 @@ import numpy as np
 from attendance_app.evaluation import (TrialAccumulator, collect_frames, gallery_snapshot,
                                      report_header, validate_ground_truth, validate_presentation)
 from attendance_app.store import ProfileStore
+from attendance_app.gui import DEFAULT_LIVENESS_CHECKPOINT
 from tools.evaluate_webcam_trial import ROOT, main
 
 
@@ -58,7 +59,7 @@ class TrialCheckpointChecks(unittest.TestCase):
         with tempfile.TemporaryDirectory(dir=ROOT/"tmp") as temporary:
             base = Path(temporary)
             for name, extra, expected in (
-                    ("default", [], ROOT/"results/liveness_camera_matched/best_model.pt"),
+                    ("default", [], DEFAULT_LIVENESS_CHECKPOINT),
                     ("candidate", ["--liveness-checkpoint", str(base/"candidate.pt")], base/"candidate.pt")):
                 with self.subTest(name=name), \
                      patch("attendance_app.recognition.FaceRecognizer"), \

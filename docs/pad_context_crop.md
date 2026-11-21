@@ -35,8 +35,9 @@ python -m tools.compare_pad_context --output-dir results/pad_context_repeat --de
 ```
 
 Để xem kết quả mẫu, mở
-[metrics.json](../results/pad_context_20261114/metrics.json). Muốn thử ở
-webcam, chọn checkpoint trong `work/context-2x/model/` bằng nút **Model
+[metrics.json](../results/pad_context_20261114/metrics.json). Checkpoint của
+lượt này đã bị xoá ngày 21/11/2026 vì app không dùng crop 2×; muốn thử lại ở
+webcam thì chạy lại lệnh trên rồi chọn checkpoint mới bằng nút **Model
 Tests…**. Báo cáo tách theo tình huống ảnh tĩnh trên điện thoại, video phát
 lại, ảnh in và người thật có hoặc không kính. Nên chia lượt đo theo người
 và thiết bị khi có thêm người tham gia. Báo cáo tổng hợp ảnh tĩnh cũ vẫn

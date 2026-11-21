@@ -37,7 +37,6 @@ class SubmissionPackageChecks(unittest.TestCase):
             "attendance_app/model_testing.py", "tools/capture_pad_data.py",
             "results/identity_open_set_20261114/metrics.json",
             "results/pad_context_20261114/metrics.json",
-            "results/pad_webcam_20261109/final_model_decision.json",
             "results/readiness_20261114/full_tests.log",
         )
         for name in additions:
@@ -90,20 +89,6 @@ class SubmissionPackageChecks(unittest.TestCase):
         with self.assertRaises(FileExistsError):
             build_package(self.root, output)
         self.assertEqual(output.read_bytes(), b"existing hand-in")
-
-    def test_unfinished_candidate_is_excluded_and_completed_candidate_is_optional(self):
-        directory = "results/liveness_regularized_20261108/"
-        self.put(directory+"best_model.pt")
-        self.put(directory+"experiment_status.json", b'{"status":"training"}')
-        first = self.root/"first.zip"
-        build_package(self.root, first)
-        with zipfile.ZipFile(first) as archive:
-            self.assertNotIn(PREFIX+"/"+directory+"best_model.pt", archive.namelist())
-        self.put(directory+"experiment_status.json", b'{"status":"completed"}')
-        second = self.root/"second.zip"
-        build_package(self.root, second)
-        with zipfile.ZipFile(second) as archive:
-            self.assertIn(PREFIX+"/"+directory+"best_model.pt", archive.namelist())
 
 
 if __name__ == "__main__":

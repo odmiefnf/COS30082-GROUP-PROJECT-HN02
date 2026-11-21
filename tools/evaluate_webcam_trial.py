@@ -9,6 +9,7 @@ from pathlib import Path
 import time
 import uuid
 
+from attendance_app.gui import DEFAULT_LIVENESS_CHECKPOINT
 from attendance_app.evaluation import (CONDITIONS, PRESENTATIONS, TrialAccumulator, collect_frames,
     gallery_snapshot, report_header, validate_ground_truth, validate_presentation)
 
@@ -26,7 +27,7 @@ def main(argv=None):
     parser.add_argument("--distance-cm", type=float, help="Operator-measured camera distance, if known")
     parser.add_argument("--database", type=Path, default=ROOT/"data/attendance/profiles.sqlite3")
     parser.add_argument("--liveness-checkpoint", type=Path,
-                        default=ROOT/"results/liveness_camera_matched/best_model.pt")
+                        default=DEFAULT_LIVENESS_CHECKPOINT)
     parser.add_argument("--camera", type=int, default=0)
     parser.add_argument("--seconds", type=float, default=15.)
     parser.add_argument("--max-frames", type=int, default=300)

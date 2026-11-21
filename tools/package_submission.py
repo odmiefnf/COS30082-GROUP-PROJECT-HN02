@@ -14,7 +14,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 PREFIX = "COS30082_Face_Attendance"
 SOURCE_DIRS = ("anti_spoofing", "attendance_app", "emotion_recognition", "face_verification", "tools", "tests")
-MODEL_DIRS = ("classification", "triplet", "liveness_lcc", "liveness_camera_aug", "liveness_camera_matched", "emotion_fer")
+MODEL_DIRS = ("classification", "triplet", "liveness_lcc", "emotion_fer")
 REQUIRED = (
     "attendance_pipeline.py", "attendance_app/gui.py", "attendance_app/service.py",
     "attendance_app/models/face_detection_yunet_2023mar.onnx",
@@ -23,12 +23,11 @@ REQUIRED = (
     "requirements.txt", "requirements-webcam.txt", "start_attendance.cmd",
     "reports/COS30082_Group_Report.docx", "results/identity_app_config.json",
     "results/liveness_app_config.json", "results/comparison/comparison.json",
-    "results/liveness_lcc_test/metrics.json", "results/liveness_camera_matched/calibration.json",
-    "results/liveness_camera_matched/test_regression_metrics.json", "results/emotion_fer_test/metrics.json",
+    "results/liveness_lcc_test/metrics.json", "results/emotion_fer_test/metrics.json",
     "results/readiness_20261108/status.json", "results/readiness_20261108/full_tests.log",
 ) + tuple(f"results/{name}/best_model.pt" for name in MODEL_DIRS)
 RESULT_DIRS = (
-    *MODEL_DIRS, "comparison", "liveness_lcc_test", "liveness_camera_aug_test", "emotion_fer_test",
+    *MODEL_DIRS, "comparison", "liveness_lcc_test", "emotion_fer_test",
     "app_upgrade_20261030",
 )
 RESULT_NAMES = {
@@ -63,18 +62,12 @@ EVIDENCE_FILES = (
         "pad_training.log", "relocation_check.json", "report_build.log", "report_render.log",
         "report_render_final.log", "report_status.json", "status.json",
     )),
-    "liveness_balanced_20261109/experiment_plan.json",
-    "liveness_balanced_20261109/experiment_status.json",
-    "pad_webcam_20261109/final_model_decision.json",
     "model_tests_feature_1826ff45/model_testing_final.log",
     "identity_open_set_20261114/metrics.json",
     "pad_context_20261114/metrics.json",
     "readiness_20261114/full_tests.log",
     "readiness_20261114/model_startup.json",
     "readiness_20261114/report_status.json",
-    "liveness_context_matched_20261120/best_model.pt",
-    "liveness_context_matched_20261120/calibration.json",
-    "liveness_context_matched_20261120_test/metrics.json",
     "liveness_mobilenetv3_20261120/best_model.pt",
     "liveness_mobilenetv3_20261120/calibration.json",
     "liveness_mobilenetv3_20261120_test/metrics.json",
@@ -96,10 +89,15 @@ EVIDENCE_FILES = (
     "liveness_mobilenetv3_webcam_20261120/history.csv",
     "liveness_mobilenetv3_webcam_20261120_on_test/metrics.json",
     "liveness_mobilenetv3_webcam_20261120_lcc_test/metrics.json",
+    "arcface_resnet18/best_model.pt",
+    "arcface_resnet18/train_history.csv",
+    "arcface_resnet18/classification_test.json",
+    "comparison_arcface/comparison.json",
+    "comparison_arcface/comparison.csv",
+    "identity_open_set_20261121_arcface_resnet18/metrics.json",
     "app_update_20261120/pipeline_metrics.json",
     "readiness_20261120/full_tests.log",
 )
-CANDIDATE = "results/liveness_regularized_20261108"
 SKIP_PARTS = {"__pycache__", "backup", "backups", "archive", "archives"}
 
 
@@ -128,13 +126,6 @@ def submission_files(root):
     for name in ("glasses_01.json", "phone_photo_01.json"):
         if (trials/name).is_file():
             selected.add(trials/name)
-    candidate = root/CANDIDATE
-    if (candidate/"experiment_status.json").is_file():
-        status = json.loads((candidate/"experiment_status.json").read_text(encoding="utf-8"))
-        if status.get("status") == "completed":
-            selected.update(candidate/name for name in (
-                "best_model.pt", "config.json", "calibration.json", "history.csv",
-                "experiment_plan.json", "experiment_status.json") if (candidate/name).is_file())
     for path in selected:
         # Refuse links/junctions rather than copying an unexpected target's data.
         if path.resolve() != path.absolute() or not path.resolve().is_relative_to(root):

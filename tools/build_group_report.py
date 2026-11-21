@@ -27,17 +27,17 @@ ROOT = Path(__file__).resolve().parents[1]
 WORK = ROOT / "tmp/group_report"
 ASSETS = WORK / "assets"
 OUTPUT = ROOT / "reports/COS30082_Group_Report.docx"
-BLUE, ORANGE = "#234f78", "#b2592b"
-COMPARISON = "results/comparison_resnet18/comparison.json"
-GALLERY_NEW = "results/identity_open_set_20261120_classification_resnet18/metrics.json"
-GALLERY_OLD = "results/identity_open_set_20261114/metrics.json"
+BLUE, ORANGE, GREEN = "#234f78", "#b2592b", "#2e7d4f"
+COMPARISON = "results/comparison_identity_20261121/comparison.json"
+GALLERY_NEW = "results/identity_open_set_20261121_arcface_resnet18/metrics.json"
+GALLERY_OLD = "results/identity_open_set_20261120_classification_resnet18/metrics.json"
 PAD_SCRATCH = "results/liveness_lcc_test/metrics.json"
 PAD_LCC = "results/liveness_mobilenetv3_20261120"
 PAD_APP = "results/liveness_mobilenetv3_webcam_20261120"
 EXPRESSION_OLD = "results/emotion_fer_test/metrics.json"
 EXPRESSION_NEW = "results/emotion_fer_mnv3_test/metrics.json"
 PIPELINE = "results/app_update_20261120/pipeline_metrics.json"
-TESTS_LOG = "results/readiness_20261120/full_tests.log"
+TESTS_LOG = "results/readiness_20261121/full_tests.log"
 
 
 def read_json(relative):
@@ -78,17 +78,18 @@ def webcam_sessions(directory):
 
 def model_name(model):
     backbone = model["checkpoint_config"]["training"].get("backbone", "compact")
-    return f"{'ResNet-18' if backbone == 'resnet18' else 'Compact'} {model['method']}"
+    method = {"arcface": "ArcFace"}.get(model["method"], model["method"])
+    return f"{'ResNet-18' if backbone == 'resnet18' else 'Compact'} {method}"
 
 
 def evidence():
     identity = read_json(COMPARISON)
-    assert identity["pair_count"] == 8805 and len(identity["models"]) == 4
+    assert identity["pair_count"] == 8805 and len(identity["models"]) == 5
     assert identity["pairs_file_sha256"] == digest(ROOT/"data/face_recognition/verification_pairs_val.txt")
     for model in identity["models"]:
         assert model["checkpoint_sha256"] == digest(model["checkpoint"])
     app = read_json("results/identity_app_config.json")
-    assert app["checkpoint"] == "classification_resnet18/best_model.pt"
+    assert app["checkpoint"] == "arcface_resnet18/best_model.pt"
     assert app["checkpoint_sha256"] == digest(ROOT/"results"/app["checkpoint"])
     gallery = read_json(GALLERY_NEW)
     assert gallery["checkpoint_sha256"] == app["checkpoint_sha256"]
@@ -116,7 +117,7 @@ def figures(identity, app, expressions):
     operating = {}
     for model in identity["models"]:
         name = model_name(model)
-        color = BLUE if model["method"] == "classification" else ORANGE
+        color = {"classification": BLUE, "triplet": ORANGE}.get(model["method"], GREEN)
         linestyle = "-" if name.startswith("ResNet") else ":"
         curve = [r for r in rows(model["artifacts"]["roc_points_csv"]) if r["metric"] == "cosine_similarity"]
         x = np.array([float(r["fpr"]) for r in curve])
@@ -138,12 +139,12 @@ def figures(identity, app, expressions):
     axes[1].set(xlim=(0, .05), ylim=(0, .6), title="Low false positive region")
     axes[1].axvline(.01, color="#777777", lw=1, linestyle=":")
     fpr, tpr = app["observed_validation_pair_fpr"], app["observed_validation_pair_tpr"]
-    axes[1].scatter([fpr], [tpr], marker="*", s=80, color=BLUE, zorder=4)
+    axes[1].scatter([fpr], [tpr], marker="*", s=80, color=GREEN, zorder=4)
     axes[1].annotate(f"App point\nTPR {tpr:.2%}", (fpr, tpr), xytext=(.03, .03), fontsize=9,
                      arrowprops={"arrowstyle": "->", "color": "#555555", "lw": .8})
-    fig.legend(*axes[0].get_legend_handles_labels(), loc="lower center", ncol=2, frameon=False,
-               bbox_to_anchor=(.5, -.01), fontsize=8.5)
-    fig.tight_layout(rect=(0, .14, 1, 1), w_pad=1.2)
+    fig.legend(*axes[0].get_legend_handles_labels(), loc="lower center", ncol=3, frameon=False,
+               bbox_to_anchor=(.5, -.01), fontsize=7.6)
+    fig.tight_layout(rect=(0, .15, 1, 1), w_pad=1.2)
     fig.savefig(ASSETS / "identity_roc.png", dpi=250)
     plt.close(fig)
 
@@ -189,6 +190,8 @@ def figures(identity, app, expressions):
     # Raster math avoids symbol substitution in cross-platform OMML import.
     math_to_image(r"$L_{\mathrm{triplet}}=\max(0,\Vert z_a-z_p\Vert_2-\Vert z_a-z_n\Vert_2+0.2)$",
                   ASSETS/"triplet_loss.png", prop=FontProperties(size=12), dpi=350, color="black")
+    math_to_image(r"$L_{\mathrm{arc}}=-\log\frac{e^{s\cos(\theta_y+m)}}{e^{s\cos(\theta_y+m)}+\sum_{j\neq y}e^{s\cos\theta_j}},\quad s=32,\ m=0.3$",
+                  ASSETS/"arcface_loss.png", prop=FontProperties(size=12), dpi=350, color="black")
     math_to_image(r"$s_{\mathrm{cos}}=u^{\mathsf{T}}v,\qquad d^2=2-2s_{\mathrm{cos}}$",
                   ASSETS/"similarity_identity.png", prop=FontProperties(size=12), dpi=350, color="black")
     return operating
@@ -332,12 +335,14 @@ def build():
     identity, app, gallery, pads, expressions = evidence()
     operating = figures(identity, app, expressions)
     ops = {name: operating[name] for name in ("Compact classification", "Compact triplet",
-                                                "ResNet-18 classification", "ResNet-18 triplet")}
+                                                "ResNet-18 classification", "ResNet-18 triplet", "ResNet-18 ArcFace")}
     software = software_evidence()
     pipeline = read_json(PIPELINE)
     detect, latency = pipeline["detector_one_face_counts"], pipeline["latency_ms"]
     g_new, g_old = gallery["splits"]["test"], read_json(GALLERY_OLD)["splits"]["test"]
-    gapp, gcal, gold = g_new["current_app_threshold"], g_new["gallery_calibrated_threshold"], g_old["current_app_threshold"]
+    gapp, gcal = g_new["current_app_threshold"], g_new["gallery_calibrated_threshold"]
+    gold, gold_cal = g_old["current_app_threshold"], g_old["gallery_calibrated_threshold"]
+    arc_test = read_json("results/arcface_resnet18/classification_test.json")["metrics"]["accuracy"]
     old_on, new_on = webcam_sessions(f"{PAD_LCC}_on_test"), webcam_sessions(f"{PAD_APP}_on_test")
     old_val, new_val = webcam_sessions(f"{PAD_LCC}_on_webcam_val"), webcam_sessions(f"{PAD_APP}_on_webcam_val_insample")
     session = lambda table, kind: next(v for k, v in table.items() if f"_{kind}_" in k)
@@ -346,7 +351,7 @@ def build():
     live_new = session(new_on, "live-person")
     sc, lc, ap = pads["scratch"], pads["lcc"], pads["app"]
     eo, en = expressions["old"], expressions["new"]
-    rc, rt = ops["ResNet-18 classification"], ops["ResNet-18 triplet"]
+    rc, rt, ra = ops["ResNet-18 classification"], ops["ResNet-18 triplet"], ops["ResNet-18 ArcFace"]
     cc, ct = ops["Compact classification"], ops["Compact triplet"]
     accepted = lambda op, n: round(op["tpr"] * n)
     report = Report()
@@ -355,13 +360,13 @@ def build():
     # Page 1
     P("Facial recognition attendance with expression and liveness", "Title")
     P("COS30082 Applied Machine Learning Group Report", "Subtitle")
-    P("20 November 2026", size=10)
+    P("21 November 2026", size=10)
     P("Group HN02", size=11)
     P("Nguyen Van Tuan Kiet - 104772099     Huynh Quoc Hieu - 104848408", size=8)
     P("Nguyen Phuc Lam - 105006540     Bùi Minh Hiếu - 105006582", size=8)
     P("Nguyễn Huy Hoàng Việt - 104992509     Vũ Bá Hiển - 104995634", size=8)
     H("Abstract")
-    P(f"We developed an attendance prototype that combines face verification, passive liveness detection and facial expression classification. Identity encoders were trained with classification and triplet objectives, first as compact CNNs from scratch and then as partially fine-tuned ImageNet ResNet-18 networks, and compared on the original 8,805 verification pairs. Fine-tuning raised validation AUC from {cc['auc']:.3f} and {ct['auc']:.3f} to {rc['auc']:.3f} and {rt['auc']:.3f}. The ResNet-18 classification encoder accepts {rc['tpr']:.2%} of same identity pairs at {rc['fpr']:.2%} pair FPR, against {ct['tpr']:.2%} for the earlier application model, and supplies the application's embeddings.")
+    P(f"We developed an attendance prototype that combines face verification, passive liveness detection and facial expression classification. Identity encoders were trained with classification and triplet objectives, first as compact CNNs from scratch and then as partially fine-tuned ImageNet ResNet-18 networks, and compared on the original 8,805 verification pairs. Fine-tuning raised validation AUC from {cc['auc']:.3f} and {ct['auc']:.3f} to {rc['auc']:.3f} and {rt['auc']:.3f}, and an additional ArcFace margin objective reached {ra['auc']:.3f}. The ArcFace encoder accepts {ra['tpr']:.2%} of same identity pairs at {ra['fpr']:.2%} pair FPR, against {rc['tpr']:.2%} for ResNet-18 classification and {ct['tpr']:.2%} for the earliest application model, and supplies the application's embeddings.")
     P(f"Liveness uses a partially fine-tuned MobileNetV3 trained on LCC FASD plus our own webcam recordings. On held-out webcam sessions it accepted {attack_new} of {attack_total} phone photo and video crops and passed {live_new[0]} of {live_new[1]} genuine crops; its LCC FASD ACER is {ap['ACER']:.2%}, against {lc['ACER']:.2%} without webcam data. A fine-tuned MobileNetV3 expression model reached {en['accuracy']:.2%} accuracy and macro F1 {en['macro_f1']:.4f} on filtered FER2013 PrivateTest, up from {eo['accuracy']:.2%} and {eo['macro_f1']:.4f}. Identity validation contains training pixel duplicates and the webcam evidence comes from one person, room and day, so these results do not establish deployment accuracy or security.")
     H("Introduction")
     P("The project brief requires CNN embeddings trained with classification and metric learning, ROC and AUC evaluation, a trained anti spoofing module, expression recognition and an attendance interface [1]. Pretrained networks may only be used with further training; our ImageNet initialised models are partially fine-tuned on the task data, and the from-scratch baselines are kept for comparison. Registration adds a person's name and embeddings without retraining. Liveness gates identity processing; expression labels are descriptive outputs and never determine attendance.")
@@ -394,24 +399,26 @@ def build():
     ], [1.6, 2.4, 2.85], 2, "Identity encoder architectures")
     H("Classification and metric objectives", level=3)
     P("The classification model attaches a Linear(128,4000) identity head to raw projection features and minimises mean cross entropy over the identity logits. At verification time the head is discarded and each 128 dimensional feature is L2 normalised, so newly registered people can be matched without retraining the classifier.")
+    P("As an additional approach, the ArcFace variant [13] replaces the linear head on the ResNet-18 encoder with 4,000 L2 normalised class weights and adds an angular margin m to the true class before scaling the cosines by s. Validation and test accuracy use the plain scaled cosines, so the margin only shapes training; all other settings match ResNet-18 classification.")
+    report.equation("arcface_loss.png", "ArcFace loss: cross entropy over scaled cosines, with margin 0.3 added to the angle of the true class and scale 32.")
     P("The metric model uses an L2 normalised embedding and one triplet for every eligible anchor per epoch. The positive is a different image with the same training ID; the negative has a different ID. Sampling is deterministic for the seed, epoch and anchor. The loss below uses unsquared L2 distances, margin 0.2 and batch mean reduction. This is a random triplet baseline inspired by embedding based verification [3], not a reproduction of FaceNet's architecture or online mining.")
     report.equation("triplet_loss.png", "Triplet loss is max of zero and the anchor-positive L2 distance minus anchor-negative L2 distance plus margin 0.2.")
     P("Identity labels supply both classification targets and triplet relationships; neither method uses verification pairs to update weights. Compact runs use no augmentation. ResNet runs add random horizontal flips, a cosine learning rate schedule and mixed precision, applied identically to both objectives so that each backbone pair remains a controlled comparison.")
 
     # Page 4
     H("Identity training and similarity selection", page=True)
-    T(["Setting", "Compact CNN, both objectives", "ResNet-18, both objectives"], [
+    T(["Setting", "Compact CNN, both objectives", "ResNet-18, all three objectives"], [
         ["Initialisation and seed", "From scratch / 42", "ImageNet, stem frozen / 42"],
         ["Epochs and batch size", "10 full epochs / 256", "10 full epochs / 256"],
         ["Optimizer and rate", "Adam, 0.001 fixed", "Adam, 0.0003 cosine to zero"],
         ["Augmentation and precision", "None / FP32", "Horizontal flip 0.5 / mixed FP16"],
         ["Epoch selection", "Classification: validation loss; triplet: training loss", "Same"],
-        ["Selected epoch (cls / triplet)", f"{cc['epoch']} / {ct['epoch']}", f"{rc['epoch']} / {rt['epoch']}"]
+        ["Selected epoch (cls / triplet / ArcFace)", f"{cc['epoch']} / {ct['epoch']}", f"{rc['epoch']} / {rt['epoch']} / {ra['epoch']}"]
     ], [1.85, 2.5, 2.5], 3, "Identity experiment configuration")
     P("All runs use a GeForce RTX 3060 Laptop GPU with 6 GiB memory, PyTorch 2.5.1 with CUDA 12.4 and a checksum verified uint8 cache of the source ZIP. Every epoch contains 1,487 batches with no cap. Triplets process three images per anchor, so the objectives are not matched for total computation, and each configuration was run once.")
     P("We compare cosine similarity and Euclidean distance on unit embeddings. Cosine needs a dot product and has a bounded scale; Euclidean distance offers an intuitive geometric distance consistent with embedding learning [3]. Their relationship means they rank unit embedding pairs identically, apart from numerical ties:")
     report.equation("similarity_identity.png", "For unit embeddings u and v, cosine is their dot product and squared Euclidean distance equals two minus twice cosine.")
-    P("ROC treats label 1 as the same identity, using cosine or negative Euclidean distance so larger scores mean a stronger match. AUC is computed on all original verification validation pairs. For the application we choose, for each model, the highest TPR among finite cosine thresholds with validation pair FPR at most 1%. We deploy the model with the best TPR at that point rather than the best AUC, because the two ResNet AUCs differ by only 0.0007 while their low FPR recall differs strongly. This selection is in sample. Classification test images are evaluated once after epoch selection and are not used to choose a checkpoint.")
+    P("ROC treats label 1 as the same identity, using cosine or negative Euclidean distance so larger scores mean a stronger match. AUC is computed on all original verification validation pairs. For the application we choose, for each model, the highest TPR among finite cosine thresholds with validation pair FPR at most 1%. We deploy the model with the best TPR at that point; the three ResNet AUCs differ by less than 0.001 while their low FPR recall differs strongly. This selection is in sample. Classification test images are evaluated once after epoch selection and are not used to choose a checkpoint.")
 
     # Page 5
     H("Liveness model and evaluation protocol", page=True)
@@ -460,9 +467,9 @@ def build():
     T(["Encoder and objective", "Selected epoch", "Cosine AUC", "TPR at FPR at most 1%"], [
         [name, op["epoch"], f"{op['auc']:.6f}", f"{op['tpr']:.2%}"] for name, op in ops.items()
     ], [2.25, 1.3, 1.5, 1.8], 6, "Verification on all 8,805 original validation pairs")
-    report.picture("identity_roc.png", "Figure 2  Identity ROC curves and the application's low FPR operating point", f"ResNet-18 encoders reach AUC {rc['auc']:.3f} and {rt['auc']:.3f}, compact encoders {cc['auc']:.3f} and {ct['auc']:.3f}; the selected ResNet-18 classification point has TPR {rc['tpr']:.2%} at FPR {rc['fpr']:.2%}.")
-    P(f"ImageNet initialisation, the deeper encoder and flip augmentation raise AUC by {rc['auc']-cc['auc']:.3f} for classification and {rt['auc']-ct['auc']:.3f} for triplet. Negative Euclidean AUC equals cosine AUC for every model. At pair FPR {rc['fpr']:.2%}, ResNet-18 classification accepts {accepted(rc, 4315):,} of 4,315 same identity pairs, against {accepted(rt, 4315)} for ResNet-18 triplet and {accepted(ct, 4315)} for the earlier compact triplet application model. The application therefore uses ResNet-18 classification with cosine threshold {rc['threshold']:.6f}. Its classification head reaches 60.00% closed set accuracy on 8,000 images of training identities, against 39.46% for the compact model.")
-    P(f"A gallery search test enrols {gapp['known_probes']} identities and probes each with a different image. At the app threshold the new encoder finds {gapp['known_correct']}/{gapp['known_probes']} known probes and misidentifies {gapp['unknown_false_identifications']}/{gapp['unknown_probes']} outsiders, against {gold['known_correct']}/{gold['known_probes']} and {gold['unknown_false_identifications']}/{gold['unknown_probes']} for the earlier encoder. A threshold calibrated on separate identities to limit outsider matches to 1% accepts {gcal['known_correct']}/{gcal['known_probes']} known and {gcal['unknown_false_identifications']}/{gcal['unknown_probes']} outsider probes; for the earlier encoder no threshold met that limit with any correct match. All identities appeared in encoder training.")
+    report.picture("identity_roc.png", "Figure 2  Identity ROC curves and the application's low FPR operating point", f"ResNet-18 encoders reach AUC {rc['auc']:.3f}, {rt['auc']:.3f} and {ra['auc']:.3f} (ArcFace), compact encoders {cc['auc']:.3f} and {ct['auc']:.3f}; the selected ArcFace point has TPR {ra['tpr']:.2%} at FPR {ra['fpr']:.2%}.")
+    P(f"ImageNet initialisation, the deeper encoder and flip augmentation raise AUC by {rc['auc']-cc['auc']:.3f} for classification and {rt['auc']-ct['auc']:.3f} for triplet. Negative Euclidean AUC equals cosine AUC for every model. The ArcFace margin adds only {ra['auc']-rc['auc']:.4f} AUC but helps most where the app operates: at pair FPR {ra['fpr']:.2%} it accepts {accepted(ra, 4315):,} of 4,315 same identity pairs, against {accepted(rc, 4315):,} for ResNet-18 classification, {accepted(rt, 4315)} for ResNet-18 triplet and {accepted(ct, 4315)} for the earliest compact triplet application model. The application therefore uses ArcFace with cosine threshold {ra['threshold']:.6f}. Its head reaches {arc_test:.2%} closed set accuracy on 8,000 images of training identities, against 60.00% for ResNet-18 classification and 39.46% for the compact model.")
+    P(f"A gallery search test enrols {gapp['known_probes']} identities and probes each with a different image. At each model's pair threshold the ArcFace encoder finds {gapp['known_correct']}/{gapp['known_probes']} known probes and misidentifies {gapp['unknown_false_identifications']}/{gapp['unknown_probes']} outsiders, against {gold['known_correct']}/{gold['known_probes']} and {gold['unknown_false_identifications']}/{gold['unknown_probes']} for ResNet-18 classification. A threshold calibrated on separate identities to limit outsider matches to 1% accepts {gcal['known_correct']}/{gcal['known_probes']} known and {gcal['unknown_false_identifications']}/{gcal['unknown_probes']} outsider probes, against {gold_cal['known_correct']}/{gold_cal['known_probes']} and {gold_cal['unknown_false_identifications']}/{gold_cal['unknown_probes']}. With 20 known probes these differences are within a few people, and all identities appeared in encoder training.")
 
     # Page 9
     H("Liveness and expression results", page=True)
@@ -494,13 +501,13 @@ def build():
         ["Validation: phone photo, dark (accepted)", "{}/{}".format(*session(old_val, "phone-still-photo")), "{}/{}".format(*session(new_val, "phone-still-photo"))],
         ["Validation: phone video, dark (accepted)", "{}/{}".format(*session(old_val, "recorded-video")), "{}/{}".format(*session(new_val, "recorded-video"))]
     ], [3.45, 1.7, 1.7], 9, "Liveness on recorded webcam sessions; crops passed or accepted as live")
-    P("The deployed model blocks every held-out attack crop while passing every genuine crop, and the dark attack that succeeded live is blocked in validation. The evidence is narrow: one person, room and day, the same photo and video content in training and test sessions, and correlated frames within a session. Printed photos, other phones and other people remain untested, so this is not an attack population error rate.")
+    P("The deployed model blocks every held-out attack crop while passing every genuine crop, and the dark attack that succeeded live is blocked in validation. The evidence is narrow: one person, room and day, the same photo and video content in training and test sessions, and correlated frames within a session. Printed photos, other phones and other people remain untested, so this is not an attack population error rate. In a later live check in a brighter office, the deployed model also rejected the registered user's genuine face with scores near zero, so the webcam data overfits its single room; the application can be started with the LCC-only model in such rooms, which restores genuine access but not phone attack protection.")
     P(f"Median single call latency on the RTX 3060 laptop is {latency['yunet_detect_960x720_cpu']:.0f} ms for YuNet on a 960 by 720 frame (CPU), {latency['liveness']:.0f} ms for liveness, {latency['identity_embed']:.0f} ms for identity and {latency['expression']:.0f} ms for expression. Each additional face only adds identity matching. Capture, drawing and streaming are excluded, so these are not end to end frame rates.")
 
     # Page 11
     H("Discussion", level=1, page=True)
     H("Model selection and deployment limits")
-    P(f"The evidence supports ImageNet fine-tuning for all three tasks and ResNet-18 classification as the deployed identity encoder. It does not support a deployment accuracy claim: at the selected point about {1-rc['tpr']:.0%} of same identity pairs are still rejected, and the gallery test finds {gapp['known_correct']} of {gapp['known_probes']} known people. Appearance templates and manual review compensate in operation. Hard negative mining, margin based losses and larger input resolution remain untested.")
+    P(f"The evidence supports ImageNet fine-tuning for all three tasks and ResNet-18 ArcFace as the deployed identity encoder. It does not support a deployment accuracy claim: at the selected point about {1-ra['tpr']:.0%} of same identity pairs are still rejected, and the gallery test finds {gapp['known_correct']} of {gapp['known_probes']} known people. Appearance templates and manual review compensate in operation. Hard negative mining and larger input resolution remain untested, and ArcFace's scale and margin were not tuned.")
     P("Each comparison controls data, input resolution and seed within a backbone, but it does not equalise compute and uses one run per configuration, so no uncertainty intervals are available. Verification validation is used for model choice and threshold calibration and contains exact training pixel duplicates. An explicitly separate cleaned protocol and an independent gallery test would strengthen the identity results without silently filtering the assignment's pair list.")
     P("The liveness history shows why camera evidence matters. Fine-tuning made LCC FASD results excellent, yet the model accepted a phone photo on our webcam. A small set of in-domain recordings fixed that case at the cost of more genuine rejections on LCC FASD. Broader recordings, with several people, devices, printed photos and dark attacks kept in training, are the next step, followed by a fresh session-level test.")
     P("Expression classification improved most for the weakest classes, but fear and sad still have F1 near 0.5. The model has not been validated for internal feelings, mental health, work attitude or student engagement. Keeping expression outside the attendance rule avoids an unsupported condition for recording presence.")
@@ -509,7 +516,7 @@ def build():
 
     # Page 12 -- cap includes references and all front matter.
     H("Conclusion", level=1, page=True)
-    P("The project trains both required identity approaches, a liveness network and an expression network, and integrates them with guided registration, appearance templates, manual review and multi-face display. Fine-tuned ResNet-18 and MobileNetV3 models clearly outperform the from-scratch baselines on held-out data, and in-domain webcam recordings closed a phone photo attack seen in live use. Pixel overlap in identity validation, limited low FPR recall and narrow camera evidence still prevent deployment claims.")
+    P("The project trains both required identity approaches plus ArcFace, a liveness network and an expression network, and integrates them with guided registration, appearance templates, manual review and multi-face display. Fine-tuned ResNet-18 and MobileNetV3 models clearly outperform the from-scratch baselines on held-out data, and in-domain webcam recordings closed a phone photo attack seen in live use. Pixel overlap in identity validation, limited low FPR recall and single-room camera evidence still prevent deployment claims.")
     H("References")
     report.reference(1, "COS30082 Applied Machine Learning. Facial Recognition with Emotion and Liveness. Project brief supplied with the assignment, pp. 1 to 6.")
     report.reference(2, "Kaggle. 11 785 Fall 20 Homework 2 Part 2. Identity dataset and verification pairs. Accessed 27 October 2026.", "https://www.kaggle.com/competitions/11-785-fall-20-homework-2-part-2/data")
@@ -523,8 +530,9 @@ def build():
     report.reference(10, "He, K., Zhang, X., Ren, S. and Sun, J. (2016). Deep Residual Learning for Image Recognition. CVPR. arXiv 1512.03385.", "https://arxiv.org/abs/1512.03385")
     report.reference(11, "Howard, A. et al. (2019). Searching for MobileNetV3. ICCV. arXiv 1905.02244.", "https://arxiv.org/abs/1905.02244")
     report.reference(12, "Russakovsky, O. et al. (2015). ImageNet Large Scale Visual Recognition Challenge. IJCV. arXiv 1409.0575.", "https://arxiv.org/abs/1409.0575")
+    report.reference(13, "Deng, J., Guo, J., Xue, N. and Zafeiriou, S. (2019). ArcFace: Additive Angular Margin Loss for Deep Face Recognition. CVPR. arXiv 1801.07698.", "https://arxiv.org/abs/1801.07698")
     H("Reproduction evidence", level=3)
-    P("The results directory holds every evaluation cited here: comparison_resnet18, the identity_open_set folders, the liveness_mobilenetv3 and liveness_mobilenetv3_webcam folders with their test reports, emotion_fer_mnv3_test, app_update_20261120 and the test log in readiness_20261120. The README links the reproduction commands.", size=10)
+    P("The results directory holds every evaluation cited here: comparison_identity_20261121, arcface_resnet18, the identity_open_set folders, the liveness_mobilenetv3 and liveness_mobilenetv3_webcam folders with their test reports, emotion_fer_mnv3_test, app_update_20261120 and the test log in readiness_20261121. The README links the reproduction commands.", size=10)
 
     OUTPUT.parent.mkdir(exist_ok=True)
     report.doc.save(OUTPUT)
