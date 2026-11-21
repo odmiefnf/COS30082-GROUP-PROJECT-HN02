@@ -22,7 +22,7 @@ Bản demo chính là web app (`start_attendance.cmd` hoặc `-m attendance_app.
 - [ ] Kiểm tra màn hình/chữ đủ đọc và âm thanh rõ. Tắt nội dung riêng không liên quan trong khung quay. Chỉ dùng ảnh/vật mẫu đã được người liên quan đồng ý.
 - [ ] Bố trí để vừa thấy app vừa thấy mặt người nói. Nếu phần mềm quay và app tranh cùng webcam, thử trước; có thể dùng điện thoại/camera sẵn có để quay màn hình và người nói trong cùng một lượt. Không cần mua thêm thiết bị chỉ để thử một cách bố trí.
 - [ ] Chuẩn bị người đã đăng ký, người chưa đăng ký và ảnh giả mạo đang có. Ghi đúng ảnh tĩnh trên điện thoại hay video phát lại, ảnh in màu hay đen trắng. Điều kiện chưa thử thì nói là chưa thử.
-- [ ] Có bảng kết quả thật và đường dẫn bằng chứng: identity ROC/AUC của bốn mô hình, PAD baseline/current với phạm vi đánh giá (LCC-FASD và phiên webcam giữ riêng), FER2013, kiểm thử phần mềm và lượt webcam đã hoàn tất. Số cần dùng nằm trong `docs/submission_readiness.md`. Không lấy preview hoặc dữ liệu mô phỏng làm bằng chứng người thật.
+- [ ] Có bảng kết quả thật và đường dẫn bằng chứng: identity ROC/AUC của năm mô hình, PAD baseline/current với phạm vi đánh giá (LCC-FASD và phiên webcam giữ riêng), FER2013, kiểm thử phần mềm và lượt webcam đã hoàn tất. Số cần dùng nằm trong `docs/submission_readiness.md`. Không lấy preview hoặc dữ liệu mô phỏng làm bằng chứng người thật.
 - [ ] Tập một lượt khoảng 7–9 phút để có khoảng đệm. Đây là gợi ý tổ chức, không thay giới hạn 5–10 phút của đề.
 
 Ví dụ mở app với database mới dành cho quay, tại `grp_project`:

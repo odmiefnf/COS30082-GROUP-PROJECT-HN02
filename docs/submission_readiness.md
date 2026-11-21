@@ -114,10 +114,15 @@ model component before recording.
   and 267 tests passed inside the copy (`results/readiness_20261121/package_check.json`), before the cleanup below.
   A clean `pip install` on another computer has not been tried.
 - [x] Full software suite: 269 tests passed after the 21 November cleanup (old liveness experiments, unused results and the temporary LCC launcher removed; one obsolete package test dropped) and the confirmed-face lock (three new tests). See `results/readiness_20261121/full_tests.log`.
-- [ ] Re-register profiles for the new identity encoder and try the app live:
-  phone photo in a dark room, genuine face with and without glasses, several people in view.
+- [x] Re-register profiles for the new identity encoder and try the app live.
+  On 21 November 2026 one profile was registered with the ArcFace encoder and the
+  user tested the new app (ArcFace and the confirmed-face lock) live: it ran stably,
+  and a phone photo and a phone video were both rejected (Not passed, no attendance).
+  This was an operator observation without counts; glasses and several-people checks
+  were not reported separately.
 - [ ] Complete independent spoof trials with more people, other phones and printed
-  photos. The brief names printed images, which are untested: run
+  photos. A second-room (office) retest was skipped by group decision; the office
+  false rejection stays a stated limitation. The brief names printed images, which are untested: run
   `tools\record_print_attack.cmd` (stores crops in `data/pad_webcam_print`, outside
   training, and scores them with the app model).
 - [ ] Rehearse and record the unedited 5-10 minute video, covering all project

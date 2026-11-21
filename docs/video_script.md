@@ -50,7 +50,7 @@ Mở trang **Attendance**: một dòng cho mỗi người trong buổi, nguồn 
 
 ### 4. Người nói 4 — Chống giả mạo (4:15–5:40)
 
-Màn hình: **Live**, đưa ảnh điện thoại, video điện thoại (và ảnh in nếu đã thử) trước camera; mặt thật để ngoài khung.
+Màn hình: **Live**, đưa ảnh điện thoại, video điện thoại (và ảnh in nếu đã thử) trước camera; mặt thật để ngoài khung. Người thật phải rời khung **ít nhất 2 giây** trước khi đưa ảnh giả: app giữ tên và Passed cho mặt vừa điểm danh đến khi mặt đó vắng quá 2 giây.
 
 > "For anti-spoofing we fine-tuned MobileNetV3 on the LCC-FASD dataset. In live use, that first model accepted a phone photo in a dark room, so we recorded our own webcam sessions — real faces, phone photos and phone videos — and added them to training, split by whole recording session."
 
@@ -74,7 +74,7 @@ Màn hình: **Register → Add appearance**, sau đó **Profiles**, **Manual rev
 
 > "Our extensions focus on real attendance problems. Add appearance stores extra templates for an existing person, for example without glasses, and refuses shots that clearly match someone else. Profiles can be renamed, given reference photos, or deleted after a database backup. When a live person is unknown or ambiguous, an operator can do a manual review; it is recorded with the reviewer and reason, and marked Manual, not Automatic."
 
-Thêm appearance không kính cho người đã đăng ký ở đoạn 3, rồi cho thấy app nhận ra khi bỏ kính.
+Thêm appearance không kính cho người đã đăng ký ở đoạn 3. Rời khung ít nhất 2 giây, rồi quay lại không đeo kính để app nhận ra từ đầu; nếu bỏ kính ngay trước camera thì tên còn hiện chỉ vì khoá tên, không chứng minh appearance có tác dụng.
 
 > "To conclude: the system meets the brief end to end, and our main limits are the low identity recall at strict thresholds and anti-spoofing evidence from a single environment. Thank you."
 
