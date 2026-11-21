@@ -1,25 +1,21 @@
 # Submission readiness
 
-Reviewed on 8 November 2026 against the supplied six-page project brief. This is
+Reviewed on 21 November 2026 against the supplied six-page project brief. This is
 a working checklist of evidence and outstanding tasks, not a predicted mark.
-The group report now identifies Group HN02 and the six supplied member names and student IDs.
+The group report identifies Group HN02 and the six supplied member names and student IDs.
 
-The 14 November update adds a separate [1:N gallery evaluation](identity_open_set.md)
-and a [paired PAD crop study](pad_context_crop.md). The app threshold matched
-2 of 20 known probes correctly and assigned 25 of 300 gallery outsiders to a
-profile. The wide PAD crop lowered genuine rejection on reused LCC-FASD images
-while accepting two additional attack crops. Fresh webcam trials for the wide
-model and identities unseen during encoder training remain open.
+**21 November update:** the app now uses three ImageNet-initialised, fine-tuned
+models: ResNet-18 classification for identity, MobileNetV3 trained on LCC-FASD
+plus our own webcam recordings for liveness, and MobileNetV3 for expression. The
+from-scratch models remain in `results/` as baselines. The group report was
+rewritten for these models and rebuilt at 12 pages. Faces are located with
+YuNet; up to 10 faces get name tags, and only the largest face is liveness
+checked and recorded.
 
-**9 November PAD follow-up:** the class-balanced candidate improves validation
-spoof rejection at the same genuine-rejection limit, but fails the predeclared
-matched-point ACER target. An authorized paired glasses trial also rejected
-more genuine crops with the candidate (56/86 passed versus 75/86 for the current
-model). The new phone-photo trial accepted 134/134 crops with the current model
-and 101/134 with the candidate. Neither demonstrates reliable phone-photo
-protection. The candidate was not promoted; the default model is unchanged.
-See [the experiment and paired comparison](pad_balanced_experiment.md).
-The report/package and historical evidence below keep their dated scope.
+Earlier notes (the 9 and 14 November PAD experiments, the 1:N gallery study and
+the phone-photo trials) remain in [pad_balanced_experiment.md](pad_balanced_experiment.md),
+[pad_context_crop.md](pad_context_crop.md) and [identity_open_set.md](identity_open_set.md)
+with their dated scope; their numbers belong to the earlier models.
 
 ## Requirement-to-evidence map
 
@@ -27,24 +23,25 @@ Paths below are relative to `grp_project`.
 
 | Brief | Required outcome | Existing implementation and evidence |
 | --- | --- | --- |
-| 1, 2.1 | Train a CNN embedding model using classification and metric learning; compare both | `face_verification/train.py`, `model.py`; completed `results/classification` and `results/triplet` runs, each 10 epochs on 380,638 training images / 4,000 IDs. Both start from random weights. |
-| 2.2, 5 | ROC/AUC on `verification_pairs_val.txt` | `face_verification/evaluate.py`; `results/comparison/comparison.json`, `comparison.csv`, pair scores and ROC artifacts. All 8,805 original pairs are retained: 4,315 same-person and 4,490 different-person. |
+| 1, 2.1 | Train a CNN embedding model using classification and metric learning; compare both | `face_verification/train.py`, `model.py`. Four runs, each 10 epochs on 380,638 training images / 4,000 IDs: compact CNN from scratch (`results/classification`, `results/triplet`) and ImageNet ResNet-18 fine-tuned (`results/classification_resnet18`, `results/triplet_resnet18`), both objectives per backbone. |
+| 2.2, 5 | ROC/AUC on `verification_pairs_val.txt` | `face_verification/evaluate.py`; `results/comparison_resnet18/comparison.json` compares all four on all 8,805 original pairs (4,315 same-person, 4,490 different-person). The earlier two-model comparison remains in `results/comparison`. |
 | 2.3 | Research and justify the similarity metric; testing both common metrics is encouraged | Both cosine and Euclidean were evaluated. On unit embeddings they give equivalent rankings because squared Euclidean distance is `2 - 2*cosine`. The report explains the choice and cites embedding research. |
-| 3 | Train and integrate an effective anti-spoofing model | `anti_spoofing/train.py`, `infer.py`; historical baseline and current app checkpoints, validation calibration and `results/liveness_camera_matched/test_regression_metrics.json`. The measured phone-photo failure remains an important limitation. |
-| 4, 6 | Train a public-data expression model and display real-time results | `emotion_recognition/train.py`, `infer.py`; FER2013 manifests and `results/emotion_fer_test/metrics.json`. Seven visible expression labels; expressions never authorize attendance. |
-| 6 | Webcam recognition, registered name, unknown-person registration and immediate liveness/expression feedback | `attendance_app/gui.py`, `camera.py`, `service.py`, `recognition.py`, `store.py`; GUI, pipeline and capture regression tests. The camera is started explicitly. |
-| 7 | Relevant individual innovative feature, explained and demonstrated | Appearance templates, traceable manual review, profile/reference management, history/CSV and diagnostics exist. Each student must identify their own actual contribution; a feature is not automatically attributed to every member. |
-| 8 | Group report, no more than 12 pages, including Methodology, Results and Discussion | `reports/COS30082_Group_Report.docx` has 12 pages. `results/readiness_20261114/report_status.json` records the rendered 14 November version. Check pagination again after filling member details. |
+| 3 | Train and integrate an effective anti-spoofing model | `anti_spoofing/train.py`, `infer.py`; app model `results/liveness_mobilenetv3_webcam_20261120` (config in `results/liveness_app_config.json`), held-out webcam test in `..._on_test`, LCC-FASD test in `..._lcc_test`. Webcam data from `tools/capture_pad_data.py` (crop 1.4x, split by session). |
+| 4, 6 | Train a public-data expression model and display real-time results | `emotion_recognition/train.py`, `infer.py`; app model `results/emotion_fer_mnv3`, test `results/emotion_fer_mnv3_test/metrics.json`; baseline `results/emotion_fer_test`. Seven labels with icons; expressions never authorize attendance. |
+| 6 | Webcam recognition, registered name, unknown-person registration and immediate liveness/expression feedback | `attendance_app/web.py`, `web_ui.py`, `gui.py`, `camera.py`, `service.py`, `recognition.py`, `store.py`; guided 10-shot registration with per-shot liveness, appearance mode, profile deletion, multi-face name tags. The camera is started explicitly. |
+| 7 | Relevant individual innovative feature, explained and demonstrated | Appearance templates, traceable manual review, profile/reference management, history/CSV, diagnostics, multi-face display and the webcam PAD data workflow exist. Each student must identify their own actual contribution; a feature is not automatically attributed to every member. |
+| 8 | Group report, no more than 12 pages, including Methodology, Results and Discussion | `reports/COS30082_Group_Report.docx`, built by `tools/build_group_report.py` on 21 November 2026; Microsoft Word reports 12 pages and every page was reviewed visually. |
 | 9 | One continuous 5-10 minute demonstration; comparable speaking time; speaker faces visible; accessible hosted link | `docs/09_video_checklist.md` gives a rehearsal plan. Recording, access check and submission remain group tasks. |
 | 10 | Each student submits an individual report of at most 5 pages | Outline in `docs/interview_preparation.md`. Personal contribution statements are not filled in on anyone's behalf. |
 | 11 | Source code, group report and video link submitted by one member; individual report and peer evaluation by each member | Final checklist below. The brief does not supply a numeric calendar due date; check Canvas. |
 | 12 | Explain implementation and methods at the Week 12 tutorial interview | Questions and evidence pointers in `docs/interview_preparation.md`. Peer evaluation and interview performance can adjust marks. |
 
 Fully pretrained models used without additional training are prohibited by the
-brief; partial fine-tuning is allowed. The current identity, PAD and expression
-CNNs were trained from scratch. OpenCV Haar is a disclosed face-localization
-component, not the learned identity verifier. Keep that distinction in the report
-and presentation.
+brief; partial fine-tuning is allowed. The three app networks start from ImageNet
+weights and are fine-tuned on the task data (ResNet-18: stem frozen; MobileNetV3:
+first four blocks frozen); the from-scratch baselines are kept for comparison.
+YuNet is a disclosed, pretrained face-localization component, not one of the
+trained networks. Keep that distinction in the report and presentation.
 
 The marking table's merged cells allocate marks as follows: face recognition 5,
 anti-spoofing 5, emotion detection 5, and UI plus group report together 5
@@ -56,34 +53,30 @@ presentation cannot guarantee a particular mark.
 
 | Item | Result and scope |
 | --- | --- |
-| Identity verification | Classification AUC 0.825601; triplet AUC 0.859969 on the original verification validation pairs. Cosine and negative-Euclidean AUC agree. |
-| Classification closed-set test | 39.4625% on 8,000 images. This is not the same task as pair verification. |
-| App identity operating point | Cosine threshold 0.8695402108345607; validation pair FPR 0.9800% and TPR 9.7335%. The very low recall must be disclosed. |
+| Identity verification | Cosine AUC on the original pairs: compact classification 0.825601, compact triplet 0.859969, ResNet-18 classification 0.913943, ResNet-18 triplet 0.914668. Cosine and negative-Euclidean AUC agree. |
+| App identity operating point | ResNet-18 classification, cosine threshold 0.618929; validation pair FPR 0.98% and TPR 26.63% (1,149/4,315). The previous compact triplet point was TPR 9.73%. About 73% of same-identity pairs are still rejected. |
+| Classification closed-set test | ResNet-18 60.00%, compact 39.46% on 8,000 images. This is not the same task as pair verification. |
+| 1:N gallery test | 20 known identities, 300 outsiders: 6/20 found and 21/300 outsiders misidentified at the app threshold (previously 2/20 and 25/300). All identities appeared in encoder training. |
 | Identity overlap | 667 verification validation images match training pixels. Results follow the assignment pair protocol, but are not an independent verification test. |
-| Current PAD offline regression | AUC 0.929084, APCER 19.10%, BPCER 11.33%, ACER 15.22% on 7,522 filtered, reused test predictions. Threshold was selected with validation, not that test or webcam trial. |
-| Current PAD validation | APCER 33.94%, BPCER 13.58%, ACER 23.76%. Genuine rejection is worse than the historical baseline on validation; improvement is not universal. |
-| Phone still photo | One operator-labelled trial: 237/237 scored crops passed PAD; all 237 identity probes were unknown; zero scratch attendance records. Identity, not PAD, prevented attendance in that trial. |
-| Genuine with glasses | One trial: 232/243 PAD-scored crops passed; 175/232 identity probes matched the confirmed profile; one correct scratch attendance record. |
-| Expression | Filtered FER2013 PrivateTest: 58.36% accuracy, macro-F1 0.4984, balanced accuracy 50.91%, 3,271 images. No webcam expression accuracy has been measured. |
+| PAD on LCC-FASD test (7,522) | Scratch baseline ACER 26.05%; MobileNetV3 LCC-only ACER 5.72% (BPCER 10.16%); app model ACER 8.88% (APCER 1.35%, BPCER 16.41%). Thresholds chosen on validation only. |
+| PAD on held-out webcam sessions | App model: 0/52 phone-photo and 0/116 phone-video crops accepted, 96/96 genuine passed. LCC-only model: 29/52, 67/116 and 91/96. One person, room and day; the same photo/video content appears in train and test sessions; frames are correlated. |
+| Live incident | The LCC-only model scored a phone photo in a dark room at 0.85 (threshold 0.041) and recorded attendance; this motivated the webcam data. |
+| Expression | Filtered FER2013 PrivateTest, 3,271 images: MobileNetV3 64.20% accuracy, macro-F1 0.6284, balanced accuracy 61.47%; EmotionCNN 58.36%, 0.4984, 50.91%. No webcam expression accuracy has been measured. |
+| Latency (RTX 3060 laptop) | Median single calls: YuNet 25 ms on a 960x720 frame (CPU), liveness 13 ms, identity 6 ms, expression 13 ms (`results/app_update_20261120/pipeline_metrics.json`). Not end-to-end FPS. |
 
-Frames within one trial are correlated. Do not report them as independent people,
+Frames within one session are correlated. Do not report them as independent people,
 an attack-population error rate, deployment accuracy, or guaranteed FAR/FRR.
 Use the final software-test log for the current test count; a passing test is not
 a correctly recognized person.
 
 ## Portable run check
 
-The identity configuration now references `triplet/best_model.pt` relative to its
-own directory. Its checkpoint SHA256, threshold, validation scores and original
-pair-file provenance are unchanged. Keep the configuration and checkpoint in the
-same relative directory structure when copying the app. The checkpoint must
-match the gallery fingerprint; do not exchange encoders to make an error vanish.
-
-A copied-directory check loaded the real trained encoder and produced a finite,
-unit-length 128-dimensional embedding from a synthetic RGB crop while running
-from another working directory. Its SHA256 and threshold matched the originals;
-no gallery or camera was accessed. This verifies checkpoint-path portability,
-not a fresh dependency installation on a second physical computer.
+`results/identity_app_config.json` references `classification_resnet18/best_model.pt`
+relative to its own directory, with the checkpoint SHA256, threshold and pair-file
+provenance. Keep the configuration and checkpoint in the same relative directory
+structure when copying the app. The checkpoint must match the gallery fingerprint;
+a database created with another encoder is refused, so register again after an
+encoder change rather than exchanging encoders to make an error vanish.
 
 On another Windows computer, with Python 3.11 available, run from the copied
 project directory:
@@ -91,9 +84,10 @@ project directory:
 ```powershell
 py -3.11 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements-webcam.txt
-.\.venv\Scripts\python.exe -m attendance_app.gui --device cpu --database data/attendance/assessment_demo.sqlite3 --session COS30082-assessment-demo
+.\.venv\Scripts\python.exe -m attendance_app.web --open --device cpu --database data/attendance/assessment_demo.sqlite3 --session COS30082-assessment-demo
 ```
 
+`requirements.txt` includes torchvision 0.20.1, which all three app networks need.
 That demo database starts empty and is separate from the user's existing gallery.
 Registration is demonstrated with the participant's permission. A GPU is not
 required to run the demo. Dataset downloads are needed to reproduce training,
@@ -101,24 +95,26 @@ not to run inference with the supplied trained checkpoints.
 
 Before distributing a source package, include source, dependency files, the
 needed trained checkpoints/configurations and readable evaluation evidence.
-Keep the personal gallery, attendance SQLite files, virtual environments,
-temporary files and bulk training downloads out of the submission package.
-Packing files is not evidence that a clean installation has succeeded: launch
-the copied application and check every model component before recording.
+Keep the personal gallery, attendance SQLite files, webcam PAD recordings,
+virtual environments, temporary files and bulk training downloads out of the
+submission package. `tools/package_submission.py` built a 172 MB package with all
+three app checkpoints on 21 November 2026. Packing files is not evidence that a
+clean installation has succeeded: launch the copied application and check every
+model component before recording.
 
 ## Final handover checklist
 
-- [x] Add Group HN02, member names and student IDs to the group report; render it again after any later content change.
+- [x] Add Group HN02, member names and student IDs to the group report.
 - [ ] Confirm actual contributions with each member; map an implemented feature
   and relevant evidence to each person's explanation.
-- [x] Rebuilt/rendered the 8 November report and reviewed all 12 pages. Recheck
-  after adding member details.
+- [x] Rebuilt the report for the current models on 21 November 2026; Word reports 12 pages and all pages were reviewed.
 - [ ] Verify the package can load models on a copied path without a private
-  gallery, using the documented dependency setup.
-- [x] Full software suite: 243 tests passed. See `results/readiness_20261114/full_tests.log`.
-- [ ] Complete independent genuine/unknown-person and spoof trials when
-  participants and materials are available. Current pending conditions include
-  no-glasses, an unregistered live person, recorded video and printed photo.
+  gallery, using the documented dependency setup (now including torchvision).
+- [x] Full software suite: 266 tests passed. See `results/readiness_20261120/full_tests.log`.
+- [ ] Re-register profiles for the new identity encoder and try the app live:
+  phone photo in a dark room, genuine face with and without glasses, several people in view.
+- [ ] Complete independent spoof trials with more people, other phones and printed
+  photos; record them with **Model tests…** for evidence.
 - [ ] Rehearse and record the unedited 5-10 minute video, covering all project
   functions and each member's genuine contribution.
 - [ ] Check the hosted link from an account that does not own the video.

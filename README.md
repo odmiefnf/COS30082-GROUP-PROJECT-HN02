@@ -5,9 +5,23 @@ Facial Recognition with Emotion & Liveness — group project repository.
 This repository contains source code, trained checkpoints, the group report and
 aggregate evaluation evidence. Raw datasets, personal face profiles and attendance
 databases are excluded. Install `requirements-webcam.txt` in a Python 3.11
-environment, then run `python -m attendance_app.gui`; a new local gallery starts
-empty. See [submission readiness](docs/submission_readiness.md) for the setup,
-results and remaining demonstration tasks.
+environment, then double-click `start_attendance.cmd` (or run
+`python -m attendance_app.web --open`) for the localhost web app; the Tk desktop
+app is `python -m attendance_app.gui`. A new local gallery starts empty. See
+[submission readiness](docs/submission_readiness.md) for the setup, results and
+remaining demonstration tasks.
+
+**Trạng thái hiện tại (21/11/2026).** App dùng ba model fine-tune từ ImageNet (được phép theo mục P1-07: có huấn luyện thêm trên dữ liệu của đề):
+
+| Phần | Model trong app | Kết quả chính | Model trước |
+|---|---|---|---|
+| Nhận diện | ResNet-18 classification (`results/classification_resnet18`), ngưỡng cosine 0,618929 | AUC 0,913943; TPR 26,63% ở FPR cặp 0,98%; tìm 6/20 người quen, nhận nhầm 21/300 người lạ | Compact triplet: AUC 0,859969; TPR 9,73%; 2/20 và 25/300 |
+| Chống giả mạo | MobileNetV3, train LCC-FASD + 872 crop webcam tự quay (`results/liveness_mobilenetv3_webcam_20261120`), ngưỡng 0,5927 | Lượt webcam giữ riêng: lọt 0/52 ảnh và 0/116 video điện thoại, cho qua 96/96 mặt thật; LCC-FASD ACER 8,88% | MobileNetV3 chỉ LCC: lọt 29/52 và 67/116; ACER 5,72% |
+| Cảm xúc | MobileNetV3 (`results/emotion_fer_mnv3`) | PrivateTest accuracy 64,20%, macro-F1 0,6284 | EmotionCNN: 58,36%, 0,4984 |
+
+Bắt mặt dùng YuNet; tối đa 10 khuôn mặt được gắn tên, chỉ mặt lớn nhất được kiểm tra liveness và điểm danh. Báo cáo nhóm 12 trang ([Word](reports/COS30082_Group_Report.docx)) được build lại ngày 21/11/2026 bằng `tools/build_group_report.py`; **266 kiểm thử đạt** (`results/readiness_20261120/full_tests.log`). Giới hạn: dữ liệu webcam chỉ có một người, một phòng, một ngày và dùng chung một ảnh/video điện thoại; tập verification có 667 ảnh trùng pixel với train.
+
+*Các ghi chú có ngày bên dưới là lịch sử; số đo trong đó thuộc các model cũ.*
 
 **Cập nhật 20/11/2026 (đưa cải tiến của Hiếu vào bản hiện tại):** camera mở nhanh hơn trên Windows nhờ đặt `OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS=0` trước khi nạp OpenCV, thêm tùy chọn `--camera-backend auto|dshow|msmf` cho cả `attendance_app.web` và `attendance_app.gui`, và đặt `BUFFERSIZE=1` ngay khi mở camera. Bộ dò mặt được chạy thử lúc khởi động (YuNet mặc định, Haar khi dùng `--detector haar`) nên khung hình đầu không bị chậm. Khung mặt nằm gọn trong khung khác (tỷ lệ chứa ≥ 0,75) được gộp, tránh báo nhầm `multiple_faces` khi đeo kính. Điểm liveness lấy trung bình các frame trong vòng 0,6 giây gần nhất (web: tối đa 5 frame theo Settings; desktop: 3 frame). Thẻ biểu cảm hiện icon kèm nhãn, ví dụ 😊 Happy. Khi đóng, app đợi tối đa 1,2 giây rồi buộc tắt tiến trình để không bị treo vì driver camera. Thêm 5 kiểm thử; toàn bộ **259 kiểm thử đạt**. [Chi tiết](docs/camera_performance.md).
 
@@ -38,7 +52,7 @@ See the [experiment and paired camera results](docs/pad_balanced_experiment.md).
 
 **Trạng thái ngày 27/10/2026:** hai identity CNN khởi tạo từ đầu đã chạy đủ 10 epoch trên 380.638 ảnh / 4.000 ID, RGB 64×64. AUC trên đủ 8.805 cặp gốc: classification **0,825601**, triplet **0,859969**. App dùng triplet. Có 667 ảnh verification validation trùng train; đây không phải test verification độc lập. Ở ngưỡng FPR cặp gần 1%, TPR chỉ **9,73%**, còn bỏ sót nhiều. [Kết quả và giới hạn](docs/06_identity_training_results.md). Phần 3 có AUC=0,823907/ACER=26,05%; phần 4 accuracy=58,36%/macro-F1=0,4984 trên các tập đã lọc. Đã kiểm tra offline ba mô hình thật và mở webcam để quan sát bắt mặt/liveness; chưa xác nhận trọn luồng đăng ký, điểm danh và đối chiếu thủ công với người thật. Downloader CelebA-Spoof đã hủy, không tự chạy lại.
 
-**Mở demo:** nhấp đúp `start_attendance.cmd`, hoặc chạy `.\.venv-gpu\Scripts\python.exe -m attendance_app.gui` tại `grp_project`, rồi bấm **Start camera**. Giao diện hiện dùng tiếng Anh; hướng dẫn giải thích bằng tiếng Việt. [Hướng dẫn đăng ký và chạy phần 6](docs/06_user_interface.md). Camera không tự bật khi mở cửa sổ. Hồ sơ mặc định ở `data/attendance/profiles.sqlite3`; không lưu ảnh/video camera, biểu cảm không quyết định ghi nhận.
+**Mở demo:** nhấp đúp `start_attendance.cmd` để mở app web, hoặc chạy `.\.venv-gpu\Scripts\python.exe -m attendance_app.web --open` (app desktop: `-m attendance_app.gui`) tại `grp_project`, rồi bấm **Start camera**. Giao diện hiện dùng tiếng Anh; hướng dẫn giải thích bằng tiếng Việt. [Hướng dẫn đăng ký và chạy phần 6](docs/06_user_interface.md). Camera không tự bật khi mở cửa sổ. Hồ sơ mặc định ở `data/attendance/profiles.sqlite3`; không lưu ảnh/video camera, biểu cảm không quyết định ghi nhận.
 
 **Model tests…:** khi camera điểm danh đã dừng, so sánh model PAD hiện tại với checkpoint thử nghiệm trên cùng crop của người thật, ảnh điện thoại, video ghi sẵn hoặc ảnh in. Có xác nhận sẵn sàng, hủy phép thử, xem báo cáo cũ và xuất JSON/CSV; giữ ngưỡng validation, không đổi model mặc định hoặc ghi điểm danh. Các khung trong một lượt không phải những mẫu độc lập. [Cách dùng và giới hạn](docs/model_tests.md).
 
@@ -46,7 +60,7 @@ See the [experiment and paired camera results](docs/pad_balanced_experiment.md).
 
 **Cập nhật bắt mặt và tiếng Anh:** dùng hai Haar cascade cùng chuẩn hóa tương phản để giảm bỏ sót; riêng lượt chỉnh detector này giữ nguyên mô hình và ngưỡng liveness/identity. Lượt kiểm thử tại mốc đó đạt **97/97 bài trong 70,1 giây**. Trên cùng 90 khung webcam trong một lượt ngắn, số khung bắt được mặt tăng từ 23 lên 51 và số khung liveness đạt tăng từ 11 lên 37; đây là kiểm tra thuận tiện, không phải benchmark độ chính xác. [Chi tiết thay đổi, kiểm tra và giới hạn](docs/app_capture_update.md).
 
-**Liveness mặc định hiện tại:** app dùng `results/liveness_camera_matched/best_model.pt`, CNN khởi tạo từ đầu và huấn luyện 10 epoch với tăng cường ánh sáng/che một phần vùng trên khuôn mặt. Ngưỡng được chọn bằng validation, có đối chiếu mức chấp nhận spoof của baseline. Checkpoint cũ `results/liveness_lcc/best_model.pt` vẫn được giữ; các số đo phần 3 ở trên là kết quả baseline lịch sử. Kiểm tra lại tập test cũ và một số crop webcam cho thấy hướng cải thiện nhưng không phải benchmark mới hoặc chứng nhận accuracy với kính. [Chẩn đoán, lựa chọn mô hình/ngưỡng và giới hạn](docs/liveness_glasses_diagnosis.md).
+**Liveness mặc định ngày 08/11/2026 (đã thay, xem trạng thái hiện tại ở đầu trang):** app khi đó dùng `results/liveness_camera_matched/best_model.pt`, CNN khởi tạo từ đầu và huấn luyện 10 epoch với tăng cường ánh sáng/che một phần vùng trên khuôn mặt. Ngưỡng được chọn bằng validation, có đối chiếu mức chấp nhận spoof của baseline. Checkpoint cũ `results/liveness_lcc/best_model.pt` vẫn được giữ; các số đo phần 3 ở trên là kết quả baseline lịch sử. Kiểm tra lại tập test cũ và một số crop webcam cho thấy hướng cải thiện nhưng không phải benchmark mới hoặc chứng nhận accuracy với kính. [Chẩn đoán, lựa chọn mô hình/ngưỡng và giới hạn](docs/liveness_glasses_diagnosis.md).
 
 - [Phần 1: mục tiêu và phạm vi](docs/01_project_scope.md)
 - [Phần 2: cách triển khai và chạy](docs/02_face_recognition.md)
@@ -74,7 +88,7 @@ py -3.11 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-Mã được kiểm tra trên Python 3.11.9, PyTorch 2.5.1 CPU, NumPy 2.4.6 và Pillow 12.3.0. Các phiên bản này được ghi trong `requirements.txt`; không cần torchvision, scikit-learn hoặc matplotlib để chạy phần 2.
+Mã được kiểm tra trên Python 3.11.9, PyTorch 2.5.1, torchvision 0.20.1, NumPy 2.4.6 và Pillow 12.3.0. Các phiên bản này được ghi trong `requirements.txt`; torchvision bắt buộc vì ResNet-18 và MobileNetV3 lấy kiến trúc từ đó. Không cần scikit-learn hoặc matplotlib để chạy app.
 
 Demo webcam phần 4 dùng dependency tùy chọn `requirements-webcam.txt` (OpenCV 4.13.0.92), không cần khi chỉ train/evaluate bằng ảnh.
 
@@ -102,7 +116,28 @@ Các công cụ phần 5: `face_verification.import_data` nhập ZIP/thư mục 
 .\.venv\Scripts\python.exe -m face_verification.evaluate --checkpoint results/classification_new/best_model.pt --checkpoint results/triplet_new/best_model.pt --data-root data/face_recognition --output-dir results/comparison_new
 ```
 
-Không cần huấn luyện lại để mở demo trên máy hiện tại. Ví dụ trên dùng output mới để giữ checkpoint đã hiệu chỉnh. Công thức thực nghiệm GPU và cache của lượt đã hoàn tất nằm trong báo cáo kết quả identity; CPU sẽ chậm hơn trên bộ lớn.
+**Các model hiện tại (ImageNet fine-tune, GPU).** Trọng số ImageNet do torchvision tải ở lần chạy đầu.
+
+```powershell
+$common = "--backbone resnet18 --hflip --cosine-lr --data-root data/face_recognition --epochs 10 --batch-size 256 --image-size 64 --learning-rate 0.0003 --device cuda --image-cache data/identity_cache64"
+Invoke-Expression ".\.venv-gpu\Scripts\python.exe -m face_verification.train --method classification --output-dir results/classification_resnet18 --evaluate-test $common"
+Invoke-Expression ".\.venv-gpu\Scripts\python.exe -m face_verification.train --method triplet --output-dir results/triplet_resnet18 $common"
+.\.venv-gpu\Scripts\python.exe -m face_verification.evaluate --checkpoint results/classification/best_model.pt --checkpoint results/triplet/best_model.pt --checkpoint results/classification_resnet18/best_model.pt --checkpoint results/triplet_resnet18/best_model.pt --data-root data/face_recognition --output-dir results/comparison_resnet18 --device cuda --batch-size 256
+.\.venv-gpu\Scripts\python.exe -m emotion_recognition.train --arch mobilenetv3 --train-manifest data/fer2013_manifests/train.csv --val-manifest data/fer2013_manifests/val.csv --output-dir results/emotion_fer_mnv3 --epochs 15 --batch-size 64 --learning-rate 0.0003 --device cuda
+.\.venv-gpu\Scripts\python.exe -m emotion_recognition.evaluate --checkpoint results/emotion_fer_mnv3/best_model.pt --manifest data/fer2013_manifests/test.csv --output-dir results/emotion_fer_mnv3_test --device cuda
+```
+
+Liveness webcam: quay dữ liệu bằng `tools\record_pad_sessions.cmd` (crop 1,4×, chỉ quay người đã đồng ý; ảnh nằm trong `data/pad_webcam`, không đưa lên git), rồi chia theo lượt và train:
+
+```powershell
+.\.venv-gpu\Scripts\python.exe -m tools.capture_pad_data split --crop-scale 1.4
+.\.venv-gpu\Scripts\python.exe -m anti_spoofing.train --train-manifest data/pad_webcam/splits/scale-1.4x/train.csv --val-manifest data/pad_webcam/splits/scale-1.4x/val.csv --output-dir results/liveness_mobilenetv3_webcam_20261120 --arch mobilenetv3_large --freeze-blocks 4 --crop-mode full --crop-scale 1.4 --image-size 224 --epochs 10 --batch-size 64 --learning-rate 0.0003 --weight-decay 0.0001 --camera-augmentation --balanced-sampler --checkpoint-selection val-acer --oversample-manifest data/pad_webcam/splits/scale-1.4x/webcam_train.csv --oversample-factor 8 --device cuda --num-threads 8
+.\.venv-gpu\Scripts\python.exe -m anti_spoofing.evaluate --checkpoint results/liveness_mobilenetv3_webcam_20261120/best_model.pt --manifest data/pad_webcam/splits/scale-1.4x/test.csv --output-dir results/liveness_mobilenetv3_webcam_20261120_on_test
+```
+
+Ngưỡng app của model nhận diện chọn bằng `tools/calibrate_identity_app.py` (TPR cao nhất với FPR cặp ≤ 1%); phép thử 1:N chạy bằng `tools/evaluate_identity_open_set.py`; số liệu bắt mặt/độ trễ bằng `tools/measure_app_pipeline.py`. Báo cáo nhóm build bằng `tools/build_group_report.py` (cần `python-docx` và `matplotlib`).
+
+Không cần huấn luyện lại để mở demo trên máy hiện tại. Ví dụ đầu mục dùng output mới để giữ checkpoint đã hiệu chỉnh. Công thức thực nghiệm GPU và cache của lượt đã hoàn tất nằm trong báo cáo kết quả identity; CPU sẽ chậm hơn trên bộ lớn.
 
 Chỉ dùng `--evaluate-test` nếu có `classification_data/test_data`. Nếu thiếu test split, bỏ cờ này; nó không bắt buộc để huấn luyện và tính AUC verification. Test classification được đánh giá sau khi chọn checkpoint, không dùng để chọn mô hình.
 

@@ -13,12 +13,14 @@ blank until the group supplies them.
    classes. The attendance app compares a probe with enrolled appearance
    templates and may return unknown or ambiguous.
 2. **How were the two required identity models trained?**
-   Both use the same compact FaceEncoder, RGB 64 x 64 input and 128-dimensional
-   embedding, random initialization, Adam at 0.001 and ten complete epochs.
-   Classification uses cross-entropy and a 4,000-class head. Triplet learning
-   uses anchor/positive/negative images and a margin of 0.2 with unsquared L2
-   distance. Positives are different images of the same training ID; negatives
-   have a different ID. The baseline samples random triplets, not hard mining.
+   Each objective was trained on two backbones, all with RGB 64 x 64 input, a
+   128-dimensional embedding and ten complete epochs. The compact FaceEncoder
+   starts from random weights (Adam 0.001, no augmentation). The ResNet-18
+   encoder starts from ImageNet weights with its max pool removed and stem
+   frozen (Adam 0.0003 with a cosine schedule, horizontal flips, mixed
+   precision). Classification uses cross-entropy and a 4,000-class head. Triplet
+   learning uses anchor/positive/negative images and a margin of 0.2 with
+   unsquared L2 distance; it samples random triplets, not hard mining.
 3. **What is the triplet loss trying to achieve?**
    `max(0, ||a-p||2 - ||a-n||2 + 0.2)` encourages the positive to be closer to
    the anchor than the negative by the margin. Labels define the relationships;
@@ -28,50 +30,65 @@ blank until the group supplies them.
    `2 - 2*cosine`. Both were evaluated and rank the pairs equivalently, so their
    equal AUC values are expected, not two independent confirmations.
 5. **How were the best identity checkpoints and model selected?**
-   Classification selected epoch 9 by validation loss; triplet selected epoch
-   10 by training loss. The app then selected triplet because its AUC was
-   0.859969 versus classification's 0.825601 on all 8,805 original verification
-   validation pairs. Pair labels did not update network weights.
-6. **Does an AUC of 0.86 mean 86% attendance accuracy?**
-   No. AUC summarizes pair-score ranking over thresholds. At the app's strict
-   cosine threshold 0.8695402108345607, validation pair FPR is approximately
-   0.98% and TPR only 9.73%. Most genuine validation pairs are rejected there.
-   A 1:N gallery and webcam domain require separate evaluation.
+   Classification epochs are selected by validation loss and triplet epochs by
+   training loss (compact 9 and 10, ResNet-18 8 and 10). On all 8,805 original
+   pairs the AUCs are 0.825601 and 0.859969 (compact) and 0.913943 and 0.914668
+   (ResNet-18). The app uses ResNet-18 classification: the two ResNet AUCs differ
+   by only 0.0007, but at 1% pair FPR classification recognises 26.63% of
+   same-identity pairs and triplet 12.44%. Pair labels did not update weights.
+6. **Does an AUC of 0.91 mean 91% attendance accuracy?**
+   No. AUC summarizes pair-score ranking over thresholds. At the app's cosine
+   threshold 0.618929, validation pair FPR is 0.98% and TPR 26.63%, so about
+   three quarters of genuine validation pairs are still rejected. In the 1:N
+   gallery test the app finds 6 of 20 known people and misidentifies 21 of 300
+   outsiders. Appearance templates and manual review compensate in operation.
 7. **What data leakage or evaluation limits exist?**
    The assignment's original validation protocol contains 667 images matching
    training pixels. The pair file was preserved and that overlap disclosed.
    Additional filtered PAD/FER evaluation sets remove specified duplicates but
    do not establish full independence by participant, video or capture device.
 8. **How is PAD trained and evaluated?**
-   A separate two-class LivenessCNN was trained from random weights on
-   LCC-FASD data. The current recipe includes camera-oriented augmentation.
-   A validation-calibrated live-score threshold gates identity, enrollment and
-   attendance. APCER is spoof acceptance, BPCER is genuine rejection, and ACER
-   is their mean. AUC measures ranking; the softmax score is not a security
-   guarantee.
-9. **What happened in the phone-photo trial?**
-   All 237 scored photo crops passed PAD. Identity was unknown for all of them,
-   preventing a scratch attendance record. This is a PAD failure for that
-   material, not proof that PAD blocked the attack. It is one correlated trial,
-   not a population estimate. Printed photos and recorded video were not tested
-   in that trial.
+   The app model is ImageNet MobileNetV3-Large with its first four blocks
+   frozen, 224 px input on a 1.4x square crop around the face, AdamW with a
+   cosine schedule, class-balanced sampling and camera-oriented augmentation.
+   It is trained on LCC-FASD plus 872 of our own webcam crops (oversampled x8),
+   split by whole recording session. A validation threshold (0.5927, Youden J)
+   gates identity, enrolment and attendance. APCER is spoof acceptance, BPCER
+   genuine rejection, ACER their mean; the score is not a security guarantee.
+9. **Why train on your own webcam data, and what did it cost?**
+   The LCC-only MobileNetV3 had LCC-FASD ACER 5.72%, yet in live use it scored a
+   phone photo in a dark room at 0.85 against a 0.041 threshold and recorded
+   attendance. On held-out webcam sessions it accepted 29/52 photo and 67/116
+   video crops. The app model accepts 0/52 and 0/116 and passes 96/96 genuine
+   crops, but its LCC-FASD ACER rises to 8.88% (BPCER 16.41%): it is specialised
+   to our camera. The webcam evidence is one person, room and day, with the same
+   photo and video content in training and test sessions, so it is not an
+   attack-population error rate. Two attack sessions were excluded after review
+   because they captured the operator's real face.
 10. **What can expression classification tell us?**
-    The own-trained FER2013 CNN predicts one of seven visible expression labels:
-    angry, disgust, fear, happy, sad, surprise and neutral. Filtered PrivateTest
-    accuracy is 58.36% and macro-F1 is 0.4984. Weak classes such as fear and
-    disgust need attention. It does not establish a person's internal mood,
+    The app's fine-tuned MobileNetV3 predicts one of seven visible FER2013
+    labels. Filtered PrivateTest accuracy is 64.20% and macro-F1 0.6284 (the
+    from-scratch EmotionCNN: 58.36% and 0.4984); disgust and fear improved most
+    but fear and sad remain near F1 0.5. It does not establish internal mood,
     mental health or work performance, and it never authorizes attendance.
-11. **Why are image quality, face count and freshness checked?**
-    The app requires one sufficiently large, clear, reasonably exposed face.
-    Missing/multiple faces and stale observations reset or invalidate evidence.
-    Capture sequence numbers prevent a preview refresh being counted as another
-    recognition observation; inference completion does not make an old frame
-    fresh again.
+11. **Why are image quality, face count and freshness checked, and how are several faces handled?**
+    YuNet finds every face; each scored face must be large, clear and reasonably
+    exposed. With several faces, the largest is the main face: only it is
+    liveness checked, shows expression and can be recorded. Other faces get a
+    name tag (green if registered) but no liveness check, so they are never
+    recorded. Registration, appearance capture and review still need exactly one
+    face. Stale observations reset or invalidate evidence.
 12. **How can a new person be registered without retraining the classifier?**
-    Registration stores a name and three distinct, consistent live embeddings,
-    spaced at least 0.45 seconds apart. The app performs embedding matching,
-    rather than appending a class to the old classifier head. Appearance
-    templates can represent changes such as glasses within one identity.
+    Guided registration captures ten poses; each shot is liveness checked on its
+    own frame and only live shots (at least three) are stored as embeddings. The
+    app matches embeddings instead of adding a class to the classifier head.
+    Appearance templates (for example with and without glasses) are added through
+    the same flow and refused if the shots clearly match another person.
+12a. **Is using ImageNet weights allowed?**
+    The brief prohibits pretrained models used without further training. All
+    three app networks are fine-tuned on the task data, and the from-scratch
+    baselines are reported for comparison. YuNet is pretrained face
+    localisation, disclosed as preprocessing, not one of the trained networks.
 13. **How is duplicate attendance prevented?**
     Automatic attendance needs three consecutive valid recognized observations.
     SQLite enforces one record per person/session. Expressions are descriptive
@@ -93,12 +110,13 @@ blank until the group supplies them.
 | Topic | Files to explain |
 | --- | --- |
 | Identity data, model and loss | `face_verification/data.py`, `model.py`, `train.py` |
-| ROC, pair counts and threshold | `results/comparison/comparison.csv`, `results/identity_app_config.json`, `tools/calibrate_identity_app.py` |
-| PAD training and operating point | `anti_spoofing/train.py`, `results/liveness_camera_matched/calibration.json`, `test_regression_metrics.json` |
-| Expression training and per-class errors | `emotion_recognition/train.py`, `results/emotion_fer_test/metrics.json` |
-| Live pipeline and attendance | `attendance_app/camera.py`, `service.py`, `store.py`, `video_stream.py` |
+| ROC, pair counts and threshold | `results/comparison_resnet18/comparison.csv`, `results/identity_app_config.json`, `tools/calibrate_identity_app.py` |
+| 1:N gallery test | `results/identity_open_set_20261120_classification_resnet18/metrics.json`, `tools/evaluate_identity_open_set.py` |
+| PAD training and operating point | `anti_spoofing/train.py`, `results/liveness_app_config.json`, `results/liveness_mobilenetv3_webcam_20261120/calibration.json` |
+| Webcam PAD data and results | `tools/capture_pad_data.py`, `tools/record_pad_sessions.cmd`, `results/liveness_mobilenetv3_webcam_20261120_on_test/metrics.json` |
+| Expression training and per-class errors | `emotion_recognition/model.py`, `train.py`, `results/emotion_fer_mnv3_test/metrics.json` |
+| Live pipeline and attendance | `attendance_app/camera.py`, `service.py`, `store.py`, `web.py`, `video_stream.py` |
 | Additional appearances/manual review | `attendance_app/templates.py`, `review.py`, `reference_import.py`, and the corresponding tests |
-| Honest webcam evidence | `results/app_upgrade_20261030/evaluation/trials/glasses_01.json` and `phone_photo_01.json` |
 
 Use the final code and test log when stating the current behavior or test count.
 Do not memorize an old screenshot or architecture paragraph if the pipeline has

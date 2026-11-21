@@ -110,7 +110,8 @@ class ProfileStore:
                                     "embedding": unit_vector(np.mean(original, axis=0), self.dimension),
                                     "sample_count": len(original)})
             variants = self.connection.execute(
-                "SELECT id,label FROM appearances WHERE person_id=? ORDER BY created_utc,id", (person_id,)).fetchall()
+                # rowid keeps insertion order when two appearances share a clock tick (ids are random).
+                "SELECT id,label FROM appearances WHERE person_id=? ORDER BY created_utc,rowid", (person_id,)).fetchall()
             for appearance_id, label in variants:
                 samples = groups.pop(appearance_id, [])
                 if not samples:
