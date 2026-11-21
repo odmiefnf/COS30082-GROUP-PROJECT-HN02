@@ -4,6 +4,19 @@ Soạn ngày 21/11/2026 cho web app và các mô hình hiện tại. Đề yêu 
 
 Thứ tự "Người nói 1–6" chỉ là chỗ trống: nhóm tự gán tên theo **đóng góp thật**. Phần tính năng sáng tạo (đoạn 6) phải do chính người làm tính năng đó trình bày; nếu nhiều người có tính năng riêng, chia đoạn 6 hoặc rút bớt các đoạn khác. Lời thoại tiếng Anh để nói trước người chấm; có thể diễn đạt lại bằng lời của mình, nhưng giữ đúng con số.
 
+## Phân công người nói (nhóm điền)
+
+| Đoạn | Nội dung | Thời gian | Người nói |
+| --- | --- | --- | --- |
+| 1 | Giới thiệu và luồng hệ thống | 0:00–1:25 | |
+| 2 | Nhận diện khuôn mặt (classification, triplet, ArcFace) | 1:25–2:50 | |
+| 3 | Đăng ký người mới và điểm danh | 2:50–4:15 | |
+| 4 | Chống giả mạo (liveness) | 4:15–5:40 | |
+| 5 | Nhận diện cảm xúc và nhiều người | 5:40–7:05 | |
+| 6 | Tính năng mở rộng và kết luận | 7:05–8:30 | |
+
+Mỗi người một đoạn, khoảng 1 phút 25 giây. Ai nói về phần mình làm chính thì dùng "I"; ai nói về phần chung của nhóm thì dùng "we" và không nhận là việc riêng của mình. Người đăng ký trực tiếp ở đoạn 3 là người nói 3, nên **không** đăng ký sẵn người này.
+
 ## Chuẩn bị trước khi quay
 
 - Mở app với database demo riêng: `.\.venv-gpu\Scripts\python.exe -m attendance_app.web --open --database data/attendance/demo_recording.sqlite3 --session COS30082-video-demo`.
@@ -32,7 +45,6 @@ Màn hình: hình ROC trong báo cáo, sau đó trang **Settings & Info**.
 > "For face verification we implemented both required approaches: classification with cross-entropy over 4,000 training identities, and metric learning with triplet loss, margin 0.2. Each was trained twice: a compact CNN from scratch, and a ResNet-18 fine-tuned from ImageNet. On all 8,805 validation pairs, the cosine AUC is 0.826 and 0.860 for the compact models, and 0.914 and 0.915 for ResNet-18."
 
 > "Cosine similarity and Euclidean distance give the same AUC on unit-length embeddings, because squared Euclidean distance equals two minus two times cosine. As an additional approach we trained ArcFace, which adds an angular margin to the classification head. It has the best AUC, 0.915, and at a 1% false-positive rate it accepts 33.0% of genuine pairs, against 26.6% for classification and 12.4% for triplet, so the app uses ArcFace with a cosine threshold of 0.509."
-
 
 > "This is still a weak operating point: about two thirds of genuine validation pairs are rejected, which is why we register many poses per person."
 
@@ -72,11 +84,11 @@ Màn hình: **Live**, thử vài biểu cảm (vui, ngạc nhiên, buồn), rồ
 
 Màn hình: **Register → Add appearance**, sau đó **Profiles**, **Manual review** nếu có tình huống hợp lệ.
 
-> "Our extensions focus on real attendance problems. Add appearance stores extra templates for an existing person, for example without glasses, and refuses shots that clearly match someone else. Profiles can be renamed, given reference photos, or deleted after a database backup. When a live person is unknown or ambiguous, an operator can do a manual review; it is recorded with the reviewer and reason, and marked Manual, not Automatic."
+> "Our extensions focus on real attendance problems. Add appearance stores extra templates for an existing person, for example without glasses, and refuses shots that clearly match someone else. Profiles can be renamed, given reference photos, or deleted after a database backup. When a live person is unknown or ambiguous, an operator can do a manual review; it is recorded with the reviewer and reason, and marked Manual, not Automatic. Finally, once a person is confirmed, the app keeps their name and liveness result until they leave the frame for two seconds, so one bad frame no longer drops them; it never adds a second record."
 
 Thêm appearance không kính cho người đã đăng ký ở đoạn 3. Rời khung ít nhất 2 giây, rồi quay lại không đeo kính để app nhận ra từ đầu; nếu bỏ kính ngay trước camera thì tên còn hiện chỉ vì khoá tên, không chứng minh appearance có tác dụng.
 
-> "To conclude: the system meets the brief end to end, and our main limits are the low identity recall at strict thresholds and anti-spoofing evidence from a single environment. Thank you."
+> "To conclude: the system meets the brief end to end, and our main limits are the low identity recall at strict thresholds and anti-spoofing evidence from a single room; in a brighter room the liveness model can reject a genuine face, and printed photos are untested. Thank you."
 
 ## Nếu có sự cố khi quay
 
