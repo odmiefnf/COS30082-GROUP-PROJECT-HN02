@@ -1,5 +1,20 @@
 # Phần 8: Báo cáo nhóm
 
+## Bản hiện tại (21/11/2026)
+
+`reports/COS30082_Group_Report.docx` được viết lại cho ba mô hình app hiện tại: identity ResNet-18 classification, liveness MobileNetV3 train trên LCC-FASD cùng dữ liệu webcam của nhóm, và biểu cảm MobileNetV3, đều khởi tạo từ ImageNet và fine-tune. Các CNN train từ đầu được báo cáo làm baseline. Trang đầu có Group HN02 và họ tên, mã sinh viên của sáu thành viên. Microsoft Word đếm **12 trang**, đúng giới hạn của đề, và toàn bộ trang đã được xem lại trực quan.
+
+- **Methodology:** sơ đồ hệ thống (YuNet → kiểm tra chất lượng → PAD → identity/biểu cảm → điểm danh, nhiều mặt chỉ người chính được ghi); bốn mô hình identity (compact và ResNet-18, mỗi loại classification và triplet); PAD MobileNetV3 với crop 1,4× và dữ liệu webcam tách theo phiên quay; biểu cảm MobileNetV3; đăng ký 10 tư thế và manual review.
+- **Results:** ROC của bốn mô hình identity và điểm vận hành (AUC 0,913943, TPR 26,63% ở FPR 0,98%); thử nghiệm 1:N (6/20 người đúng, 21/300 người ngoài bị nhận nhầm); PAD trên LCC-FASD (ACER 26,05% → 5,72% → 8,88%) và trên phiên webcam giữ riêng (0/52 ảnh điện thoại, 0/116 video, 96/96 mặt thật); F1 từng lớp biểu cảm (64,20%, macro-F1 0,6284); độ bền detector và độ trễ; 266 kiểm thử phần mềm.
+- **Discussion:** lý do chọn classification thay triplet (TPR ở FPR thấp, không chỉ AUC), PAD bị chuyên biệt cho camera của nhóm, giới hạn dữ liệu webcam một người/một phòng/một ngày, trùng dữ liệu identity và quy định về trọng số ImageNet.
+- **12 tài liệu tham khảo**, gồm YuNet, ResNet, MobileNetV3 và ImageNet.
+
+Nguồn dựng: `tools/build_group_report.py`, chạy bằng môi trường `tmp/report_tools/venv` (python-docx, matplotlib, pymupdf). Công cụ kiểm tra SHA-256 của file cặp verification, bốn checkpoint identity, checkpoint identity và liveness của app trước khi dựng, rồi ghi SHA-256 các file nguồn vào `tmp/group_report/build_evidence.json`. Số đo detector và độ trễ do `tools/measure_app_pipeline.py` tạo (`results/app_update_20261120/pipeline_metrics.json`); log kiểm thử ở `results/readiness_20261120/full_tests.log`.
+
+Báo cáo vẫn tách YuNet (định vị có sẵn) khỏi ba mạng được fine-tune và không mô tả manual review là cải thiện độ chính xác của CNN. Phần bên dưới là lịch sử các bản 30/10 và 14/11 với mô hình cũ; số liệu ở đó không còn là số của app.
+
+## Lịch sử
+
 **Bản ngày 14/11/2026** bổ sung kết quả tìm kiếm trong danh sách 1:N, thử nghiệm PAD vùng cắt rộng 2× và bằng chứng cho chức năng Model Tests. Nhóm đánh giá trên ảnh dữ liệu và ghi rõ giới hạn đối với webcam và người mới. Trạng thái tài liệu nằm tại `results/readiness_20261114/report_status.json`. Các mốc 30/10 bên dưới là lịch sử.
 
 Đã tạo `reports/COS30082_Group_Report.docx` bằng tiếng Anh theo lựa chọn của người dùng. Bản cuối đã bổ sung ảnh điện thoại, có **12 trang**, gồm cả trang đầu và tài liệu tham khảo, và hoàn tất kiểm tra trực quan toàn bộ trang; đáp ứng giới hạn không quá 12 trang trong đề. Tên nhóm, họ tên và mã sinh viên để trống để điền sau.
@@ -8,7 +23,7 @@
 
 Lượt ảnh điện thoại có 431 khung trong 15,016 giây, 237 crop được PAD chấm và **cả 237 đều được cho qua**. Identity trả unknown ở 237 probe, khớp ảnh giả 0 và không có điểm danh trong bản sao tạm. Báo cáo đã nêu rõ **PAD không chặn được mẫu này; identity mới là gate ngăn điểm danh**, thay vì diễn giải 0 điểm danh như chống giả mạo thành công. Không gọi ảnh tĩnh là video replay; thử video ghi sẵn vẫn còn chờ. Mỗi điều kiện chỉ n=1, gallery một người/một appearance, không có ảnh/video lưu lại hoặc ghi nhận vào database gốc.
 
-## Nội dung
+### Nội dung bản 30/10–14/11
 
 - Abstract và Introduction: mục tiêu, phạm vi và kết quả chính.
 - Methodology: sơ đồ tổng thể; dữ liệu và cách lọc trùng; kiến trúc CNN; loss; hyperparameter; chọn checkpoint và hiệu chỉnh ngưỡng của classification, triplet, liveness và expression.
@@ -18,14 +33,14 @@ Lượt ảnh điện thoại có 431 khung trong 15,016 giây, 237 crop đượ
 
 Các bảng và biểu đồ lấy số liệu từ JSON kết quả đã lưu. Công cụ tạo báo cáo xác minh SHA-256 của năm checkpoint (hai identity, PAD baseline/current, expression) và file cặp verification trước khi dựng tài liệu. Báo cáo phân biệt kiểm tra phần mềm bằng ảnh train với đánh giá độc lập; không mô tả đối chiếu thủ công là cải thiện độ chính xác của CNN. Bộ định vị Haar có sẵn và lựa chọn ROI được nêu rõ, bên cạnh ba CNN được huấn luyện từ đầu.
 
-## Kiểm tra tài liệu
+### Kiểm tra tài liệu bản 30/10
 
 Đã kết xuất bản cuối có cả hai lượt webcam thành **12 trang** và kiểm tra trực quan toàn bộ trang, bao gồm công thức, bảng, biểu đồ, tài liệu tham khảo và đánh số trang. Abstract và Discussion đều nêu rõ PAD cho ảnh điện thoại qua và identity mới ngăn điểm danh; không mô tả đây là bản đã sửa lỗi chống giả mạo. PDF và ảnh kết xuất chỉ dùng kiểm tra nội bộ trong `tmp/group_report/render_phase5_phone_final`, không phải tệp nộp được yêu cầu ở lượt này. Không thay đổi mô hình, ngưỡng hoặc gallery người dùng trong khi viết báo cáo/đo webcam.
 
 Nguồn dựng: `tools/build_group_report.py`. Công cụ kết xuất kiểm tra: `tools/render_group_report.py`. Trạng thái và SHA-256 bản cập nhật: `results/app_upgrade_20261030/phase5_report_status.json`; tiến độ đánh giá: `results/app_upgrade_20261030/phase5_status.json`. `results/section8_status.json` giữ mốc báo cáo baseline lịch sử.
 
-## Việc còn lại sau khi xem
+## Việc còn lại (21/11/2026)
 
-Điền thông tin nhóm/thành viên vào trang đầu và kiểm tra lại giới hạn 12 trang sau khi chỉnh sửa. Nếu sửa bằng mã nguồn, bổ sung thông tin trong công cụ dựng trước khi chạy lại để tránh mất thay đổi thủ công. Đã có một lượt người thật đeo kính và một lượt ảnh tĩnh trên điện thoại; người dùng chưa sẵn sàng lượt không kính. Người chưa đăng ký, video ghi sẵn và ảnh in còn chờ; báo cáo cần giữ đúng trạng thái hiện có.
+Thông tin nhóm đã có trên trang đầu. Nếu sửa báo cáo, sửa trong `tools/build_group_report.py` rồi dựng lại và kiểm tra lại giới hạn 12 trang, để tránh mất thay đổi thủ công. Báo cáo chưa có kết quả thử app trực tiếp với liveness mới, thử giả mạo với người, điện thoại và ảnh in khác; nếu đo thêm, cập nhật đúng số đo và phạm vi.
 
-**Phần 9 chưa quay/nộp video**; đã có [checklist chuẩn bị](09_video_checklist.md). Bước 5 nâng cấp app chưa hoàn tất đánh giá các điều kiện còn chờ.
+**Phần 9 chưa quay/nộp video**; đã có [checklist chuẩn bị](09_video_checklist.md).

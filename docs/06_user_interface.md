@@ -1,5 +1,19 @@
 # Phần 6: Webcam, đăng ký và giao diện điểm danh
 
+## Trạng thái hiện tại (21/11/2026)
+
+Phần này thay các mô tả cũ bên dưới ở những điểm khác nhau; các mục ngày 27–30/10 còn lại là lịch sử.
+
+- **Giao diện chính là web app chạy trên máy** (`attendance_app/web.py`, trang `web_ui.py`). Nhấp đúp `start_attendance.cmd` hoặc chạy `.\.venv-gpu\Scripts\python.exe -m attendance_app.web --open`; trình duyệt mở `http://127.0.0.1:8000`. Các trang: **Live**, **Register**, **Profiles**, **Attendance**, **Settings & Info**. GUI Tkinter (`attendance_app.gui`) vẫn chạy được nhưng không phải bản demo chính.
+- **Ba mô hình của app** đều khởi tạo từ ImageNet rồi fine-tune: identity ResNet-18 classification (`results/identity_app_config.json`, cosine 0,618929), liveness MobileNetV3 train trên LCC-FASD cùng dữ liệu webcam của nhóm (`results/liveness_app_config.json`, ngưỡng 0,5927), biểu cảm MobileNetV3 (`results/emotion_fer_mnv3/best_model.pt`). Các CNN train từ đầu được giữ làm baseline.
+- **Định vị mặt mặc định là YuNet** (`attendance_app/models/face_detection_yunet_2023mar.onnx`, qua `cv2.FaceDetectorYN`); `--detector haar` và `--detector roi` vẫn còn để đối chiếu.
+- **Nhiều người trong khung:** app bắt tối đa 10 mặt. Mặt lớn nhất là người chính: chỉ người này được kiểm tra liveness, hiện biểu cảm và được ghi điểm danh. Các mặt khác chỉ có nhãn tên (xanh nếu đã đăng ký, vàng nếu chưa), không qua liveness nên không bao giờ được ghi. Register, thêm appearance và Manual review vẫn yêu cầu đúng một mặt.
+- **Đăng ký có hướng dẫn:** trang **Register** chụp 10 tư thế (thẳng, trái, phải, ngẩng, cúi). Khung camera chỉ hiện viền oval và chụp được bất kỳ lúc nào; mỗi ảnh được chấm liveness riêng, ảnh không đạt hiện **Not live** và chỉ các ảnh live (ít nhất 3) được lưu thành embedding.
+- **Thêm appearance** nằm trong Register (chế độ thứ hai, chọn hồ sơ có sẵn), ví dụ chụp thêm khi không đeo kính. App từ chối nếu các ảnh mới khớp rõ với người khác. Trang **Profiles** có nút mở thẳng chế độ này và **Delete profile** (sao lưu database trước khi xoá).
+- Điểm danh tự động vẫn cần ba quan sát hợp lệ liên tiếp và mỗi người chỉ có một dòng mỗi buổi.
+
+Khi đổi encoder identity, database cũ bị từ chối theo fingerprint; cần đăng ký lại. Số đo và giới hạn hiện tại nằm trong `docs/submission_readiness.md` và báo cáo nhóm.
+
 **Bổ sung giai đoạn 4 ngày 30/10/2026:** chọn **Camera index** khi dừng, **Test camera** thử một frame, **Diagnostics…** chỉ rõ lỗi từng thành phần và **Retry model setup** sau khi sửa cấu hình. Hướng dẫn phân biệt tối/chói/mờ và bước chưa kiểm tra. [Hướng dẫn camera và chẩn đoán](camera_diagnostics.md).
 
 **Bổ sung giai đoạn 3 ngày 30/10/2026:** khi camera tắt, **Profiles…** cho tìm/đổi tên hồ sơ, bỏ nhóm mẫu sau sao lưu và nhập ba ảnh tham chiếu cho người mới hoặc thêm appearance. [Hướng dẫn quản lý hồ sơ và nhập ảnh](profile_management.md).
@@ -14,7 +28,7 @@ Ngày thực hiện: **27/10/2026**. Mã phần này dùng ba CNN đã huấn lu
 
 **Cập nhật 30/10/2026:** bước 1–4 của [lộ trình nâng cấp app](app_upgrade_roadmap.md) đã hoàn tất. Lượt cuối đạt 159/159 kiểm thử; camera 0 thật trả 640×480 ở lượt Test camera. Đánh giá có/không kính và đồng bộ báo cáo thuộc bước 5.
 
-**Liveness mặc định hiện tại:** app nạp `results/liveness_camera_matched/best_model.pt`. Đây là CNN cùng kiến trúc, huấn luyện lại từ đầu 10 epoch với tăng cường ánh sáng và che một phần vùng trên khuôn mặt; ngưỡng chọn trên validation theo mức chấp nhận spoof đối chiếu baseline. Checkpoint `results/liveness_lcc/best_model.pt` và số đo baseline trước đây được giữ nguyên. Các lượt so sánh webcam còn nhỏ và chưa phải kiểm chứng độ chính xác với kính; tập test cũ đã được dùng lại, không phải benchmark mới. [Chi tiết chẩn đoán, mô hình/ngưỡng và giới hạn](liveness_glasses_diagnosis.md).
+**Liveness mặc định ngày 30/10 (lịch sử, đã thay bằng MobileNetV3 ngày 20/11):** app khi đó nạp `results/liveness_camera_matched/best_model.pt`. Đây là CNN cùng kiến trúc, huấn luyện lại từ đầu 10 epoch với tăng cường ánh sáng và che một phần vùng trên khuôn mặt; ngưỡng chọn trên validation theo mức chấp nhận spoof đối chiếu baseline. Checkpoint `results/liveness_lcc/best_model.pt` và số đo baseline trước đây được giữ nguyên. Các lượt so sánh webcam còn nhỏ và chưa phải kiểm chứng độ chính xác với kính; tập test cũ đã được dùng lại, không phải benchmark mới. [Chi tiết chẩn đoán, mô hình/ngưỡng và giới hạn](liveness_glasses_diagnosis.md).
 
 ## Yêu cầu của phần 6
 
@@ -22,13 +36,15 @@ Theo mục 6, trang 4 của đề: dùng webcam, tự nhận diện khi người
 
 ## Mở ứng dụng trên máy hiện tại
 
-Cách nhanh: nhấp đúp **`start_attendance.cmd`** trong thư mục `grp_project`.
+Cách nhanh: nhấp đúp **`start_attendance.cmd`** trong thư mục `grp_project`; file này mở web app.
 
 Hoặc mở PowerShell ở `grp_project`:
 
 ```powershell
-.\.venv-gpu\Scripts\python.exe -m attendance_app.gui
+.\.venv-gpu\Scripts\python.exe -m attendance_app.web --open
 ```
+
+Web app mặc định dùng GPU nếu có (`--device auto`); thêm `--device cpu` để chạy chỉ bằng CPU. Phần còn lại của mục này mô tả GUI Tkinter cũ, vẫn chạy được bằng `-m attendance_app.gui`.
 
 Để quay lại checkpoint liveness baseline khi cần đối chiếu:
 
@@ -36,7 +52,7 @@ Hoặc mở PowerShell ở `grp_project`:
 .\.venv-gpu\Scripts\python.exe -m attendance_app.gui --liveness-checkpoint results/liveness_lcc/best_model.pt
 ```
 
-Ứng dụng mặc định suy luận trên CPU với 4 thread để GPU có thể dành cho huấn luyện và để giảm tài nguyên khi demo. Môi trường GPU vẫn chạy được chế độ CPU. Muốn dùng GPU khi demo:
+GUI Tkinter mặc định suy luận trên CPU với 4 thread để GPU có thể dành cho huấn luyện và để giảm tài nguyên khi demo. Môi trường GPU vẫn chạy được chế độ CPU. Muốn dùng GPU khi demo:
 
 ```powershell
 .\.venv-gpu\Scripts\python.exe -m attendance_app.gui --device cuda
@@ -48,9 +64,11 @@ Camera chỉ được mở sau khi bấm **Start camera**. Chế độ xem bố 
 .\.venv-gpu\Scripts\python.exe -m attendance_app.gui --preview
 ```
 
-Trên máy khác, tạo Python 3.11 venv rồi cài `requirements-webcam.txt`. Các checkpoint và `results/identity_app_config.json` phải được chép sang, trong đó liveness mặc định mới cần có tại `results/liveness_camera_matched/best_model.pt`; trường `checkpoint` trong JSON identity cần trỏ đến checkpoint thật trên máy đó. Nếu muốn so sánh baseline, chép thêm `results/liveness_lcc/best_model.pt` và dùng lệnh đối chiếu bên trên. Khi đổi vị trí, chỉ sửa đường dẫn; SHA256 phải giữ khớp. Chạy bằng `.venv/Scripts/python.exe` thay cho `.venv-gpu` nếu cài CPU.
+Trên máy khác, tạo Python 3.11 venv rồi cài `requirements-webcam.txt` (đã gồm torchvision). Các checkpoint, `results/identity_app_config.json` và `results/liveness_app_config.json` phải được chép sang, gồm `results/classification_resnet18/best_model.pt`, `results/liveness_mobilenetv3_webcam_20261120/best_model.pt` và `results/emotion_fer_mnv3/best_model.pt`; trường `checkpoint` trong JSON identity cần trỏ đến checkpoint thật trên máy đó. Nếu muốn so sánh baseline, chép thêm `results/liveness_lcc/best_model.pt` và dùng lệnh đối chiếu bên trên. Khi đổi vị trí, chỉ sửa đường dẫn; SHA256 phải giữ khớp. Chạy bằng `.venv/Scripts/python.exe` thay cho `.venv-gpu` nếu cài CPU.
 
 ## Thử theo thứ tự này
+
+Các bước dưới đây là luồng GUI Tkinter ngày 30/10 (đăng ký ba mẫu). Trên web app, đăng ký ở trang **Register** theo 10 tư thế như mục trạng thái hiện tại ở đầu tài liệu.
 
 1. Khi camera tắt, chọn **Camera index** và có thể bấm **Test camera** để kiểm tra một frame; không tạo điểm danh. Nhập tên buổi học vào **Session**, ví dụ `COS30082-lopA-2026-10-30`. Bấm **Start camera** khi các mô hình đã sẵn sàng. Nếu lỗi, mở **Diagnostics…**.
 2. Một người đứng trước camera, nhìn thẳng, đủ sáng và giữ mặt rõ. Khung sẽ xuất hiện quanh mặt.
@@ -60,7 +78,7 @@ Trên máy khác, tạo Python 3.11 venv rồi cài `requirements-webcam.txt`. C
 6. Rời khung rồi quay lại: một hồ sơ chỉ có một dòng trong mỗi buổi. Dừng camera, đổi tên buổi và bắt đầu lại để tạo buổi khác.
 7. Bấm **Stop** hoặc đóng cửa sổ để nhả camera. Hồ sơ và bản ghi vẫn còn khi mở lại.
 
-Nếu có hai người trong hình, ứng dụng yêu cầu chỉ một người; không chọn tùy ý khuôn mặt lớn nhất. Nếu không nhận ra người đã đăng ký, hãy thử ánh sáng/góc mặt tương tự; không hạ ngưỡng chỉ để đạt demo mà không đánh giá lại.
+Nếu có nhiều người trong hình, mặt lớn nhất là người chính và chỉ người đó được kiểm tra liveness và ghi điểm danh; các mặt khác chỉ có nhãn tên. Đăng ký và thêm appearance vẫn yêu cầu chỉ một người. Nếu không nhận ra người đã đăng ký, hãy thử ánh sáng/góc mặt tương tự; không hạ ngưỡng chỉ để đạt demo mà không đánh giá lại.
 
 ## Thêm appearance cho người đã đăng ký
 
@@ -81,7 +99,9 @@ Không lưu ảnh/video trong luồng này. Người vận hành xác nhận dan
 ## Luồng xử lý
 
 ```text
-Webcam BGR -> RGB -> định vị một mặt -> kiểm tra kích thước/độ rõ/ánh sáng
+Webcam BGR -> RGB -> YuNet định vị tối đa 10 mặt -> kiểm tra kích thước/độ rõ/ánh sáng
+  -> các mặt phụ: CNN identity -> chỉ hiện nhãn tên, không liveness, không ghi điểm danh
+  -> mặt lớn nhất (người chính):
   -> cùng một crop RGB -> CNN biểu cảm -> hiển thị nhãn (không quyết định điểm danh)
                       -> CNN liveness
        -> chưa đạt/thiếu ngưỡng: hiển thị trạng thái, dừng nhận diện/đăng ký
@@ -97,9 +117,9 @@ Biểu cảm chỉ mô tả nhãn FER2013 nhìn thấy, hiển thị kèm icon (
 
 ## Định vị mặt
 
-Mặc định dùng **Haar cascade cổ điển có sẵn trong OpenCV** để tạo bounding box. Đây là thành phần định vị có trọng số được cung cấp sẵn; không dùng nó để tính embedding, phân loại danh tính, liveness hay biểu cảm. Ba CNN của bài được khởi tạo và huấn luyện từ đầu. Cần trình bày rõ sự khác biệt này trong báo cáo; không ghi rằng toàn bộ thành phần định vị cũng tự huấn luyện.
+Từ 20/11/2026, mặc định dùng **YuNet** (`cv2.FaceDetectorYN`, ngưỡng điểm 0,6). Đây là detector có trọng số được cung cấp sẵn, chỉ dùng để tạo bounding box; không dùng nó để tính embedding, phân loại danh tính, liveness hay biểu cảm. Ba CNN của app khởi tạo từ ImageNet và được fine-tune trên dữ liệu của bài. Cần trình bày rõ sự khác biệt này trong báo cáo; không ghi rằng thành phần định vị cũng tự huấn luyện. Khung YuNet được chỉnh thành hình vuông cỡ tương đương khung Haar (hệ số 0,91) để crop đưa vào các CNN giữ cùng tỉ lệ. Trên 300 khung người thật của LCC-FASD xoay 35°, Haar bắt đúng một mặt ở 38 khung và YuNet ở 277 (`results/app_update_20261120/pipeline_metrics.json`).
 
-Bản cập nhật kết hợp cascade `default` trên ảnh cân bằng histogram với cascade `alt2` trên ảnh CLAHE, xét ảnh rộng tối đa 800 pixel, `scaleFactor=1.08`, `minNeighbors=4`, và kích thước mặt tối thiểu tương ứng khoảng 80 pixel trên khung gốc. Các phát hiện chồng lấp có IoU từ 0,55 được gộp để tránh đếm cùng mặt hai lần; không giữ khung mặt cũ khi khung hiện tại không phát hiện. CNN vẫn nhận crop RGB gốc, không nhận ảnh tăng tương phản dành cho detector. Riêng bước chỉnh detector giữ nguyên ngưỡng chất lượng, liveness, identity và checkpoint; việc đổi liveness mặc định sau đó được giải thích trong ghi chú đầu tài liệu.
+Mô tả Haar bên dưới là bộ định vị mặc định cũ, nay chạy bằng `--detector haar`. Bản cập nhật Haar ngày 27/10 kết hợp cascade `default` trên ảnh cân bằng histogram với cascade `alt2` trên ảnh CLAHE, xét ảnh rộng tối đa 800 pixel, `scaleFactor=1.08`, `minNeighbors=4`, và kích thước mặt tối thiểu tương ứng khoảng 80 pixel trên khung gốc. Các phát hiện chồng lấp có IoU từ 0,55 được gộp để tránh đếm cùng mặt hai lần; không giữ khung mặt cũ khi khung hiện tại không phát hiện. CNN vẫn nhận crop RGB gốc, không nhận ảnh tăng tương phản dành cho detector. Riêng bước chỉnh detector giữ nguyên ngưỡng chất lượng, liveness, identity và checkpoint; việc đổi liveness mặc định sau đó được giải thích trong ghi chú đầu tài liệu.
 
 Nếu cách hiểu quy định của giảng viên không cho dùng cả detector có sẵn, chế độ ROI tránh thành phần đó nhưng người dùng phải tự căn mặt và hệ thống không phát hiện được nhiều mặt ngoài ROI:
 
@@ -118,7 +138,7 @@ Thư mục dự án hiện nằm trong OneDrive. Ứng dụng không tự gửi 
 
 Mỗi hồ sơ được so khớp bằng cosine giữa embedding probe và centroid đã chuẩn hóa L2. Ứng dụng kiểm tra SHA256 checkpoint và database, không tái sử dụng embedding cũ khi đổi encoder. Nếu đổi mô hình, dùng database mới với `--database data/attendance/new_encoder.sqlite3` và đăng ký lại.
 
-`tools.calibrate_identity_app` chọn mô hình có AUC cosine cao nhất trong hai mô hình; trên chính tập validation, chọn ngưỡng có TPR cao nhất với **FPR của cặp ≤1%**. Đây là ngưỡng thử nghiệm in-sample, không phải chứng nhận FAR ngoài thực tế. So khớp 1:N với nhiều hồ sơ có thể tăng xác suất nhận nhầm; cần đo lại bằng người chưa đăng ký trên webcam. Điều kiện cách biệt với điểm thứ hai mặc định 0,05 là quy tắc thận trọng bổ sung, chưa được hiệu chỉnh bằng tập webcam.
+Ngày 27/10, `tools.calibrate_identity_app` chọn mô hình có AUC cosine cao nhất trong hai mô hình. Ngày 20/11, nhóm chọn ResNet-18 classification thay vì triplet dù AUC thấp hơn 0,0007, vì ở FPR 1% nó nhận đúng 26,63% cặp cùng người so với 12,44%. Cả hai lần, trên chính tập validation, chọn ngưỡng có TPR cao nhất với **FPR của cặp ≤1%**. Đây là ngưỡng thử nghiệm in-sample, không phải chứng nhận FAR ngoài thực tế. So khớp 1:N với nhiều hồ sơ có thể tăng xác suất nhận nhầm; cần đo lại bằng người chưa đăng ký trên webcam. Điều kiện cách biệt với điểm thứ hai mặc định 0,05 là quy tắc thận trọng bổ sung, chưa được hiệu chỉnh bằng tập webcam.
 
 Tập gốc có 667 ảnh verification validation trùng pixel train; kết quả AUC và ngưỡng phải đi kèm giới hạn này. Không tự lọc file cặp gốc để cải thiện số đo. Liveness LCC-FASD và biểu cảm FER2013 cũng có khác biệt miền dữ liệu với webcam; điểm softmax không phải xác suất đảm bảo đúng ngoài môi trường đó.
 
@@ -140,8 +160,10 @@ Nếu không mở được camera, ứng dụng giữ trạng thái tắt, báo 
 
 | File | Vai trò |
 | --- | --- |
-| attendance_app/gui.py | GUI, worker riêng, hàng đợi giới hạn frame, Start/Stop/đóng nhả camera |
-| attendance_app/camera.py | Haar/ROI, một khuôn mặt, kiểm tra ảnh, crop RGB dùng chung |
+| attendance_app/web.py, web_ui.py | Web app chính: server localhost, luồng MJPEG, các trang Live/Register/Profiles/Attendance/Settings |
+| attendance_app/gui.py | GUI Tkinter, worker camera dùng chung với web app, Start/Stop/đóng nhả camera |
+| attendance_app/video_stream.py | Đọc camera nền (DirectShow/MSMF), chỉ giữ frame mới nhất |
+| attendance_app/camera.py | YuNet/Haar/ROI, tối đa 10 mặt, kiểm tra ảnh, crop RGB dùng chung |
 | attendance_app/recognition.py | Nạp encoder thật, kiểm tra fingerprint, embedding, cosine open-set |
 | attendance_app/store.py | SQLite transaction, tên Unicode, mẫu, ghi nhận duy nhất theo buổi |
 | attendance_app/service.py | Liveness gate, đăng ký có chủ ý, theo dõi nhận diện qua các frame |

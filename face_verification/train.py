@@ -53,7 +53,8 @@ def _positive_float(value: str) -> float:
 def build_parser() -> argparse.ArgumentParser:
     """Build the public command-line interface."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--method", choices=("classification", "triplet"), default="classification")
+    parser.add_argument("--method", choices=("classification", "arcface", "triplet"), default="classification",
+                        help="arcface: classification with an additive angular margin head (s=32, m=0.3).")
     parser.add_argument("--data-root", type=Path, required=True,
                         help="Root containing classification_data/, or classification_data/ itself.")
     parser.add_argument("--output-dir", type=Path, required=True)
@@ -131,7 +132,8 @@ def _classification_epoch(
                 optimizer.zero_grad(set_to_none=True)
                 images = _hflip(images, hflip)
             with torch.autocast(device.type, dtype=torch.float16, enabled=scaler is not None):
-                logits = model(images)
+                # Labels reach the ArcFace margin only while training; a linear head ignores them.
+                logits = model(images, labels if optimizer is not None else None)
                 loss = criterion(logits.float(), labels)
             if not torch.isfinite(loss):
                 raise RuntimeError("Classification loss became non-finite; check the inputs and learning rate.")
@@ -285,8 +287,8 @@ def _evaluate_classification_test(
 
 def train(args: argparse.Namespace) -> Path:
     """Train on train_data and return the selected encoder checkpoint path."""
-    if args.evaluate_test and args.method != "classification":
-        raise ValueError("--evaluate-test is supported only with --method classification.")
+    if args.evaluate_test and args.method == "triplet":
+        raise ValueError("--evaluate-test needs a classification head (--method classification or arcface).")
     if args.seed < 0 or args.seed >= 2**32:
         raise ValueError("seed must be in the range 0 to 2**32 - 1.")
     if args.image_size < 32:
@@ -304,7 +306,7 @@ def train(args: argparse.Namespace) -> Path:
     cosine_lr = getattr(args, "cosine_lr", False)
     validation_dataset = None
     validation_summary = None
-    if args.method == "classification":
+    if args.method != "triplet":
         training_dataset = FaceImageDataset(split_root / "train_data", args.image_size, augment=False)
         if len(training_dataset.class_to_idx) < 2:
             raise ValueError("Classification training requires at least two identities in train_data.")
@@ -321,7 +323,8 @@ def train(args: argparse.Namespace) -> Path:
         else:
             print(f"Validation skipped: no val_data directory at {validation_path}.", flush=True)
         model = FaceClassifier(len(training_dataset.class_to_idx), args.embedding_dim,
-                               backbone=backbone, pretrained=pretrained).to(device)
+                               backbone=backbone, pretrained=pretrained,
+                               head="arcface" if args.method == "arcface" else "linear").to(device)
         encoder = model.encoder
         criterion = nn.CrossEntropyLoss()
     else:
@@ -384,6 +387,9 @@ def train(args: argparse.Namespace) -> Path:
         "loss": ({"name": "CrossEntropyLoss", "input": "raw_identity_logits",
                   "label_smoothing": 0.0, "reduction": "mean"}
                  if args.method == "classification" else
+                 {"name": "CrossEntropyLoss", "input": "ArcFace_additive_angular_margin_logits",
+                  "scale": 32.0, "margin": 0.3, "margin_applied": "training_only", "reduction": "mean"}
+                 if args.method == "arcface" else
                  {"name": "TripletMarginLoss", "input": "L2_normalized_embeddings",
                   "margin": 0.2, "p": 2, "eps": 1e-6, "swap": False, "reduction": "mean"}),
         "optimizer": {"name": "Adam", "learning_rate": args.learning_rate,
@@ -444,9 +450,9 @@ def train(args: argparse.Namespace) -> Path:
             }
             if improved:
                 _save_checkpoint(best_path, encoder, config, metadata,
-                                 model.classifier if args.method == "classification" else None)
+                                 model.classifier if args.method != "triplet" else None)
             _save_checkpoint(output_dir / "last_model.pt", encoder, config, metadata,
-                             model.classifier if args.method == "classification" else None)
+                             model.classifier if args.method != "triplet" else None)
             details = f"train_loss={float(train_metrics['loss']):.6f}"
             if "accuracy" in train_metrics:
                 details += f" train_accuracy={float(train_metrics['accuracy']):.4f}"

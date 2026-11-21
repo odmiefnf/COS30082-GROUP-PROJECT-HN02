@@ -108,15 +108,20 @@ model component before recording.
 - [ ] Confirm actual contributions with each member; map an implemented feature
   and relevant evidence to each person's explanation.
 - [x] Rebuilt the report for the current models on 21 November 2026; Word reports 12 pages and all pages were reviewed.
-- [ ] Verify the package can load models on a copied path without a private
-  gallery, using the documented dependency setup (now including torchvision).
+- [x] Verify the package can load models on a copied path without a private
+  gallery. On 21 November 2026 the 292-file, 172 MB package was extracted into a new
+  folder; the web app loaded all three models and YuNet on CPU with an empty database,
+  and 267 tests passed inside the copy (`results/readiness_20261121/package_check.json`).
+  A clean `pip install` on another computer has not been tried.
 - [x] Full software suite: 266 tests passed. See `results/readiness_20261120/full_tests.log`.
 - [ ] Re-register profiles for the new identity encoder and try the app live:
   phone photo in a dark room, genuine face with and without glasses, several people in view.
 - [ ] Complete independent spoof trials with more people, other phones and printed
-  photos; record them with **Model tests…** for evidence.
+  photos. The brief names printed images, which are untested: run
+  `tools\record_print_attack.cmd` (stores crops in `data/pad_webcam_print`, outside
+  training, and scores them with the app model).
 - [ ] Rehearse and record the unedited 5-10 minute video, covering all project
-  functions and each member's genuine contribution.
+  functions and each member's genuine contribution. Script: `docs/video_script.md`.
 - [ ] Check the hosted link from an account that does not own the video.
 - [ ] One member submits source, group report and the video link through Canvas.
 - [ ] Each member submits their own report (at most 5 pages) and peer evaluation.

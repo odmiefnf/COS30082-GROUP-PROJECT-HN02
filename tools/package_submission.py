@@ -96,6 +96,8 @@ EVIDENCE_FILES = (
     "liveness_mobilenetv3_webcam_20261120/history.csv",
     "liveness_mobilenetv3_webcam_20261120_on_test/metrics.json",
     "liveness_mobilenetv3_webcam_20261120_lcc_test/metrics.json",
+    "app_update_20261120/pipeline_metrics.json",
+    "readiness_20261120/full_tests.log",
 )
 CANDIDATE = "results/liveness_regularized_20261108"
 SKIP_PARTS = {"__pycache__", "backup", "backups", "archive", "archives"}

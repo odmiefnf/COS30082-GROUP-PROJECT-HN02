@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import math
+
 import torch
 from torch import nn
 from torch.nn import functional as F
@@ -99,17 +101,48 @@ def build_encoder(backbone: str = "compact", embedding_dim: int = 128, pretraine
     raise ValueError(f"Unsupported identity backbone: {backbone!r}")
 
 
+class ArcFaceHead(nn.Module):
+    """Additive angular margin head (Deng et al., 2019): scale * cos(theta + m) for the true class.
+
+    Without labels it returns scale * cos(theta), so validation and test accuracy use no margin.
+    """
+
+    def __init__(self, embedding_dim: int, num_classes: int, scale: float = 32.0, margin: float = 0.3) -> None:
+        super().__init__()
+        self.weight = nn.Parameter(torch.empty(num_classes, embedding_dim))
+        nn.init.xavier_uniform_(self.weight)
+        self.scale, self.margin = scale, margin
+        self.cos_m, self.sin_m = math.cos(margin), math.sin(margin)
+        # Past theta = pi - m, cos(theta + m) stops decreasing; use the usual linear fallback there.
+        self.threshold, self.fallback = math.cos(math.pi - margin), math.sin(math.pi - margin) * margin
+
+    def forward(self, features: torch.Tensor, labels: torch.Tensor | None = None) -> torch.Tensor:
+        with torch.autocast(features.device.type, enabled=False):
+            cosine = F.linear(F.normalize(features.float()), F.normalize(self.weight.float()))
+            if labels is None:
+                return self.scale * cosine
+            sine = torch.sqrt((1 - cosine * cosine).clamp_min(1e-7))
+            target = cosine * self.cos_m - sine * self.sin_m
+            target = torch.where(cosine > self.threshold, target, cosine - self.fallback)
+            true_class = F.one_hot(labels, cosine.size(1)).bool()
+            return self.scale * torch.where(true_class, target, cosine)
+
+
 class FaceClassifier(nn.Module):
     """Train an encoder through identity classification using raw logits."""
 
     def __init__(self, num_classes: int, embedding_dim: int = 128,
-                 backbone: str = "compact", pretrained: bool = False) -> None:
+                 backbone: str = "compact", pretrained: bool = False, head: str = "linear") -> None:
         super().__init__()
         if not isinstance(num_classes, int) or num_classes < 1:
             raise ValueError("num_classes must be a positive integer.")
         self.encoder = build_encoder(backbone, embedding_dim, pretrained)
-        self.classifier = nn.Linear(embedding_dim, num_classes)
+        self.classifier = (ArcFaceHead(embedding_dim, num_classes) if head == "arcface"
+                           else nn.Linear(embedding_dim, num_classes))
 
-    def forward(self, images: torch.Tensor) -> torch.Tensor:
-        """Return logits suitable for torch.nn.CrossEntropyLoss."""
-        return self.classifier(self.encoder.forward_raw(images))
+    def forward(self, images: torch.Tensor, labels: torch.Tensor | None = None) -> torch.Tensor:
+        """Return logits suitable for torch.nn.CrossEntropyLoss (ArcFace adds its margin only with labels)."""
+        features = self.encoder.forward_raw(images)
+        if isinstance(self.classifier, ArcFaceHead):
+            return self.classifier(features, labels)
+        return self.classifier(features)
