@@ -14,6 +14,8 @@ from .review import ManualReview
 
 GUIDED_MIN_SHOTS = 3
 GUIDED_MAX_SHOTS = 10
+# A confirmed face keeps its name and liveness result until it is out of view this long.
+LOCK_GRACE_SECONDS = 2.0
 
 
 def uses_pad_context(liveness):
@@ -63,6 +65,36 @@ class AttendanceService:
         self.review_id = None
         self.guided_shots = []
         self.multi_streaks = {}  # person_id -> consecutive multi-face frames seen live and recognized
+        self.face_lock = None  # the main face confirmed for attendance; see _still_locked
+
+    def _lock_face(self, identity, live, embedding, now):
+        self.face_lock = {"person_id": identity["person_id"], "identity": dict(identity),
+                          "liveness": dict(live, locked=True), "embedding": embedding,
+                          "seen": now, "session": self.session}
+
+    def _still_locked(self, embedding, identity, now):
+        """Keep a confirmed face's name and liveness result while the same face stays in view.
+
+        Attendance still needs ``stable_frames`` consecutive live, recognized frames. After
+        that, a frame that fails liveness or falls below the identity threshold keeps the
+        locked result. The lock ends when the face is out of view for LOCK_GRACE_SECONDS,
+        the face no longer matches the previous frame, another registered person is
+        matched, the session or profiles change, or a capture or review starts.
+        """
+        lock = self.face_lock
+        if lock is None:
+            return False
+        if (now - lock["seen"] > LOCK_GRACE_SECONDS or self.session != lock["session"]
+                or identity["status"] == "known" and identity["person_id"] != lock["person_id"]
+                or lock["person_id"] not in {p["id"] for p in self.profiles}
+                or self.pending_name is not None or self.pending_appearance is not None
+                or self.review_open or self.appearance_dialog_open
+                # Frame-to-frame continuity: consecutive frames of one face sit far above the threshold.
+                or float(np.dot(lock["embedding"], embedding)) < self.recognizer.threshold):
+            self.face_lock = None
+            return False
+        lock["embedding"], lock["seen"] = embedding, now
+        return True
 
     def set_liveness_smooth_window(self, window):
         if window < 1:
@@ -391,8 +423,13 @@ class AttendanceService:
                 face["expression"] = self.emotion.predict_crop(crop)
             except (OSError, ValueError, RuntimeError) as exc:
                 face["expression_error"] = str(exc)
-            if live.get("is_live") is True:
-                identity = self.recognizer.match(self.recognizer.embed(crop), self.profiles)
+            if live.get("is_live") is True or self.face_lock is not None:
+                embedding = self.recognizer.embed(crop)
+                identity = self.recognizer.match(embedding, self.profiles)
+            if self.face_lock is not None and self._still_locked(embedding, identity, now):
+                face.update(status="attendance_confirmed", identity=self.face_lock["identity"],
+                            liveness=self.face_lock["liveness"])
+            elif live.get("is_live") is True:
                 face.update(status=identity["status"], identity=identity)
                 if identity["status"] == "known":
                     person = identity["person_id"]
@@ -401,6 +438,7 @@ class AttendanceService:
                         face["attendance_recorded"] = self.store.record_attendance(
                             self.session, person, identity["cosine"], live["live_score"])
                         face["status"] = "attendance_confirmed"
+                        self._lock_face(identity, live, embedding, now)
             results.append(face)
         self.multi_streaks = seen  # only the main face builds a streak; a new main face starts again
         return results
@@ -439,7 +477,7 @@ class AttendanceService:
             result["expression"] = self.emotion.predict_crop(crop)
         except (OSError, ValueError, RuntimeError) as exc:
             result["expression_error"] = str(exc)
-        if live.get("is_live") is True:
+        if live.get("is_live") is True or self.face_lock is not None:
             embedding = self.recognizer.embed(crop)
             identity = self.recognizer.match(embedding, self.profiles)
         # Async camera input can age while a slow model runs. Recheck before
@@ -449,6 +487,13 @@ class AttendanceService:
             self.reset_tracking("The camera observation is stale. Capture a fresh face.")
             result.update(status="observation_stale", liveness=None, identity=None, expression=None)
             result.update(self.frame_state())
+            return result
+        if self.face_lock is not None and self._still_locked(embedding, identity, now):
+            if live.get("is_live") is True:  # review/appearance anchors still need a truly live frame
+                self.review.observe(crop, embedding, live["live_score"], identity["status"], self.session, now)
+            result.update(status="attendance_confirmed", identity=self.face_lock["identity"],
+                          liveness=self.face_lock["liveness"], stable_frames=self.stable_frames)
+            result.update(self.frame_state(now))
             return result
         if live.get("is_live") is not True:
             self.reset_tracking("Liveness no longer passes. Cancel and capture a new observation.")
@@ -528,6 +573,7 @@ class AttendanceService:
                 result["attendance_recorded"] = self.store.record_attendance(
                     self.session, identity["person_id"], identity["cosine"], live["live_score"])
                 result["status"] = "attendance_confirmed"
+                self._lock_face(identity, live, embedding, now)
         else:
             self.last_person, self.streak = None, 0
         result["stable_frames"] = self.streak

@@ -9,14 +9,14 @@ Epoch 1/2: train_loss=1.315254, val_loss=0.735735, val_accuracy=0.5000; best epo
 Validation ACER=0.0000, APCER=0.0000, BPCER=0.0000
 Epoch 2/2: train_loss=0.850214, val_loss=0.750780, val_accuracy=0.5000; best epoch=1
 Validation ACER=0.0000, APCER=0.0000, BPCER=0.0000
-Calibrated threshold 0.357035 on ALL 4 validation images using best epoch 1; saved C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tmp\tmp5yesihkq\out\best_model.pt
+Calibrated threshold 0.357035 on ALL 4 validation images using best epoch 1; saved C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tmp\tmpvm9z45gd\out\best_model.pt
 .Fingerprinting 6 training and 4 validation images...
 Training liveness CNN from scratch on cpu; labels: 0=spoof, 1=live.
 Epoch 1/1: train_loss=0.685550, val_loss=0.730040, val_accuracy=0.5000; best epoch=1
-Calibrated threshold 0.366682 on ALL 4 validation images using best epoch 1; saved C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tmp\tmpzt_gckhm\out\best_model.pt
+Calibrated threshold 0.366682 on ALL 4 validation images using best epoch 1; saved C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tmp\tmpsykjsl1x\out\best_model.pt
 ...............................................Training FER CNN from scratch: 21 train, 21 validation; cpu.
 Epoch 1/1: train_loss=2.0267, val_loss=1.9480, val_accuracy=0.1429, val_macro_f1=0.0357; best=1
-Saved best epoch 1: C:\Users\kiet1\AppData\Local\Temp\fer_synthetic_sjk71_xq\model\best_model.pt
+Saved best epoch 1: C:\Users\kiet1\AppData\Local\Temp\fer_synthetic_ibdf6ljn\model\best_model.pt
 {
   "metrics": {
     "accuracy": 0.14285714285714285,
@@ -151,9 +151,9 @@ Saved best epoch 1: C:\Users\kiet1\AppData\Local\Temp\fer_synthetic_sjk71_xq\mod
     "confusion_order": "rows=true, columns=predicted; fixed FER label order",
     "zero_division": 0
   },
-  "checkpoint": "C:\\Users\\kiet1\\AppData\\Local\\Temp\\fer_synthetic_sjk71_xq\\model\\best_model.pt",
-  "checkpoint_sha256": "4bc4002f348e3c5acc3b35fe989c388b564783b308e0bfddb2ef1a304f067c0c",
-  "manifest_sha256": "575c7d31971cdce54dd5819b4ea6156a4931c54eb5edbf3a473d09141b9cca15",
+  "checkpoint": "C:\\Users\\kiet1\\AppData\\Local\\Temp\\fer_synthetic_ibdf6ljn\\model\\best_model.pt",
+  "checkpoint_sha256": "06fc59758383972b4da66cf6886f0f8440d2ca44d630840f0dce1b96ca487b5d",
+  "manifest_sha256": "f96fb5aa986058c8562f94e16b60f84fe473e553b0e30a9d21d76ddb8afbfe05",
   "training_smoke_test": false,
   "selected_epoch": 1,
   "evaluation_samples": 21,
@@ -164,21 +164,21 @@ Saved best epoch 1: C:\Users\kiet1\AppData\Local\Temp\fer_synthetic_sjk71_xq\mod
   "device": "cpu"
 }
 Emotion evaluation failed: Evaluation must be PrivateTest, with paths/pixels absent from train/validation.
-...............{"status": "checking_zip", "source": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_lmta1n55\\official.zip", "output_dir": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_lmta1n55\\imported", "files_processed": 0, "files_total": null, "elapsed_seconds": 0.0}
-{"status": "extracting", "source": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_lmta1n55\\official.zip", "output_dir": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_lmta1n55\\imported", "files_processed": 0, "files_total": 15, "elapsed_seconds": 0.0}
-{"status": "checking_zip", "source": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_lmta1n55\\official.zip", "output_dir": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_lmta1n55\\imported", "files_processed": 0, "files_total": null, "elapsed_seconds": 0.0}
-{"status": "extracting", "source": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_lmta1n55\\official.zip", "output_dir": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_lmta1n55\\imported", "files_processed": 0, "files_total": 15, "elapsed_seconds": 0.0}
-.{"status": "checking_zip", "source": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_p4jdcwvt\\unsafe0.zip", "output_dir": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_p4jdcwvt\\out0", "files_processed": 0, "files_total": null, "elapsed_seconds": 0.0}
-{"status": "checking_zip", "source": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_p4jdcwvt\\unsafe1.zip", "output_dir": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_p4jdcwvt\\out1", "files_processed": 0, "files_total": null, "elapsed_seconds": 0.0}
-{"status": "checking_zip", "source": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_p4jdcwvt\\unsafe2.zip", "output_dir": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_p4jdcwvt\\out2", "files_processed": 0, "files_total": null, "elapsed_seconds": 0.0}
-{"status": "checking_zip", "source": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_p4jdcwvt\\unsafe3.zip", "output_dir": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_p4jdcwvt\\out3", "files_processed": 0, "files_total": null, "elapsed_seconds": 0.0}
-..................................invalid command name "2126912806080poll"
+...............{"status": "checking_zip", "source": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_l1ush_ht\\official.zip", "output_dir": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_l1ush_ht\\imported", "files_processed": 0, "files_total": null, "elapsed_seconds": 0.0}
+{"status": "extracting", "source": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_l1ush_ht\\official.zip", "output_dir": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_l1ush_ht\\imported", "files_processed": 0, "files_total": 15, "elapsed_seconds": 0.0}
+{"status": "checking_zip", "source": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_l1ush_ht\\official.zip", "output_dir": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_l1ush_ht\\imported", "files_processed": 0, "files_total": null, "elapsed_seconds": 0.0}
+{"status": "extracting", "source": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_l1ush_ht\\official.zip", "output_dir": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_l1ush_ht\\imported", "files_processed": 0, "files_total": 15, "elapsed_seconds": 0.0}
+.{"status": "checking_zip", "source": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_i0j40owy\\unsafe0.zip", "output_dir": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_i0j40owy\\out0", "files_processed": 0, "files_total": null, "elapsed_seconds": 0.0}
+{"status": "checking_zip", "source": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_i0j40owy\\unsafe1.zip", "output_dir": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_i0j40owy\\out1", "files_processed": 0, "files_total": null, "elapsed_seconds": 0.0}
+{"status": "checking_zip", "source": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_i0j40owy\\unsafe2.zip", "output_dir": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_i0j40owy\\out2", "files_processed": 0, "files_total": null, "elapsed_seconds": 0.0}
+{"status": "checking_zip", "source": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_i0j40owy\\unsafe3.zip", "output_dir": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_i0j40owy\\out3", "files_processed": 0, "files_total": null, "elapsed_seconds": 0.0}
+.....................................invalid command name "2063412379776poll"
     while executing
-"2126912806080poll"
+"2063412379776poll"
     ("after" script)
-invalid command name "2126912802880placeholder"
+invalid command name "2063412343424placeholder"
     while executing
-"2126912802880placeholder"
+"2063412343424placeholder"
     ("after" script)
 can't invoke "event" command: application has been destroyed
     while executing
@@ -192,15 +192,15 @@ can't invoke "event" command: application has been destroyed
     (procedure "ttk::ThemeChanged" line 6)
     invoked from within
 "ttk::ThemeChanged"
-.invalid command name "2127121777792poll"
+.invalid command name "2063020517952poll"
     while executing
-"2127121777792poll"
+"2063020517952poll"
     ("after" script)
 ............................................CAPTURE_STARTED: keep the declared person/condition in view.
 .CAPTURE_STARTED: keep the declared person/condition in view.
 CAPTURE_STARTED: keep the declared person/condition in view.
 ...........
 ----------------------------------------------------------------------
-Ran 266 tests in 94.807s
+Ran 269 tests in 70.365s
 
 OK

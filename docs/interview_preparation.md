@@ -98,7 +98,10 @@ blank until the group supplies them.
 13. **How is duplicate attendance prevented?**
     Automatic attendance needs three consecutive valid recognized observations.
     SQLite enforces one record per person/session. Expressions are descriptive
-    feedback and do not change that decision.
+    feedback and do not change that decision. After confirmation the app keeps
+    that face's name and liveness result while the same face stays in view
+    (embedding checked against the previous frame, released after 2 s out of
+    view), so a single failed frame no longer drops the name.
 14. **What does manual review improve, and what does it not improve?**
     An operator may explicitly verify a live unknown/ambiguous person and record
     a separate manual source, reviewer and reason. Transactions preserve record
