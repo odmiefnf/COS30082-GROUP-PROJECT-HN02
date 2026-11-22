@@ -1,8 +1,12 @@
 """A selected-camera probe: no models, database, attendance or image persistence."""
 from __future__ import annotations
 
+import os
 import numpy as np
 
+from .video_stream import resolve_camera_backend
+
+os.environ.setdefault("OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS", "0")
 from .video_stream import resolve_camera_backend  # also disables slow MSMF hardware probing
 
 
