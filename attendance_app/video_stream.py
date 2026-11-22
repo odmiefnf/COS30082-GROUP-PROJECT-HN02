@@ -170,7 +170,7 @@ class LatestCamera:
             self._condition.notify_all()
             thread = self._thread
         if thread is not None and thread is not threading.current_thread():
-            thread.join(timeout=1.0)
+            thread.join(timeout=1.0)  # a blocked driver must not hang app shutdown
         if not already_closed and self._release_error is not None:
             raise RuntimeError(self._release_error)
 

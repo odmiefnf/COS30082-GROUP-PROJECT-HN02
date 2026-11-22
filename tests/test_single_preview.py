@@ -67,7 +67,7 @@ class SinglePreviewChecks(unittest.TestCase):
 
     def test_outdated_or_incompatible_face_observations_do_not_overlay_new_pixels(self):
         cases = [
-            ({"captured_at": 99.8}, 11, 100.05),
+            ({"captured_at": 99.5}, 11, 100.05),  # older than BOX_MAX_AGE
             ({"stream_id": 2}, 11, 100.05),
             ({"rgb": np.zeros((80, 120, 3), dtype=np.uint8)}, 11, 100.05),
             ({}, 9, 100.05),

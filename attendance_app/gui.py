@@ -14,12 +14,18 @@ from PIL import Image, ImageDraw, ImageTk
 
 from .device_check import CAMERA_HELP, camera_index, probe_camera
 from .diagnostics import COMPONENTS, frame_details, frame_guidance
+from .theme import (BG, BORDER, CANVAS, CANVAS_LIVE, CARD, FONT, HEADER_BG, INK, MINT, MUTED,
+                    PILL_BG, PRIMARY, PRIMARY_INK, PRIMARY_SOFT, SUBTLE, SURFACE, TONES,
+                    FlatButton, apply_style, card, entry)
 from .video_stream import LatestCamera, put_latest
 
 PROJECT = Path(__file__).resolve().parents[1]
-DEFAULT_LIVENESS_CHECKPOINT = PROJECT/"results/liveness_camera_matched/best_model.pt"
-BG, CARD, INK, MUTED, BLUE = "#eef3f8", "#ffffff", "#172b45", "#61748b", "#1765d1"
+DEFAULT_LIVENESS_CHECKPOINT = PROJECT/"results/liveness_mobilenetv3_webcam_20261120/best_model.pt"
+BLUE = PRIMARY
 FACE_PENDING, FACE_RECOGNIZED = "#fbbf24", "#4ade80"
+# Newest analysis older than this draws no face box. Detection plus three CNNs take ~100 ms
+# per frame even on GPU, so 0.2 s dropped most boxes; the status text accepts up to 1 s.
+BOX_MAX_AGE = .5
 EXPRESSION_ICONS = {
     "angry": "😠",
     "disgust": "🤢",
@@ -62,6 +68,41 @@ MESSAGES = {
     "appearance_expired": "Appearance capture expired · Start again",
 }
 
+# Presentation-only colour coding of the feedback banner and result cards.
+_SUCCESS = {MESSAGES[key] for key in ("known", "attendance_confirmed", "registered", "appearance_added")}
+_DANGER = {MESSAGES[key] for key in ("spoof", "liveness_unavailable", "registration_existing_or_ambiguous",
+                                     "registration_person_changed", "appearance_conflict",
+                                     "appearance_person_changed", "appearance_expired")}
+_WARNING = {MESSAGES[key] for key in ("unknown", "ambiguous", "registering", "appearance_capturing",
+                                      "observation_stale", "multiple_faces", "face_too_small_or_outside",
+                                      "image_quality")}
+
+
+def message_tone(text):
+    """Map a feedback message to a banner tone; never used for any decision."""
+    lowered = text.casefold()
+    if text in _SUCCESS:
+        return "success"
+    if text in _DANGER or "failed" in lowered or "error" in lowered:
+        return "danger"
+    if text in _WARNING or lowered.startswith(("sample ", "appearance sample", "manual review in progress",
+                                               "capturing")):
+        return "warning"
+    if lowered.startswith(("models ready", "testing", "analyzing", "click start", "retrying", "face the camera",
+                           "loading", "opened")):
+        return "info"
+    return "neutral"
+
+
+def stat_tone(key, text):
+    if text in ("", "—", "Not checked"):
+        return "neutral"
+    if key == "liveness":
+        return {"Passed": "success", "Not passed": "danger", "Unavailable": "warning"}.get(text, "neutral")
+    if key == "identity":
+        return "warning" if text == "Not recognized" else "success"
+    return "neutral" if text == "Unavailable" else "info"
+
 
 class CameraWorker(threading.Thread):
     """Serialize models/SQLite; camera capture and Tk rendering run independently."""
@@ -74,7 +115,7 @@ class CameraWorker(threading.Thread):
         self.last_sequence = 0
         self.camera = None
         self.service = None
-        self.latest = None
+        self.latest = self.latest_rgb = None
         self.latest_time = float("-inf")
         self.profiles_open = False
         self.reference_importer = None
@@ -94,14 +135,18 @@ class CameraWorker(threading.Thread):
                 or self.service.review_open or self.service.appearance_dialog_open):
             raise ValueError("Finish or cancel the current capture or review first.")
 
+    def profile_rows(self):
+        """Names and sample counts only; embeddings never leave the worker."""
+        return [{"id": p["id"], "name": p["name"], "created_utc": p["created_utc"],
+                 "sample_count": p["sample_count"], "appearances": [
+                     {"id": a["id"], "label": a["label"], "sample_count": a["sample_count"]}
+                     for a in p["appearances"]]} for p in self.service.profiles]
+
     def publish_profiles(self, message=None, selected_id=None):
         self.service.profiles = self.service.store.profiles()
-        profiles = [{"id": p["id"], "name": p["name"], "created_utc": p["created_utc"],
-                     "sample_count": p["sample_count"], "appearances": [
-                         {"id": a["id"], "label": a["label"], "sample_count": a["sample_count"]}
-                         for a in p["appearances"]]} for p in self.service.profiles]
+        profiles = self.profile_rows()
         self.publish(event="profiles_data", profiles=profiles, message=message, selected_id=selected_id,
-                     photo_import_available=self.args.detector == "haar",
+                     photo_import_available=self.args.detector != "roi",
                      attendance=self.service.store.attendance(self.service.session))
 
     def publish(self, **update):
@@ -133,6 +178,8 @@ class CameraWorker(threading.Thread):
                 pass
         if self.service is not None:
             self.service.cancel_registration()
+            if hasattr(self.service, "clear_guided_shots"):
+                self.service.clear_guided_shots()
 
     def require_appearance_face(self):
         """Use only a fresh live observation, with no capture or review in progress."""
@@ -157,7 +204,7 @@ class CameraWorker(threading.Thread):
             from emotion_recognition.infer import EmotionRecognizer
             from .recognition import FaceRecognizer
             from .store import ProfileStore
-            from .service import AttendanceService
+            from .service import AttendanceService, pad_crop_scale, uses_pad_context
             from .camera import FaceLocator, FrameProcessor
             from .reference_import import ReferenceImporter
             torch.set_num_threads(self.args.num_threads)
@@ -171,8 +218,9 @@ class CameraWorker(threading.Thread):
                 if name == "Liveness" and model.threshold is None:
                     raise ValueError("Liveness checkpoint requires a validation-calibrated threshold.")
                 training = metadata.get("training", {})
-                if training.get("smoke_test") is not False or training.get("initialization") != "random_from_scratch":
-                    raise ValueError(f"{name} requires a completed from-scratch training checkpoint.")
+                allowed = ("random_from_scratch", "partial_fine_tuning_imagenet")
+                if training.get("smoke_test") is not False or training.get("initialization") not in allowed:
+                    raise ValueError(f"{name} requires a completed trained checkpoint.")
                 return model
 
             liveness = self.load_component("Liveness", str(self.args.liveness_checkpoint),
@@ -184,11 +232,41 @@ class CameraWorker(threading.Thread):
             self.startup_stage = "Profiles"
             self.publish(event="component", component="Profiles", status="Loading", detail=str(self.args.database))
             store = ProfileStore(self.args.database, recognizer.fingerprint, recognizer.dimension)
-            self.service = AttendanceService(store, recognizer, liveness, emotion, self.args.session)
+            # 3-frame PAD smoothing by default; the web app sends its own window setting on start.
+            self.service = AttendanceService(store, recognizer, liveness, emotion, self.args.session,
+                                             liveness_smooth_window=3)
             self.reference_importer = ReferenceImporter(store, recognizer, liveness, locator)
-            processor = FrameProcessor(locator, self.service)
+            scale = pad_crop_scale(liveness)
+            crop_options = ({"pad_scale": scale} if scale is not None
+                            else {"pad_context": True} if uses_pad_context(liveness) else {})
+            # Recognize several people at once; registration and review stay single-person.
+            processor = FrameProcessor(locator, self.service, multi_face=True, **crop_options)
             self.publish(event="component", component="Profiles", status="Ready", detail=str(self.args.database))
-            self.publish(event="ready", profiles=len(self.service.profiles), attendance=store.attendance(self.service.session))
+            def _num(val):
+                return float(val) if isinstance(val, (int, float)) else None
+            ckpt = getattr(recognizer, "checkpoint", None)
+            rec_cfg = getattr(recognizer, "config", None)
+            rec_cfg = rec_cfg if isinstance(rec_cfg, dict) else {}
+            stable = getattr(self.service, "stable_frames", 3)
+            model_info = {
+                "identity_threshold": _num(getattr(recognizer, "threshold", None)),
+                "identity_margin": _num(getattr(recognizer, "margin", None)),
+                "identity_dim": int(recognizer.dimension) if isinstance(getattr(recognizer, "dimension", None), int) else 128,
+                "identity_backbone": str(rec_cfg.get("backbone", "compact")),
+                "identity_method": str(rec_cfg.get("method", "triplet")),
+                "identity_checkpoint": f"{ckpt.parent.name}/{ckpt.name}" if isinstance(ckpt, Path) else str(ckpt or ""),
+                "liveness_threshold": _num(getattr(liveness, "threshold", None)),
+                "liveness_arch": str((getattr(liveness, "config", None) or {}).get("arch", "liveness_cnn")),
+                "liveness_crop_scale": (getattr(liveness, "config", None) or {}).get("crop_scale"),
+                "liveness_checkpoint": "/".join(Path(str(getattr(self.args, "liveness_checkpoint", ""))).parts[-2:]),
+                "emotion_checkpoint": "/".join(Path(str(getattr(self.args, "emotion_checkpoint", ""))).parts[-2:]),
+                "emotion_arch": str(((getattr(emotion, "payload", None) or {}).get("config") or {}).get("architecture", "")),
+                "stable_frames": int(stable) if isinstance(stable, int) else 3,
+                "device": str(getattr(self.args, "device", "cpu")),
+                "num_threads": int(self.args.num_threads) if isinstance(getattr(self.args, "num_threads", None), int) else 4,
+            }
+            self.publish(event="ready", profiles=len(self.service.profiles),
+                         attendance=store.attendance(self.service.session), model_info=model_info)
             while True:
                 try:
                     command, value = self.commands.get(timeout=.08 if self.camera is None else .001)
@@ -196,6 +274,14 @@ class CameraWorker(threading.Thread):
                     command, value = None, None
                 if command == "quit":
                     break
+                if command == "set_stable_frames":
+                    frames = max(1, min(5, int(value)))
+                    self.service.stable_frames = frames
+                    self.publish(event="config_updated", stable_frames=frames)
+                if command == "set_liveness_smooth":
+                    window = max(1, min(5, int(value)))
+                    self.service.set_liveness_smooth_window(window)
+                    self.publish(event="config_updated", liveness_smooth_window=window)
                 if command == "stop":
                     self.stop_camera()
                     self.publish(event="stopped")
@@ -213,10 +299,9 @@ class CameraWorker(threading.Thread):
                         self.stop_camera()
                         self.service.session = session
                         stream_id = self.stream_id
-                        backend = getattr(self.args, "camera_backend", None)
                         self.camera = LatestCamera(selected_camera,
                             on_preview=lambda sample, token=stream_id: self.preview(sample, token),
-                            backend=backend)
+                            backend=getattr(self.args, "camera_backend", None))
                         self.camera.open()
                         self.publish(event="started", camera=selected_camera, stream_id=stream_id,
                                      attendance=store.attendance(session))
@@ -233,7 +318,51 @@ class CameraWorker(threading.Thread):
                         self.publish(event="notice", message=str(exc))
                 if command == "cancel":
                     self.service.cancel_registration()
-                if command in ("profiles_list", "profile_rename", "profile_remove", "profile_import_check", "profile_import_commit"):
+                if command == "profiles_snapshot":
+                    # Read-only view while the camera runs; editing still needs the camera stopped.
+                    self.publish(event="profiles_snapshot", profiles=self.profile_rows())
+                if command == "guided_capture":
+                    try:
+                        slot = value.get("slot") if isinstance(value, dict) else None
+                        latest, rgb = self.latest, self.latest_rgb
+                        if latest is None or rgb is None or time.monotonic() - self.latest_time > 1.5:
+                            raise ValueError("Start the camera and face it before capturing.")
+                        if len(latest.get("boxes") or []) != 1:
+                            raise ValueError("Exactly one face must be in view to capture a shot.")
+                        shots = self.service.capture_guided_shot(rgb, tuple(latest["boxes"][0]), slot=slot)
+                        self.publish(event="guided_state", shots=[
+                            {"id": s["id"], "slot": s["slot"], "live_score": s["live_score"],
+                             "is_live": s["is_live"], "crop": s["crop"].copy()}
+                            for s in shots
+                        ])
+                    except ValueError as exc:
+                        self.publish(event="guided_error", message=str(exc))
+                if command == "guided_remove":
+                    val = value if isinstance(value, dict) else {}
+                    shots = self.service.remove_guided_shot(shot_id=val.get("shot_id"), slot=val.get("slot"))
+                    self.publish(event="guided_state", shots=[
+                        {"id": s["id"], "slot": s["slot"], "live_score": s["live_score"], "is_live": s["is_live"], "crop": s["crop"].copy()}
+                        for s in shots
+                    ])
+                if command == "guided_clear":
+                    self.service.clear_guided_shots()
+                    self.publish(event="guided_state", shots=[])
+                if command == "guided_commit":
+                    try:
+                        val = value if isinstance(value, dict) else {}
+                        result = self.service.commit_guided_registration(
+                            val.get("name", ""),
+                            force=bool(val.get("force", False)),
+                            appearance_person_id=val.get("appearance_person_id"),
+                            appearance_label=val.get("appearance_label", ""),
+                        )
+                        self.publish(event="guided_committed", result=result,
+                                     profiles=len(self.service.profiles),
+                                     attendance=store.attendance(self.service.session))
+                    except (ValueError, sqlite3.Error) as exc:
+                        self.publish(event="guided_error", message=str(exc))
+                if command in ("profiles_list", "profile_rename", "profile_remove", "profile_delete",
+                               "profile_import_check", "profile_import_commit"):
                     try:
                         self.require_profile_management()
                         if command != "profiles_list" and not self.profiles_open:
@@ -249,6 +378,11 @@ class CameraWorker(threading.Thread):
                             backup = store.remove_appearance(**value)
                             self.reference_importer.cancel()
                             self.publish_profiles("Appearance removed. Backup: "+backup, value["person_id"])
+                        elif command == "profile_delete":
+                            backup = store.delete_profile(**value)
+                            self.reference_importer.cancel()
+                            self.service.cancel_registration()
+                            self.publish_profiles("Profile and its attendance deleted. Backup: "+backup)
                         elif command == "profile_import_check":
                             report = self.reference_importer.prepare(**value)
                             self.publish(event="profile_import_checked", report=report)
@@ -313,7 +447,7 @@ class CameraWorker(threading.Thread):
                     frame_stage = "Frame processing"
                     processing_started = time.perf_counter()
                     result = processor.process(rgb, observed_at=sample.captured_at)
-                    self.latest, self.latest_time = result, sample.captured_at
+                    self.latest, self.latest_time, self.latest_rgb = result, sample.captured_at, rgb
                     elapsed = time.perf_counter() - started
                     self.publish(event="frame", rgb=rgb, result=result, elapsed=elapsed,
                                  processing_seconds=time.perf_counter()-processing_started,
@@ -352,6 +486,7 @@ class AttendanceWindow:
         self.review_dialog = None
         self.appearance_dialog = None
         self.history_dialog = None
+        self.model_test_dialog = None
         self.profiles_dialog = None
         self.profiles_opening = False
         self.models_ready = False
@@ -370,101 +505,131 @@ class AttendanceWindow:
         root.minsize(min(1100, width), min(700, height))
         root.configure(bg=BG)
         root.protocol("WM_DELETE_WINDOW", self.close)
-        style = ttk.Style(root)
-        style.theme_use("clam")
-        style.configure("Treeview", background=CARD, foreground=INK, fieldbackground=CARD, rowheight=34,
-                        borderwidth=0, font=("Segoe UI", 10))
-        style.configure("Treeview.Heading", font=("Segoe UI", 10, "bold"), background="#edf3fb", foreground=MUTED)
+        apply_style(root)
+        self.state_text = tk.StringVar(value="Preview · Camera off" if args.preview else "Loading three models…")
+        self.build_app_bar(root)
         outer = tk.Frame(root, bg=BG)
-        outer.pack(fill="both", expand=True, padx=18, pady=12)
-        header = tk.Frame(outer, bg=BG)
-        header.pack(fill="x")
-        self.label(header, "FACE ATTENDANCE", 19, True, BG).pack(side="left")
-        self.label(header, "COS30082  /  LOCAL DEMO", 10, True, BG, MUTED).pack(side="right", pady=4)
-        self.label(outer, "Identity recognition · Liveness check · Facial expression display", 11, bg=BG, fg=MUTED).pack(anchor="w", pady=(2, 8))
-        bar = tk.Frame(outer, bg=CARD, padx=12, pady=8)
-        bar.pack(fill="x", pady=(0, 10))
-        control_card = bar
+        outer.pack(fill="both", expand=True, padx=18, pady=(14, 8))
+
+        # Toolbar: session + camera controls on the left, secondary tools on the right.
+        control_card = card(outer, padx=14, pady=10)
+        control_card.pack(fill="x", pady=(0, 12))
         bar = tk.Frame(control_card, bg=CARD)
         bar.pack(fill="x")
-        self.label(bar, "Session", 10, True).pack(side="left", padx=(0, 12))
+        self.caption(bar, "SESSION").pack(side="left", padx=(0, 10))
         self.session = tk.StringVar(value=args.session)
-        self.session_entry = tk.Entry(bar, textvariable=self.session, font=("Segoe UI", 11), width=24,
-                                      relief="solid", bd=1, bg="#f8fafc", fg=INK)
-        self.session_entry.pack(side="left", ipady=6)
-        self.start_button = self.button(bar, "Start camera", self.start, BLUE)
-        self.start_button.pack(side="left", padx=(16, 8))
-        self.stop_button = self.button(bar, "Stop", lambda: self.send("stop"), "#e7edf5", INK)
+        self.session_entry = entry(bar, self.session, 11, width=22)
+        self.session_entry.pack(side="left", ipady=6, ipadx=6)
+        self.start_button = self.button(bar, "▶  Start camera", self.start, "primary")
+        self.start_button.pack(side="left", padx=(14, 6))
+        self.stop_button = self.button(bar, "■  Stop", lambda: self.send("stop"), "danger")
         self.stop_button.pack(side="left")
-        self.history_button = self.button(bar, "History / CSV", self.open_history, "#e7edf5", INK)
-        self.history_button.pack(side="left", padx=(8, 0))
-        for button in (self.start_button, self.stop_button, self.history_button):
-            button.configure(pady=6)
-        self.state_text = tk.StringVar(value="Preview · Camera off" if args.preview else "Loading three models…")
-        self.label(bar, variable=self.state_text, size=10, fg=MUTED).pack(side="right", padx=5)
+        self.history_button = self.button(bar, "History / CSV", self.open_history, "secondary")
+        self.history_button.pack(side="right")
+        tk.Frame(control_card, bg=BORDER, height=1).pack(fill="x", pady=9)
         device_bar = tk.Frame(control_card, bg=CARD)
-        device_bar.pack(fill="x", pady=(6, 0))
-        self.label(device_bar, "Camera index", 10, True).pack(side="left", padx=(0, 10))
+        device_bar.pack(fill="x")
+        self.caption(device_bar, "CAMERA").pack(side="left", padx=(0, 10))
         self.camera_choice = tk.StringVar(value=str(args.camera))
         indices = sorted(set(range(10)) | {args.camera})
         self.camera_selector = ttk.Combobox(device_bar, textvariable=self.camera_choice,
-            values=[str(index) for index in indices], width=5, state="readonly", font=("Segoe UI", 11))
+            values=[str(index) for index in indices], width=4, state="readonly", font=(FONT, 10))
         self.camera_selector.pack(side="left")
         self.camera_selector.bind("<<ComboboxSelected>>", self.camera_changed)
-        self.test_camera_button = ttk.Button(device_bar, text="Test camera", command=self.test_camera)
-        self.test_camera_button.pack(side="left", padx=10)
-        ttk.Button(device_bar, text="Diagnostics…", command=self.open_diagnostics).pack(side="left")
+        self.test_camera_button = self.button(device_bar, "Test camera", self.test_camera, "secondary", 9)
+        self.test_camera_button.pack(side="left", padx=(8, 0))
         self.camera_summary = tk.StringVar(value=f"Camera {args.camera} · Not tested")
-        self.label(device_bar, variable=self.camera_summary, size=10, fg=MUTED).pack(side="left", padx=14)
-        self.label(outer, "Stored locally · Camera images are not saved · Expressions are display only · Educational prototype", 9, bg=BG, fg=MUTED).pack(side="bottom", anchor="w", pady=(8, 0))
+        self.label(device_bar, variable=self.camera_summary, size=9, fg=MUTED).pack(side="left", padx=12)
+        self.model_test_button = self.button(device_bar, "Model tests…", self.open_model_tests, "ghost", 9)
+        self.model_test_button.pack(side="right")
+        self.button(device_bar, "Diagnostics…", self.open_diagnostics, "ghost", 9).pack(side="right", padx=(0, 4))
+
+        self.label(outer, "Stored locally  •  Camera images are not saved  •  Expressions are display only  •  Educational prototype",
+                   8, bg=BG, fg=SUBTLE).pack(side="bottom", anchor="w", pady=(8, 0))
         content = tk.Frame(outer, bg=BG)
         content.pack(fill="both", expand=True)
         content.columnconfigure(0, weight=7)
-        content.columnconfigure(1, weight=3, minsize=310)
+        content.columnconfigure(1, weight=3, minsize=320)
         content.rowconfigure(0, weight=1)
         # A preferred column size is independent of live text. Grid still
         # allocates the actual size when the user resizes the window.
         left = tk.Frame(content, bg=BG, width=720)
         left.pack_propagate(False)
-        left.grid(row=0, column=0, sticky="nsew", padx=(0, 16))
+        left.grid(row=0, column=0, sticky="nsew", padx=(0, 14))
         right = tk.Frame(content, bg=BG)
         right.grid(row=0, column=1, sticky="nsew")
-        camera_card = tk.Frame(left, bg=CARD, padx=12, pady=12)
+
+        # Live camera card with a colour-coded feedback banner of fixed height.
+        camera_card = card(left, padx=14, pady=12)
         camera_card.columnconfigure(0, weight=1)
         camera_card.rowconfigure(1, weight=1)
         camera_top = tk.Frame(camera_card, bg=CARD)
-        camera_top.grid(row=0, column=0, sticky="ew", pady=(0, 6))
-        self.label(camera_top, "LIVE CAMERA", 10, True).pack(side="left")
+        camera_top.grid(row=0, column=0, sticky="ew", pady=(0, 8))
+        self.label(camera_top, "Live camera", 11, True).pack(side="left")
         self.speed = tk.StringVar(value="FPS not measured")
-        speed_label = self.label(camera_top, variable=self.speed, size=9, fg=MUTED, width=42)
+        speed_label = self.label(camera_top, variable=self.speed, size=9, fg=MUTED, width=34)
         speed_label.configure(anchor="e")
         speed_label.pack(side="right")
-        self.canvas = tk.Canvas(camera_card, bg="#102039", highlightthickness=0, height=1)
+        self.canvas = tk.Canvas(camera_card, bg=CANVAS, highlightthickness=1, highlightbackground=BORDER, height=1)
         self.canvas.grid(row=1, column=0, sticky="nsew")
+        self.canvas.bind("<Configure>", lambda event: self.placeholder() if self.canvas_image is None else None)
+        checks_row = tk.Frame(camera_card, bg=CARD)
+        checks_row.grid(row=2, column=0, sticky="ew", pady=(10, 0))
+        self.quality_chips = {}
+        for idx, (key, title) in enumerate((("face", "Single face"), ("lighting", "Good lighting"),
+                                            ("focus", "Sharp focus"), ("liveness", "Liveness"))):
+            checks_row.columnconfigure(idx, weight=1, uniform="checks")
+            chip = tk.Frame(checks_row, bg=SURFACE, padx=8, pady=4, highlightthickness=1, highlightbackground=BORDER)
+            chip.grid(row=0, column=idx, sticky="ew", padx=(0 if idx == 0 else 6, 0))
+            dot = tk.Label(chip, text="●", bg=SURFACE, fg=SUBTLE, font=(FONT, 8))
+            dot.pack(side="left", padx=(0, 5))
+            txt = tk.Label(chip, text=title, bg=SURFACE, fg=MUTED, font=(FONT, 8, "bold"), anchor="w")
+            txt.pack(side="left", fill="x", expand=True)
+            self.quality_chips[key] = (chip, dot, txt)
+        self.scan_bar = tk.Canvas(camera_card, bg="#e5eaf0", highlightthickness=0, height=5)
+        self.scan_bar.grid(row=3, column=0, sticky="ew", pady=(8, 0))
+        self.scan_bar.bind("<Configure>", lambda event: self.paint_scan_bar())
+        self.scan_ratio, self.scan_color = 0.0, MINT
+        soft, accent, ink = TONES["neutral"]
+        self.feedback_box = tk.Frame(camera_card, bg=soft)
+        self.feedback_box.grid(row=4, column=0, sticky="ew", pady=(8, 0))
+        self.feedback_box.columnconfigure(1, weight=1)
+        self.feedback_accent = tk.Frame(self.feedback_box, bg=accent, width=4)
+        self.feedback_accent.grid(row=0, column=0, rowspan=2, sticky="ns")
         self.feedback = tk.StringVar(value="Click Start camera when you are ready")
-        self.feedback_label = self.label(camera_card, variable=self.feedback, size=11, bold=True,
-                                         width=1, height=2, wraplength=680)
+        self.feedback_label = self.label(self.feedback_box, variable=self.feedback, size=11, bold=True,
+                                         bg=soft, fg=ink, width=1, height=2, wraplength=680)
         self.feedback_label.configure(anchor="nw")
-        self.feedback_label.grid(row=2, column=0, sticky="ew", pady=(12, 3))
+        self.feedback_label.grid(row=0, column=1, sticky="ew", padx=(12, 10), pady=(7, 0))
         self.guidance = tk.StringVar(value="Choose a camera index while stopped. Test camera reads one frame without recording attendance.")
-        self.guidance_label = self.label(camera_card, variable=self.guidance, size=10, fg=MUTED,
+        self.guidance_label = self.label(self.feedback_box, variable=self.guidance, size=9, bg=soft, fg=MUTED,
                                          width=1, height=2, wraplength=650)
         self.guidance_label.configure(anchor="nw")
-        self.guidance_label.grid(row=3, column=0, sticky="ew", pady=(2, 0))
+        self.guidance_label.grid(row=1, column=1, sticky="ew", padx=(12, 10), pady=(0, 7))
         self.feedback_label.bind("<Configure>", lambda event: self.feedback_label.configure(wraplength=max(100, event.width-8)))
         self.guidance_label.bind("<Configure>", lambda event: self.guidance_label.configure(wraplength=max(100, event.width-8)))
+        self.feedback.trace_add("write", lambda *_: self.paint_feedback())
+
+        # Result cards: a coloured top strip and value text show the state at a glance.
         stats = tk.Frame(left, bg=BG)
-        stats.pack(side="bottom", fill="x", pady=(10, 0))
+        stats.pack(side="bottom", fill="x", pady=(12, 0))
         self.identity_text, self.live_text, self.expression_text = (tk.StringVar(value="—") for _ in range(3))
-        for index, (title, value) in enumerate((("IDENTITY", self.identity_text), ("LIVENESS", self.live_text), ("EXPRESSION", self.expression_text))):
+        self.stat_vars = {"identity": self.identity_text, "liveness": self.live_text, "expression": self.expression_text}
+        self.stat_cards = {}
+        for index, (key, title) in enumerate((("identity", "IDENTITY  ·  click for details"),
+                                              ("liveness", "LIVENESS"), ("expression", "EXPRESSION"))):
             stats.columnconfigure(index, weight=1, uniform="stats")
-            card = tk.Frame(stats, bg=CARD, padx=13, pady=12)
-            card.grid(row=0, column=index, sticky="nsew", padx=(0 if index == 0 else 9, 0))
-            self.label(card, title + (" · details" if index == 0 else ""), 9, True, fg=MUTED).pack(anchor="w")
-            value_label = self.label(card, variable=value, size=12, bold=True,
-                                     width=1, height=2, wraplength=200)
+            frame = card(stats, padx=0, pady=0)
+            frame.grid(row=0, column=index, sticky="nsew", padx=(0 if index == 0 else 10, 0))
+            strip = tk.Frame(frame, bg=TONES["neutral"][1], height=4)
+            strip.pack(fill="x")
+            inner = tk.Frame(frame, bg=CARD, padx=14, pady=10)
+            inner.pack(fill="both", expand=True)
+            self.caption(inner, title).pack(anchor="w")
+            value_label = self.label(inner, variable=self.stat_vars[key], size=13, bold=True,
+                                     fg=SUBTLE, width=1, height=2, wraplength=200)
             value_label.configure(anchor="nw")
-            value_label.pack(fill="x", pady=(5, 0))
+            value_label.pack(fill="x", pady=(4, 0))
             value_label.bind("<Configure>", lambda event: event.widget.configure(
                 wraplength=max(100, event.width-8)))
             if index == 0:
@@ -474,51 +639,98 @@ class AttendanceWindow:
                                       highlightthickness=1, highlightbackground=CARD, highlightcolor=BLUE)
                 value_label.bind("<Button-1>", self.show_identity_details)
                 value_label.bind("<Return>", self.show_identity_details)
+            self.stat_cards[key] = (strip, value_label)
+            self.stat_vars[key].trace_add("write", lambda *_, name=key: self.paint_stat(name))
         camera_card.pack(fill="both", expand=True)
+
+        # Right column: tabbed panel (Registration | Model details) + Present this session.
         right.columnconfigure(0, weight=1)
-        right.rowconfigure(1, weight=1, minsize=140)
-        register = tk.Frame(right, bg=CARD, padx=18, pady=12)
-        register.grid(row=0, column=0, sticky="ew", pady=(0, 12))
-        self.label(register, "People & registration", 15, True).pack(anchor="w")
-        self.label(register, "New person: register with name / student ID. Changed look: Add appearance to the existing profile.", 10, fg=MUTED, wraplength=300).pack(anchor="w", pady=(5, 8))
+        right.rowconfigure(1, weight=1, minsize=150)
+        panel_card = card(right, padx=14, pady=10)
+        panel_card.grid(row=0, column=0, sticky="ew", pady=(0, 8))
+        panel_card.columnconfigure(0, weight=1)
+        tab_bar = tk.Frame(panel_card, bg=SURFACE, padx=3, pady=3, highlightthickness=1, highlightbackground=BORDER)
+        tab_bar.grid(row=0, column=0, sticky="ew", pady=(0, 8))
+        tab_bar.columnconfigure((0, 1), weight=1, uniform="tabs")
+        self.tab_buttons = {}
+        self.tab_frames = {}
+        for idx, (key, title) in enumerate((("register", "People & registration"), ("models", "Live model scores"))):
+            btn = tk.Button(tab_bar, text=title, command=lambda k=key: self.select_tab(k),
+                            relief="flat", bd=0, highlightthickness=0, pady=5, cursor="hand2",
+                            font=(FONT, 9, "bold"))
+            btn.grid(row=0, column=idx, sticky="ew", padx=(0 if idx == 0 else 2, 0))
+            self.tab_buttons[key] = btn
+        tab_stack = tk.Frame(panel_card, bg=CARD)
+        tab_stack.grid(row=1, column=0, sticky="nsew")
+        tab_stack.columnconfigure(0, weight=1)
+        tab_stack.rowconfigure(0, weight=1)
+
+        register = tk.Frame(tab_stack, bg=CARD)
+        register.grid(row=0, column=0, sticky="nsew")
+        self.tab_frames["register"] = register
+        hint = self.label(register, "New person: register with name / student ID. "
+                          "Changed look: add an appearance to an existing profile.", 9, fg=MUTED, wraplength=280)
+        hint.pack(fill="x", anchor="w", pady=(0, 8))
+        hint.bind("<Configure>", lambda event: event.widget.configure(wraplength=max(120, event.width-4)))
+        self.caption(register, "NAME / STUDENT ID").pack(anchor="w", pady=(0, 3))
         self.name = tk.StringVar()
-        tk.Entry(register, textvariable=self.name, font=("Segoe UI", 12), relief="solid", bd=1,
-                 bg="#f8fafc", fg=INK).pack(fill="x", ipady=4)
+        entry(register, self.name, 11).pack(fill="x", ipady=5, ipadx=6)
         register_actions = tk.Frame(register, bg=CARD)
         register_actions.pack(fill="x", pady=(8, 0))
-        self.register_button = self.button(register_actions, "Register from camera", lambda: self.send("register", self.name.get()), BLUE)
+        self.register_button = self.button(register_actions, "Register from camera",
+                                           lambda: self.send("register", self.name.get()), "primary")
         self.register_button.pack(side="left", fill="x", expand=True, padx=(0, 8))
-        cancel_button = self.button(register_actions, "Cancel capture", lambda: self.send("cancel"), "#e7edf5", INK)
-        cancel_button.configure(pady=6, padx=10)
+        cancel_button = self.button(register_actions, "Cancel capture", lambda: self.send("cancel"), "secondary")
         cancel_button.pack(side="right")
         existing_actions = tk.Frame(register, bg=CARD)
         existing_actions.pack(fill="x", pady=(6, 0))
-        existing_actions.columnconfigure((0, 1), weight=1)
-        self.appearance_button = self.button(existing_actions, "Add appearance", lambda: self.send("appearance_request"), "#e7edf5", INK)
+        existing_actions.columnconfigure((0, 1), weight=1, uniform="actions")
+        self.appearance_button = self.button(existing_actions, "Add appearance", lambda: self.send("appearance_request"))
         self.appearance_button.grid(row=0, column=0, sticky="ew", padx=(0, 4))
-        self.review_button = self.button(existing_actions, "Manual review", lambda: self.send("review"), "#e7edf5", INK)
+        self.review_button = self.button(existing_actions, "Manual review", lambda: self.send("review"))
         self.review_button.grid(row=0, column=1, sticky="ew", padx=(4, 0))
+        tk.Frame(register, bg=BORDER, height=1).pack(fill="x", pady=(9, 6))
         self.profile_count = tk.StringVar(value="0 registered profiles")
         profile_bar = tk.Frame(register, bg=CARD)
-        profile_bar.pack(fill="x", pady=(8, 0))
-        self.label(profile_bar, variable=self.profile_count, size=10, fg=MUTED).pack(side="left")
-        self.profiles_button = self.button(profile_bar, "Profiles…", self.open_profiles, "#e7edf5", INK)
+        profile_bar.pack(fill="x")
+        self.label(profile_bar, variable=self.profile_count, size=9, fg=MUTED).pack(side="left")
+        self.profiles_button = self.button(profile_bar, "Profiles…", self.open_profiles, "ghost", 9)
         self.profiles_button.pack(side="right")
-        for button in (self.register_button, self.appearance_button, self.review_button, self.profiles_button):
-            button.configure(pady=6, padx=10)
-        attendance = tk.Frame(right, bg=CARD, padx=16, pady=16)
+
+        models_tab = tk.Frame(tab_stack, bg=CARD)
+        models_tab.grid(row=0, column=0, sticky="nsew")
+        self.tab_frames["models"] = models_tab
+        self.pad_detail = tk.StringVar(value="Waiting for live frame")
+        self.id_detail = tk.StringVar(value="Waiting for live frame")
+        self.build_telemetry_tab(models_tab)
+        self.select_tab("register")
+
+        attendance = card(right, padx=14, pady=10)
         attendance.grid(row=1, column=0, sticky="nsew")
-        self.label(attendance, "Present this session", 15, True).pack(anchor="w", pady=(0, 10))
-        self.tree = ttk.Treeview(attendance, columns=("name", "time", "source"), show="headings", height=3)
-        self.tree.heading("name", text="Name / student ID")
-        self.tree.heading("time", text="Time")
-        self.tree.heading("source", text="Source")
-        self.tree.column("name", width=185, stretch=True)
-        self.tree.column("time", width=62, stretch=False, anchor="center")
-        self.tree.column("source", width=90, stretch=False, anchor="center")
+        attendance_head = tk.Frame(attendance, bg=CARD)
+        attendance_head.pack(fill="x", pady=(0, 6))
+        self.label(attendance_head, "Present this session", 12, True).pack(side="left")
+        self.present_count = tk.StringVar(value="0 present")
+        tk.Label(attendance_head, textvariable=self.present_count, bg=PRIMARY_SOFT, fg=PRIMARY_INK,
+                 font=(FONT, 9, "bold"), padx=10, pady=2).pack(side="right")
+        tree_wrap = tk.Frame(attendance, bg=CARD)
+        self.tree = ttk.Treeview(tree_wrap, columns=("name", "time", "source"), show="headings", height=3)
+        self.tree.heading("name", text="NAME / STUDENT ID", anchor="w")
+        self.tree.heading("time", text="TIME")
+        self.tree.heading("source", text="SOURCE")
+        self.tree.column("name", width=165, stretch=True)
+        self.tree.column("time", width=56, stretch=False, anchor="center")
+        self.tree.column("source", width=84, stretch=False, anchor="center")
+        self.tree.tag_configure("odd", background=SURFACE)
+        self.tree.tag_configure("manual", foreground="#b45309")
         self.tree.bind("<Double-1>", self.show_attendance_detail)
-        self.label(attendance, "One record per person per session.", 9, fg=MUTED).pack(side="bottom", anchor="w", pady=(9, 0))
-        self.tree.pack(fill="both", expand=True)
+        tree_scroll = ttk.Scrollbar(tree_wrap, orient="vertical", command=self.tree.yview)
+        self.tree.configure(yscrollcommand=tree_scroll.set)
+        self.tree.pack(side="left", fill="both", expand=True)
+        tree_scroll.pack(side="right", fill="y")
+        self.label(attendance, "One record per session · Double-click for details", 8,
+                   fg=SUBTLE).pack(side="bottom", anchor="w", pady=(7, 0))
+        tree_wrap.pack(fill="both", expand=True)
         self.photo = None
         self.attendance_rows = None
         self.controls(False, False)
@@ -538,6 +750,8 @@ class AttendanceWindow:
             self.component_status["Identity"] = {"status": "Ready", "detail": "PREVIEW · Example configuration loaded"}
             self.component_status["Liveness"] = {"status": "Error", "detail": "PREVIEW · Example missing checkpoint; no files were read"}
             root.after(300, self.open_diagnostics)
+        elif getattr(args, "preview_model_tests", False):
+            root.after(300, self.open_model_tests)
         if not args.preview:
             self.worker = CameraWorker(args, self.commands, self.updates, self.previews, self.analyses)
             self.worker.start()
@@ -545,7 +759,241 @@ class AttendanceWindow:
 
     def label(self, parent, text=None, size=11, bold=False, bg=CARD, fg=INK, variable=None, **kwargs):
         return self.tk.Label(parent, text=text, textvariable=variable, bg=bg, fg=fg, anchor="w", justify="left",
-                             font=("Segoe UI", size, "bold" if bold else "normal"), **kwargs)
+                             font=(FONT, size, "bold" if bold else "normal"), **kwargs)
+
+    def caption(self, parent, text, bg=CARD):
+        return self.tk.Label(parent, text=text, bg=bg, fg=MUTED, anchor="w", font=(FONT, 8, "bold"))
+
+    def build_app_bar(self, root):
+        tk = self.tk
+        bar = tk.Frame(root, bg=HEADER_BG, padx=20, pady=10)
+        bar.pack(fill="x")
+        tk.Frame(root, bg=BORDER, height=1).pack(fill="x")
+        logo = tk.Canvas(bar, width=40, height=40, bg=HEADER_BG, highlightthickness=0)
+        logo.create_polygon(20, 3, 35, 11.5, 35, 28.5, 20, 37, 5, 28.5, 5, 11.5,
+                            fill=PRIMARY_SOFT, outline=MINT, width=1.8)
+        logo.create_oval(15, 11, 25, 22, outline=PRIMARY_INK, width=1.6)
+        logo.create_arc(11, 22, 29, 36, start=15, extent=150, style="arc", outline=PRIMARY_INK, width=1.6)
+        logo.create_arc(7, 17, 33, 27, start=20, extent=140, style="arc", outline=MINT, width=1.6)
+        logo.pack(side="left", padx=(0, 12))
+        titles = tk.Frame(bar, bg=HEADER_BG)
+        titles.pack(side="left")
+        brand_row = tk.Frame(titles, bg=HEADER_BG)
+        brand_row.pack(anchor="w")
+        tk.Label(brand_row, text="Face Attendance", bg=HEADER_BG, fg=INK, font=(FONT, 15, "bold")).pack(side="left")
+        tk.Label(brand_row, text="  ·  Live Verification", bg=HEADER_BG, fg=PRIMARY_INK,
+                 font=(FONT, 10, "bold")).pack(side="left", pady=(3, 0))
+        tk.Label(titles, text="Identity verification  ·  Anti-spoofing liveness  ·  Facial expression",
+                 bg=HEADER_BG, fg=MUTED, font=(FONT, 9)).pack(anchor="w")
+        tk.Label(bar, text="COS30082 · LOCAL DEMO", bg=HEADER_BG, fg=SUBTLE, font=(FONT, 8, "bold")).pack(side="right", padx=(16, 0))
+        pill = tk.Frame(bar, bg=PILL_BG, padx=12, pady=5, highlightthickness=1, highlightbackground=BORDER)
+        pill.pack(side="right")
+        self.state_dot = tk.Canvas(pill, width=10, height=10, bg=PILL_BG, highlightthickness=0)
+        self.state_dot_item = self.state_dot.create_oval(1, 1, 9, 9, fill=SUBTLE, outline="")
+        self.state_dot.pack(side="left", padx=(0, 8))
+        tk.Label(pill, textvariable=self.state_text, bg=PILL_BG, fg=INK, font=(FONT, 9, "bold")).pack(side="left")
+        self.state_text.trace_add("write", lambda *_: self.paint_state())
+        self.paint_state()
+
+    def select_tab(self, active):
+        self.active_tab = active
+        for key, button in self.tab_buttons.items():
+            if key == active:
+                button.configure(bg=CARD, fg=PRIMARY_INK)
+            else:
+                button.configure(bg=SURFACE, fg=MUTED)
+        self.tab_frames[active].tkraise()
+
+    def build_telemetry_tab(self, parent):
+        tk = self.tk
+        self.caption(parent, "LIVENESS (PAD) & IDENTITY").pack(anchor="w")
+        self.telemetry_bars = {}
+        for key, title, var in (("pad", "Liveness score", self.pad_detail),
+                                ("identity", "Identity match", self.id_detail)):
+            row = tk.Frame(parent, bg=CARD)
+            row.pack(fill="x", pady=(3, 0))
+            tk.Label(row, text=title, bg=CARD, fg=INK, font=(FONT, 8, "bold")).pack(side="left")
+            tk.Label(row, textvariable=var, bg=CARD, fg=MUTED, font=(FONT, 8)).pack(side="right")
+            bar = tk.Canvas(parent, bg="#e5eaf0", highlightthickness=0, height=5)
+            bar.pack(fill="x", pady=(2, 2))
+            bar.bind("<Configure>", lambda event, k=key: self.paint_mini_bar(k))
+            self.telemetry_bars[key] = [bar, 0.0, MINT]
+        tk.Frame(parent, bg=BORDER, height=1).pack(fill="x", pady=(4, 4))
+        self.caption(parent, "EXPRESSIONS (FER2013 · DISPLAY ONLY)").pack(anchor="w", pady=(0, 2))
+        self.emotion_bars = {}
+        for name in ("happy", "neutral", "surprise", "sad", "angry", "fear", "disgust"):
+            row = tk.Frame(parent, bg=CARD)
+            row.pack(fill="x", pady=0)
+            row.columnconfigure(1, weight=1)
+            tk.Label(row, text=name.title(), bg=CARD, fg=MUTED, font=(FONT, 8), width=8, anchor="w").grid(row=0, column=0, sticky="w")
+            bar = tk.Canvas(row, bg="#edf1f5", highlightthickness=0, height=6)
+            bar.grid(row=0, column=1, sticky="ew", padx=(4, 6))
+            pct = tk.Label(row, text="—", bg=CARD, fg=SUBTLE, font=(FONT, 8), width=4, anchor="e")
+            pct.grid(row=0, column=2, sticky="e")
+            bar.bind("<Configure>", lambda event, k=name: self.paint_emotion_bar(k))
+            self.emotion_bars[name] = [bar, pct, 0.0, False]
+
+    def paint_mini_bar(self, key):
+        bar, ratio, color = self.telemetry_bars[key]
+        bar.delete("all")
+        w, h = max(1, bar.winfo_width()), max(1, bar.winfo_height())
+        bar.create_rectangle(0, 0, w, h, fill="#e5eaf0", outline="")
+        if ratio > 0:
+            bar.create_rectangle(0, 0, max(4, int(w * min(1.0, ratio))), h, fill=color, outline="")
+
+    def paint_emotion_bar(self, key):
+        bar, _, ratio, top = self.emotion_bars[key]
+        bar.delete("all")
+        w, h = max(1, bar.winfo_width()), max(1, bar.winfo_height())
+        bar.create_rectangle(0, 0, w, h, fill="#edf1f5", outline="")
+        if ratio > 0:
+            bar.create_rectangle(0, 0, max(3, int(w * min(1.0, ratio))), h,
+                                 fill=MINT if top else "#93c5b8", outline="")
+
+    def set_chip(self, key, tone):
+        chip, dot, txt = self.quality_chips[key]
+        if tone == "neutral":
+            bg, border, dot_c, fg = SURFACE, BORDER, SUBTLE, MUTED
+        else:
+            bg, dot_c, fg = TONES[tone]
+            border = dot_c if tone == "success" else BORDER
+        chip.configure(bg=bg, highlightbackground=border)
+        dot.configure(bg=bg, fg=dot_c)
+        txt.configure(bg=bg, fg=fg)
+
+    def update_quality_chips(self, result=None):
+        if result is None:
+            for key in self.quality_chips:
+                self.set_chip(key, "neutral")
+            return
+        status = result.get("status", "")
+        boxes = result.get("boxes", [])
+        reasons = set(result.get("quality_reasons") or [])
+        if status == "multiple_faces":
+            self.set_chip("face", "danger")
+        elif status in ("no_face", "face_too_small_or_outside") or len(boxes) != 1:
+            self.set_chip("face", "warning")
+        else:
+            self.set_chip("face", "success")
+        if "brightness" in result:
+            self.set_chip("lighting", "warning" if reasons & {"dark", "bright"} else "success")
+        else:
+            self.set_chip("lighting", "neutral")
+        if "sharpness" in result:
+            self.set_chip("focus", "warning" if "blur" in reasons else "success")
+        else:
+            self.set_chip("focus", "neutral")
+        live = result.get("liveness")
+        if live is None:
+            self.set_chip("liveness", "neutral")
+        elif live.get("is_live") is True:
+            self.set_chip("liveness", "success")
+        elif live.get("is_live") is False:
+            self.set_chip("liveness", "danger")
+        else:
+            self.set_chip("liveness", "warning")
+
+    def update_telemetry(self, result=None):
+        if result is None:
+            self.pad_detail.set("Waiting for live frame")
+            self.id_detail.set("Waiting for live frame")
+            for key in self.telemetry_bars:
+                self.telemetry_bars[key][1], self.telemetry_bars[key][2] = 0.0, MINT
+                self.paint_mini_bar(key)
+            for name, item in self.emotion_bars.items():
+                item[2], item[3] = 0.0, False
+                item[1].configure(text="—", fg=SUBTLE)
+                self.paint_emotion_bar(name)
+            return
+        live = result.get("liveness") or {}
+        score, threshold = live.get("live_score"), live.get("threshold")
+        if score is not None and threshold is not None:
+            self.pad_detail.set(f"{score:.2f}  (thr {threshold:.2f})")
+            self.telemetry_bars["pad"][1] = max(0.0, min(1.0, float(score)))
+            self.telemetry_bars["pad"][2] = MINT if live.get("is_live") is True else "#ef4444"
+        else:
+            self.pad_detail.set("Not checked")
+            self.telemetry_bars["pad"][1] = 0.0
+        self.paint_mini_bar("pad")
+        ident = result.get("identity") or {}
+        cos = ident.get("cosine")
+        streak = result.get("stable_frames", 0)
+        if cos is not None:
+            suffix = f" · {streak}/3" if ident.get("status") == "known" else ""
+            self.id_detail.set(f"cos {cos:.2f}{suffix}")
+            self.telemetry_bars["identity"][1] = max(0.0, min(1.0, (float(cos) + 1.0) / 2.0))
+            self.telemetry_bars["identity"][2] = MINT if ident.get("status") == "known" else "#f59e0b"
+        else:
+            self.id_detail.set("Not checked")
+            self.telemetry_bars["identity"][1] = 0.0
+        self.paint_mini_bar("identity")
+        expr = result.get("expression") or {}
+        scores = expr.get("scores") or {}
+        top_label = expr.get("label")
+        for name, item in self.emotion_bars.items():
+            val = float(scores.get(name, 0.0)) if scores else 0.0
+            is_top = bool(scores) and name == top_label
+            item[2], item[3] = val, is_top
+            item[1].configure(text=f"{val:.0%}" if scores else "—",
+                              fg=PRIMARY_INK if is_top else MUTED if scores else SUBTLE)
+            self.paint_emotion_bar(name)
+
+    def paint_state(self):
+        text = self.state_text.get().casefold()
+        if "not ready" in text or "error" in text:
+            color = "#ef4444"
+        elif "running" in text or "recorded" in text or text.startswith("ready"):
+            color = MINT
+        elif any(word in text for word in ("loading", "opening", "closing", "retry")):
+            color = "#f59e0b"
+        else:
+            color = SUBTLE
+        self.state_dot.itemconfigure(self.state_dot_item, fill=color)
+
+    def paint_scan_bar(self):
+        bar = self.scan_bar
+        bar.delete("all")
+        width = max(1, bar.winfo_width())
+        height = max(1, bar.winfo_height())
+        bar.create_rectangle(0, 0, width, height, fill="#e5eaf0", outline="")
+        if self.scan_ratio > 0:
+            fill_width = max(8, int(width * min(1.0, self.scan_ratio)))
+            bar.create_rectangle(0, 0, fill_width, height, fill=self.scan_color, outline="")
+
+    def paint_feedback(self):
+        text = self.feedback.get()
+        tone = message_tone(text)
+        soft, accent, ink = TONES[tone]
+        self.feedback_box.configure(bg=soft)
+        self.feedback_accent.configure(bg=accent)
+        self.feedback_label.configure(bg=soft, fg=ink)
+        self.guidance_label.configure(bg=soft)
+        lowered = text.casefold()
+        if "3/3" in text or text in (MESSAGES["attendance_confirmed"], MESSAGES["registered"], MESSAGES["appearance_added"]):
+            self.scan_ratio, self.scan_color = 1.0, "#10b981"
+        elif text == MESSAGES["known"]:
+            self.scan_ratio, self.scan_color = 0.72, MINT
+        elif "2/3" in text:
+            self.scan_ratio, self.scan_color = 0.67, MINT
+        elif "1/3" in text:
+            self.scan_ratio, self.scan_color = 0.34, MINT
+        elif tone == "danger":
+            self.scan_ratio, self.scan_color = 1.0, "#ef4444"
+        elif tone == "warning":
+            self.scan_ratio, self.scan_color = 0.50, "#f59e0b"
+        elif lowered.startswith(("analyzing", "face the camera", "testing")):
+            self.scan_ratio, self.scan_color = 0.38, MINT
+        elif lowered.startswith(("models ready", "opened")):
+            self.scan_ratio, self.scan_color = 0.16, MINT
+        else:
+            self.scan_ratio, self.scan_color = 0.0, MINT
+        self.paint_scan_bar()
+
+    def paint_stat(self, key):
+        strip, value_label = self.stat_cards[key]
+        tone = stat_tone(key, self.stat_vars[key].get())
+        strip.configure(bg=TONES[tone][1])
+        value_label.configure(fg=SUBTLE if tone == "neutral" else TONES[tone][2])
 
     def camera_changed(self, event=None):
         self.camera_status = "Not tested"
@@ -554,7 +1002,8 @@ class AttendanceWindow:
         self.refresh_diagnostics()
 
     def device_locked(self):
-        return self.running or self.camera_starting or self.probe_busy or self.closing
+        return (self.running or self.camera_starting or self.probe_busy or self.closing
+                or self.model_test_dialog is not None)
 
     def refresh_device_controls(self):
         locked = self.device_locked()
@@ -563,6 +1012,7 @@ class AttendanceWindow:
         self.test_camera_button.configure(state="normal" if not locked and not profiles_busy and not self.args.preview else "disabled")
         self.start_button.configure(state="normal" if self.models_ready and not locked and not profiles_busy else "disabled")
         self.profiles_button.configure(state="normal" if (self.models_ready or self.args.preview) and not locked else "disabled")
+        self.model_test_button.configure(state="normal" if not locked and not profiles_busy else "disabled")
         self.session_entry.configure(state="disabled" if locked else "normal")
 
     def test_camera(self):
@@ -629,9 +1079,9 @@ class AttendanceWindow:
     def preview_review(self):
         from .review_dialog import ReviewDialog
         from datetime import timezone
-        crop = Image.new("RGB", (180, 130), "#e7edf5")
+        crop = Image.new("RGB", (180, 130), "#eef2f6")
         draw = ImageDraw.Draw(crop)
-        draw.text((38, 55), "PREVIEW ONLY", fill="#61748b")
+        draw.text((42, 58), "PREVIEW ONLY", fill="#6b7280")
         request = {"id": "preview-only-never-saved", "expires_at": time.monotonic()+30.,
                    "observed_utc": datetime.now(timezone.utc).isoformat(), "crop": crop,
                    "profiles": [{"id": "demo-a", "name": "Demo profile A"}, {"id": "demo-b", "name": "Demo profile B"}]}
@@ -664,9 +1114,30 @@ class AttendanceWindow:
     def history_closed(self):
         self.history_dialog = None
 
+    def open_model_tests(self):
+        if self.model_test_dialog is not None:
+            self.model_test_dialog.window.lift()
+            return
+        if (self.device_locked() or self.profiles_dialog is not None or self.profiles_opening
+                or self.appearance_dialog is not None or self.review_dialog is not None):
+            self.feedback.set("Stop the camera and finish any open capture or profile operation before model tests.")
+            return
+        from .model_test_dialog import ModelTestDialog
+        self.model_test_dialog = ModelTestDialog(self.root, PROJECT,
+            getattr(self.args, "liveness_checkpoint", DEFAULT_LIVENESS_CHECKPOINT),
+            camera_index(self.camera_choice.get()), self.model_tests_closed, preview=self.args.preview)
+        self.refresh_device_controls()
+
+    def model_tests_closed(self):
+        self.model_test_dialog = None
+        if not self.closing:
+            self.refresh_device_controls()
+
     def open_profiles(self):
         if self.profiles_dialog is not None:
             self.profiles_dialog.window.lift()
+            return
+        if self.device_locked():
             return
         if self.args.preview:
             from .profiles_dialog import ProfilesDialog
@@ -689,10 +1160,8 @@ class AttendanceWindow:
         if not self.closing:
             self.refresh_device_controls()
 
-    def button(self, parent, text, action, background, foreground="white"):
-        return self.tk.Button(parent, text=text, command=action, bg=background, fg=foreground,
-                              activebackground=background, activeforeground=foreground, bd=0,
-                              font=("Segoe UI", 11, "bold"), padx=17, pady=9, cursor="hand2")
+    def button(self, parent, text, action, variant="secondary", size=10):
+        return FlatButton(parent, text, action, variant, size)
 
     def controls(self, ready, running):
         self.running = running
@@ -720,25 +1189,46 @@ class AttendanceWindow:
 
     def placeholder(self):
         if not self.running:
-            self.canvas.delete("all")
-            width, height = self.canvas.winfo_width(), self.canvas.winfo_height()
-            cx, cy = width / 2, height / 2 - 40
-            scale = max(.25, min(1., (height-90)/200))
-            self.canvas.create_rectangle(cx-78*scale, cy-95*scale, cx+78*scale, cy+80*scale, outline="#41658a", width=2)
-            self.canvas.create_oval(cx-30*scale, cy-60*scale, cx+30*scale, cy, outline="#88a7c8", width=3)
-            self.canvas.create_arc(cx-55*scale, cy, cx+55*scale, cy+90*scale, start=0, extent=180, style="arc", outline="#88a7c8", width=3)
-            self.canvas.create_text(cx, height-58, text="CAMERA OFF", fill="#d7e6f7", font=("Segoe UI", 15, "bold"))
-            self.canvas.create_text(cx, height-28, text="The camera preview will appear here", fill="#88a7c8", font=("Segoe UI", 11))
+            canvas = self.canvas
+            canvas.configure(bg=CANVAS)
+            canvas.delete("all")
+            width, height = canvas.winfo_width(), canvas.winfo_height()
+            cx = width / 2
+            cy = max(24, (height - 58) / 2)
+            scale = max(.26, min(1.0, (height - 78) / 195))
+            # Soft framing corner brackets around the center scan zone
+            bw, bh, arm = 96*scale, 84*scale, 18*scale
+            for sx in (-1, 1):
+                for sy in (-1, 1):
+                    x, y = cx + sx*bw, cy + sy*bh
+                    canvas.create_line(x, y, x - sx*arm, y, fill="#cbd5e1", width=2, capstyle="round")
+                    canvas.create_line(x, y, x, y - sy*arm, fill="#cbd5e1", width=2, capstyle="round")
+            # Geometric hexagon + minimalist face outline + mint scan arc
+            rx, ry = 58*scale, 66*scale
+            hex_pts = [cx, cy-ry, cx+rx, cy-ry*0.5, cx+rx, cy+ry*0.5,
+                       cx, cy+ry, cx-rx, cy+ry*0.5, cx-rx, cy-ry*0.5]
+            canvas.create_polygon(*hex_pts, fill="#ffffff", outline="#94a3b8", width=2)
+            canvas.create_oval(cx-24*scale, cy-36*scale, cx+24*scale, cy+20*scale,
+                               outline="#475569", width=2)
+            canvas.create_arc(cx-40*scale, cy+16*scale, cx+40*scale, cy+84*scale,
+                              start=20, extent=140, style="arc", outline="#475569", width=2)
+            canvas.create_arc(cx-78*scale, cy-16*scale, cx+78*scale, cy+34*scale,
+                              start=24, extent=132, style="arc", outline=MINT, width=2.4)
+            canvas.create_text(cx, height-48, text="Live face detection", fill=INK, font=(FONT, 14, "bold"))
+            canvas.create_text(cx, height-24, text="Click “Start camera” to scan your face and verify attendance",
+                               fill=MUTED, font=(FONT, 10))
 
     def render_attendance(self, rows):
         if rows == self.attendance_rows:
             return
         self.attendance_rows = rows
+        self.present_count.set(f"{len(rows)} present")
         self.tree.delete(*self.tree.get_children())
         for index, row in enumerate(rows):
             local = datetime.fromisoformat(row["recorded_utc"]).astimezone().strftime("%H:%M")
             source = {"automatic": "Automatic", "manual_review": "Manual"}.get(row.get("source"), "Unknown")
-            self.tree.insert("", "end", iid=str(index), values=(row["name"], local, source))
+            tags = (("odd",) if index % 2 else ()) + (("manual",) if row.get("source") == "manual_review" else ())
+            self.tree.insert("", "end", iid=str(index), values=(row["name"], local, source), tags=tags)
 
     def show_attendance_detail(self, event=None):
         selection = self.tree.selection()
@@ -791,6 +1281,8 @@ class AttendanceWindow:
                            else "Unavailable" if live.get("is_live") is None else "Not passed")
         expression = result.get("expression")
         self.expression_text.set(format_expression(expression, result.get("expression_error")))
+        self.update_quality_chips(result)
+        self.update_telemetry(result)
         self.profile_count.set(f"{update['profiles']} registered profiles")
         self.render_attendance(update["attendance"])
         capture_pending = update.get("capture_pending", False)
@@ -828,8 +1320,8 @@ class AttendanceWindow:
         if (analysis is not None and analysis["stream_id"] == update["stream_id"]
                 and analysis["rgb"].shape == sample.rgb.shape
                 and sample.sequence >= analysis["sequence"]
-                and 0 <= sample.captured_at-analysis["captured_at"] <= .2
-                and 0 <= now-analysis["captured_at"] <= .2):
+                and 0 <= sample.captured_at-analysis["captured_at"] <= BOX_MAX_AGE
+                and 0 <= now-analysis["captured_at"] <= BOX_MAX_AGE):
             draw = ImageDraw.Draw(image)
             result = analysis["result"]
             identity = result.get("identity") or {}
@@ -858,6 +1350,8 @@ class AttendanceWindow:
         self.identity_text.set("Not checked")
         self.live_text.set("Not checked")
         self.expression_text.set("—")
+        self.update_quality_chips(None)
+        self.update_telemetry(None)
         self.feedback.set("Analyzing the current camera view…")
         self.guidance.set("Keep one face in view. Identity, liveness and expression results appear below the camera.")
         for button in (self.register_button, self.appearance_button, self.review_button):
@@ -897,6 +1391,7 @@ class AttendanceWindow:
                     self.analysis_times.clear()
                     self.preview_fps = self.analysis_fps = 0.
                     self.canvas_image = None
+                    self.canvas.configure(bg=CANVAS_LIVE)
                     self.controls(True, True)
                     self.camera_status = "Opened successfully"
                     self.camera_summary.set(f"Camera {update.get('camera', self.camera_choice.get())} · Running")
@@ -922,6 +1417,8 @@ class AttendanceWindow:
                     self.guidance.set("Choose another camera or use Test camera. Open Diagnostics for setup and device status.")
                     for value in (self.identity_text, self.live_text, self.expression_text):
                         value.set("—")
+                    self.update_quality_chips(None)
+                    self.update_telemetry(None)
                     self.speed.set("FPS not measured")
                     self.placeholder()
                 elif event == "fatal":
@@ -1001,6 +1498,8 @@ class AttendanceWindow:
 
     def close(self):
         self.closing = True
+        if self.model_test_dialog is not None:
+            self.model_test_dialog.close()
         if self.diagnostics_dialog is not None:
             self.diagnostics_dialog.close()
         if self.profiles_dialog is not None:
@@ -1015,7 +1514,7 @@ class AttendanceWindow:
             self.appearance_dialog = None
         self.send("quit")
         self.state_text.set("Closing camera…")
-        self._close_deadline = time.monotonic() + 1.2
+        self._close_deadline = time.monotonic() + 1.2  # a stuck camera driver must not hang the window
         self.await_close()
 
     def cancel_review_dialog(self, token):
@@ -1032,15 +1531,12 @@ class AttendanceWindow:
 
     def await_close(self):
         timed_out = hasattr(self, "_close_deadline") and time.monotonic() > self._close_deadline
-        if timed_out or ((self.worker is None or not self.worker.is_alive()) and (self.camera_probe is None or not self.camera_probe.is_alive())):
-            try:
-                self.root.quit()
-            except Exception:
-                pass
-            try:
-                self.root.destroy()
-            except Exception:
-                pass
+        if timed_out or ((self.worker is None or not self.worker.is_alive()) and (self.camera_probe is None or not self.camera_probe.is_alive()) and self.model_test_dialog is None):
+            for finish in (self.root.quit, self.root.destroy):
+                try:
+                    finish()
+                except Exception:
+                    pass
         else:
             self.root.after(80, self.await_close)
 
@@ -1049,13 +1545,13 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--identity-config", type=Path, default=PROJECT/"results/identity_app_config.json")
     parser.add_argument("--liveness-checkpoint", type=Path, default=DEFAULT_LIVENESS_CHECKPOINT)
-    parser.add_argument("--emotion-checkpoint", type=Path, default=PROJECT/"results/emotion_fer/best_model.pt")
+    parser.add_argument("--emotion-checkpoint", type=Path, default=PROJECT/"results/emotion_fer_mnv3/best_model.pt")
     parser.add_argument("--database", type=Path, default=PROJECT/"data/attendance/profiles.sqlite3")
     parser.add_argument("--session", default=datetime.now().astimezone().strftime("%Y-%m-%d"))
     parser.add_argument("--camera", type=int, default=0)
     parser.add_argument("--camera-backend", choices=("auto", "dshow", "msmf"), default="auto",
                         help="OpenCV video backend preference (auto uses fast MSMF on Windows).")
-    parser.add_argument("--detector", choices=("haar", "roi"), default="haar")
+    parser.add_argument("--detector", choices=("yunet", "haar", "roi"), default="yunet")
     parser.add_argument("--roi", type=int, nargs=4, metavar=("X", "Y", "W", "H"))
     parser.add_argument("--device", choices=("cpu", "auto", "cuda"), default="cpu")
     parser.add_argument("--num-threads", type=int, default=4)
@@ -1065,10 +1561,11 @@ def main(argv=None):
     parser.add_argument("--preview-history", action="store_true", help="Preview history with fictional rows; never loads models, opens a camera or reads the database.")
     parser.add_argument("--preview-profiles", action="store_true", help="Preview profile management with fictional data; no models, database or camera.")
     parser.add_argument("--preview-diagnostics", action="store_true", help="Preview an example setup error; no models, database or camera.")
+    parser.add_argument("--preview-model-tests", action="store_true", help="Preview model tests; no files, models, database or camera.")
     args = parser.parse_args(argv)
-    if sum((args.preview_review, args.preview_appearance, args.preview_history, args.preview_profiles, args.preview_diagnostics)) > 1:
+    if sum((args.preview_review, args.preview_appearance, args.preview_history, args.preview_profiles, args.preview_diagnostics, args.preview_model_tests)) > 1:
         parser.error("Choose one dialog preview at a time.")
-    if args.preview_review or args.preview_appearance or args.preview_history or args.preview_profiles or args.preview_diagnostics:
+    if args.preview_review or args.preview_appearance or args.preview_history or args.preview_profiles or args.preview_diagnostics or args.preview_model_tests:
         args.preview = True
     if args.num_threads < 1 or not 0 <= args.camera <= 99:
         parser.error("Positive threads and a camera index from 0 to 99 required.")
@@ -1084,6 +1581,7 @@ def main(argv=None):
 
 
 def force_exit(code=0):
+    """End the process even if a camera driver thread is blocked; SQLite writes are already committed."""
     try:
         import sys
         if sys.platform == "win32":
@@ -1100,5 +1598,4 @@ def force_exit(code=0):
 
 
 if __name__ == "__main__":
-    code = main()
-    force_exit(code or 0)
+    force_exit(main() or 0)

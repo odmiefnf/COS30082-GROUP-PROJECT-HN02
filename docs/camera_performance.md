@@ -1,10 +1,13 @@
-# Webcam performance and stable layout — 14 November 2026
+# Webcam performance and stable layout — 8 November 2026
 
-Update on 14 November 2026:
-- **Fast camera open on Windows:** `OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS=0` is set before importing OpenCV in `start_attendance.cmd`, `attendance_app/video_stream.py`, `attendance_app/device_check.py` and `emotion_recognition/webcam.py`, avoiding the 2.4–3.1 second Media Foundation hardware-transform probing stall. An explicit `--camera-backend auto|dshow|msmf` flag is also supported, and `CAP_PROP_BUFFERSIZE = 1` is configured immediately on open.
-- **Haar locator warmup:** `FaceLocator.__init__` warms up both Haar cascades (`default` and `alt2`) on a 32×32 zero frame during startup so the first live camera frame does not incur the ~306 ms cold-call spike.
-- **Nested cascade deduplication & temporal PAD smoothing:** `FaceLocator._deduplicate` suppresses inner boxes with `overlap / smaller >= 0.75` alongside `IoU >= 0.55`, and `AttendanceService._smooth_liveness` averages up to 3 calibrated `live_score` observations within 0.6 seconds to prevent 1-frame glasses-glare flicker between `Passed` and `Not passed`.
-- **Emotion icons:** The `EXPRESSION` card displays icons alongside emotion labels and confidence (`😊 Happy`, `😠 Angry`, `😢 Sad`, `😮 Surprise`, `😨 Fear`, `🤢 Disgust`, `😐 Neutral`). The full suite now passes **206 tests**.
+Update on 20 November 2026 (Hiếu's camera and stability changes, ported to the current app):
+
+- **Fast camera open on Windows:** `OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS=0` is set before OpenCV loads in `start_attendance.cmd`, `attendance_app/video_stream.py`, `attendance_app/device_check.py` (via `video_stream`) and `emotion_recognition/webcam.py`, avoiding the Media Foundation hardware-transform probing stall Hiếu measured at about 2.4–3.1 seconds. `--camera-backend auto|dshow|msmf` is accepted by both `attendance_app.web` and `attendance_app.gui`, and `CAP_PROP_BUFFERSIZE = 1` is set immediately after opening, before size and FPS.
+- **Detector warm-up:** `FaceLocator` runs the active detector once on a blank frame while loading — YuNet by default, or both Haar cascades with `--detector haar` — so the first live frame does not pay the cold-call cost (about 300 ms for Haar in Hiếu's measurement).
+- **Nested boxes:** `FaceLocator._deduplicate` also merges a box that lies mostly inside another (`overlap / smaller >= 0.75`), and YuNet results now pass through the same filter, so one face wearing glasses is not reported as `multiple_faces`.
+- **Liveness smoothing window in time:** `AttendanceService` averages calibrated `live_score` values only from the last 0.6 seconds, capped by the frame window (web Settings default 5, desktop default 3). On a slow camera an old live score can no longer outvote a current spoof. Checkpoint weights and thresholds are unchanged; `tools/check_liveness_camera.py` still scores single frames.
+- **Expression icons:** `format_expression` in `attendance_app/gui.py` renders, e.g., `😊 Happy · 85%` in both the desktop and web apps.
+- **No hang on close:** both apps wait at most 1.2 seconds for the camera worker, then end the process with `TerminateProcess` (`force_exit`). Database writes are committed per transaction before that point. `LatestCamera.close()` waits at most 1 second for the capture thread.
 
 Update on 8 November 2026: the default window is now up to 1440 by 960,
 clamped to the available screen. Compact header/toolbar spacing gives more

@@ -168,24 +168,105 @@ class Fixture(unittest.TestCase):
         self.assertEqual(self.service.analyze(crop, 2.2)["stable_frames"], 1)
         self.assertFalse(self.store.attendance("COS30082-01"))
 
-    def test_liveness_temporal_smoothing_absorbs_single_frame_glare_dip_and_rejects_sustained_spoof(self):
+    def test_confirmed_face_keeps_its_name_until_it_is_out_of_view(self):
+        person_id = self.enroll()
+        self.service.profiles = self.store.profiles()
+        self.recognizer.match.return_value = {"status": "known", "person_id": person_id, "name": "Kiệt", "cosine": .99}
         crop = Image.new("RGB", (100, 100))
-        scores = [(0.00, 0.45), (0.04, 0.42), (0.08, 0.0005)]
-        for now, score in scores:
-            self.live.predict_crop.return_value = {
-                "live_score": score, "threshold": 0.00214, "is_live": score >= 0.00214
-            }
+        for now in (0., .2, .4):
+            result = self.service.analyze(crop, now)
+        self.assertTrue(result["attendance_recorded"])
+        # The same face then fails liveness and the identity threshold: the confirmed result stays.
+        self.live.predict_crop.return_value = {"is_live": False, "live_score": .01}
+        self.recognizer.match.return_value = {"status": "unknown", "person_id": None, "name": None, "cosine": .6}
+        for now in (.6, 1.5, 3.4):  # gaps under LOCK_GRACE_SECONDS are the same visit
+            result = self.service.analyze(crop, now)
+            self.assertEqual((result["status"], result["identity"]["name"], result["liveness"]["is_live"]),
+                             ("attendance_confirmed", "Kiệt", True))
+            self.assertFalse(result["attendance_recorded"])
+        self.assertEqual(len(self.store.attendance("COS30082-01")), 1)
+        # Out of view for longer than the grace period: the face is checked from scratch.
+        self.assertEqual(self.service.analyze(crop, 5.5)["status"], "spoof")
+        self.assertIsNone(self.service.face_lock)
+
+    def test_lock_ends_when_another_face_replaces_the_confirmed_one(self):
+        person_id = self.enroll()
+        self.service.profiles = self.store.profiles()
+        self.recognizer.match.return_value = {"status": "known", "person_id": person_id, "name": "Kiệt", "cosine": .99}
+        crop = Image.new("RGB", (100, 100))
+        for now in (0., .2, .4):
+            self.service.analyze(crop, now)
+        self.live.predict_crop.return_value = {"is_live": False, "live_score": .01}
+        self.recognizer.match.return_value = {"status": "unknown", "person_id": None, "name": None, "cosine": .1}
+        self.recognizer.embed.return_value = np.array([0., 1., 0.], dtype=np.float32)  # a different face
+        result = self.service.analyze(crop, .6)
+        self.assertEqual((result["status"], result["identity"]), ("spoof", None))
+        self.assertIsNone(self.service.face_lock)
+
+    def test_registration_started_on_a_confirmed_face_is_not_skipped_by_the_lock(self):
+        person_id = self.enroll()
+        self.service.profiles = self.store.profiles()
+        self.recognizer.match.return_value = {"status": "known", "person_id": person_id, "name": "Kiệt", "cosine": .99}
+        crop = Image.new("RGB", (100, 100))
+        for now in (0., .2, .4):
+            self.service.analyze(crop, now)
+        self.service.begin_registration("New person")
+        self.assertEqual(self.service.analyze(crop, .6)["status"], "registration_existing_or_ambiguous")
+        self.assertIsNone(self.service.face_lock)
+
+    def test_liveness_temporal_smoothing_absorbs_single_frame_glare_dip_and_rejects_sustained_spoof(self):
+        self.service.set_liveness_smooth_window(3)
+        crop = Image.new("RGB", (100, 100))
+        for now, score in ((0.00, 0.45), (0.04, 0.42), (0.08, 0.0005)):
+            self.live.predict_crop.return_value = {"live_score": score, "threshold": 0.00214, "is_live": score >= 0.00214}
             result = self.service.analyze(crop, now)
             self.assertTrue(result["liveness"]["is_live"])
-        self.assertEqual(result["liveness"]["smoothed_frames"], 3)
+        self.assertEqual(result["liveness"]["smooth_window"], 3)
         self.assertAlmostEqual(result["liveness"]["raw_live_score"], 0.0005)
         for now in (0.12, 0.16, 0.20):
-            self.live.predict_crop.return_value = {
-                "live_score": 0.0001, "threshold": 0.00214, "is_live": False
-            }
+            self.live.predict_crop.return_value = {"live_score": 0.0001, "threshold": 0.00214, "is_live": False}
             result = self.service.analyze(crop, now)
         self.assertFalse(result["liveness"]["is_live"])
         self.assertEqual(result["status"], "spoof")
+
+    def test_liveness_smoothing_ignores_scores_older_than_the_time_window(self):
+        self.service.set_liveness_smooth_window(3)
+        crop = Image.new("RGB", (100, 100))
+        self.live.predict_crop.return_value = {"live_score": 0.9, "threshold": 0.5, "is_live": True}
+        self.assertTrue(self.service.analyze(crop, 0.0)["liveness"]["is_live"])
+        # One second later (slow camera, tracking not reset): the old live score must not rescue a spoof.
+        self.live.predict_crop.return_value = {"live_score": 0.2, "threshold": 0.5, "is_live": False}
+        result = self.service.analyze(crop, 1.0)
+        self.assertEqual(result["liveness"]["smooth_window"], 1)
+        self.assertFalse(result["liveness"]["is_live"])
+
+    def test_multi_face_only_the_live_main_face_is_recorded_and_single_person_flows_block_it(self):
+        a, b = self.enroll("A"), self.store.enroll("B", [[0., 1., 0.]] * 3)
+        self.service.profiles = self.store.profiles()
+        crop_a, crop_b, photo = (Image.new("RGB", (100, 100), color) for color in ("red", "green", "blue"))
+        vectors = {id(crop_a): 0, id(crop_b): 1, id(photo): 2}  # one unit embedding axis per face
+        people = {0: (a, "A"), 1: (b, "B")}
+        self.recognizer.embed.side_effect = lambda crop: np.eye(3, dtype=np.float32)[vectors[id(crop)]]
+        self.recognizer.match.side_effect = lambda embedding, profiles: (
+            {"status": "known", "person_id": people[int(embedding.argmax())][0],
+             "name": people[int(embedding.argmax())][1], "cosine": .9}
+            if int(embedding.argmax()) in people else {"status": "unknown", "person_id": None, "name": None, "cosine": .1})
+        self.live.predict_crop.side_effect = lambda crop: (
+            {"is_live": False, "live_score": .01} if crop is photo else {"is_live": True, "live_score": .95})
+        records = lambda: {row["person_id"] for row in self.store.attendance("COS30082-01")}
+        for now in (1.0, 1.1, 1.2):  # A is the main (largest) face for stable_frames=3 frames
+            faces = self.service.analyze_faces([(crop_a, None), (crop_b, None), (photo, None)], now=now)
+        self.assertEqual([f["status"] for f in faces], ["attendance_confirmed", "known", "unknown"])
+        self.assertEqual([f["liveness"] is None for f in faces], [False, True, True])  # PAD for the main face only
+        self.assertEqual(records(), {a})  # B is named but not recorded while a bystander
+        self.assertEqual((self.live.predict_crop.call_count, self.emotion.predict_crop.call_count), (3, 3))
+        for now in (1.3, 1.4, 1.5):  # B steps forward and becomes the main face
+            faces = self.service.analyze_faces([(crop_b, None), (crop_a, None)], now=now)
+        self.assertEqual(records(), {a, b})
+        faces = self.service.analyze_faces([(photo, None), (crop_a, None)], now=1.6)  # a photo as the main face
+        self.assertEqual((faces[0]["status"], faces[0]["identity"]), ("spoof", None))
+        self.service.pending_name = "New person"
+        self.assertIsNone(self.service.analyze_faces([(crop_a, None), (crop_b, None)], now=1.7))
 
     def test_no_face_multiple_faces_or_quality_failure_skip_all_models(self):
         locator = Mock()
@@ -204,6 +285,23 @@ class Fixture(unittest.TestCase):
         self.assertEqual(result["status"], "unknown")
         np.testing.assert_array_equal(np.asarray(self.live.predict_crop.call_args.args[0]), frame[20:120, 30:130])
         self.assertFalse(self.store.attendance("COS30082-01"))
+
+    def test_context_checkpoint_requires_and_uses_context_only_for_pad(self):
+        self.live.config = {"context_crop": True}
+        service = AttendanceService(self.store, self.recognizer, self.live, self.emotion, "context-fixture")
+        with self.assertRaisesRegex(ValueError, "requires a context crop"):
+            service.analyze(Image.new("RGB", (100, 100)))
+        self.live.predict_crop.assert_not_called()
+        frame = np.random.default_rng(42).integers(0, 256, (160, 200, 3), dtype=np.uint8)
+        locator = Mock()
+        locator.detect.return_value = [(30, 20, 100, 100)]
+        result = FrameProcessor(locator, service, pad_context=True).process(frame)
+        self.assertEqual(result["status"], "unknown")
+        np.testing.assert_array_equal(np.asarray(self.live.predict_crop.call_args.args[0]), frame[:, :180])
+        tight = frame[20:120, 30:130]
+        np.testing.assert_array_equal(np.asarray(self.recognizer.embed.call_args.args[0]), tight)
+        np.testing.assert_array_equal(np.asarray(self.emotion.predict_crop.call_args.args[0]), tight)
+        np.testing.assert_array_equal(np.asarray(service.review.latest.crop), tight)
 
     def test_camera_read_failure_and_stop_release_device_without_using_a_real_camera(self):
         for fail_read in (True, False):
