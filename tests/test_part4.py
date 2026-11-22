@@ -98,6 +98,21 @@ class FERChecks(unittest.TestCase):
         self.assertEqual(tuple(logits.shape),(3,7))
         torch.nn.functional.cross_entropy(logits,torch.tensor([0,3,6])).backward()
         self.assertTrue(all(parameter.grad is not None and torch.isfinite(parameter.grad).all() for parameter in model.parameters()))
+    def test_mobilenetv3_keeps_48px_contract_freezes_early_blocks_and_reloads(self):
+        from emotion_recognition.model import EmotionMobileNetV3
+        torch.manual_seed(7)
+        model=EmotionMobileNetV3().eval()  # pretrained=False keeps the test offline
+        self.assertTrue(all(not p.requires_grad for p in model.net.features[:4].parameters()))
+        self.assertTrue(all(p.requires_grad for p in model.net.features[4:].parameters()))
+        images=torch.rand(2,1,48,48)*2-1
+        with torch.inference_mode(): logits=model(images)
+        self.assertEqual(tuple(logits.shape),(2,7))
+        with self.assertRaises(ValueError): model(torch.rand(2,3,48,48))
+        config={"architecture":"EmotionMobileNetV3-v1","classes":list(CLASSES),"channels":1,"image_size":48}
+        torch.save({"task":"facial_expression","config":config,"model_state":model.state_dict()},self.base/"mnv3.pt")
+        loaded,_=load_model(self.base/"mnv3.pt")
+        self.assertIsInstance(loaded,EmotionMobileNetV3)
+        with torch.inference_mode(): torch.testing.assert_close(loaded(images),logits,rtol=0,atol=0)
     def test_full_train_evaluate_and_infer_keep_fixed_labels_and_holdout(self):
         prepare(self.root,self.manifests); output=self.base/"model"; evaluation=self.base/"evaluation"
         self.assertEqual(train_main(["--train-manifest",str(self.manifests/"train.csv"),"--val-manifest",str(self.manifests/"val.csv"),"--output-dir",str(output),"--epochs","1","--batch-size","7","--device","cpu","--num-threads","2"]),0)

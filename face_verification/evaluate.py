@@ -27,7 +27,7 @@ import torch
 
 from .data import load_face_image
 from .metrics import auc, compute_roc, select_validation_threshold
-from .model import FaceEncoder
+from .model import FaceEncoder, build_encoder
 
 
 Pair = tuple[Path, Path, int]
@@ -203,7 +203,7 @@ def load_encoder(
     state = checkpoint.get("model_state")
     if not isinstance(state, dict):
         raise ValueError(f"{checkpoint_path}: 'model_state' must contain the encoder-only state dict.")
-    encoder = FaceEncoder(embedding_dim=embedding_dim)
+    encoder = build_encoder(config.get("backbone", "compact"), embedding_dim)
     try:
         encoder.load_state_dict(state, strict=True)
     except (RuntimeError, TypeError, ValueError) as exc:

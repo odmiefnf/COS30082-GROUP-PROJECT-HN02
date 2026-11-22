@@ -1,0 +1,18 @@
+test_model_dialog_locks_other_camera_owners_and_preview_never_captures (test_model_testing.DialogChecks.test_model_dialog_locks_other_camera_owners_and_preview_never_captures) ... ok
+test_report_table_and_close_wait_for_the_camera_runner (test_model_testing.DialogChecks.test_report_table_and_close_wait_for_the_camera_runner) ... ok
+test_correct_decisions_follow_the_operator_scenario_and_only_scored_crops (test_model_testing.ReportChecks.test_correct_decisions_follow_the_operator_scenario_and_only_scored_crops) ... ok
+test_csv_is_spreadsheet_safe_and_keeps_scope_thresholds_and_cancellation (test_model_testing.ReportChecks.test_csv_is_spreadsheet_safe_and_keeps_scope_thresholds_and_cancellation) ... ok
+test_inconsistent_or_unsafe_reports_are_rejected (test_model_testing.ReportChecks.test_inconsistent_or_unsafe_reports_are_rejected) ... ok
+test_json_roundtrip_preserves_evidence_and_exports_refuse_overwrite (test_model_testing.ReportChecks.test_json_roundtrip_preserves_evidence_and_exports_refuse_overwrite) ... ok
+test_legacy_report_without_cancellation_metadata_is_not_labelled_uncancelled (test_model_testing.ReportChecks.test_legacy_report_without_cancellation_metadata_is_not_labelled_uncancelled) ... ok
+test_no_observations_have_no_acceptance_percentage_and_unknown_truth_is_not_guessed (test_model_testing.ReportChecks.test_no_observations_have_no_acceptance_percentage_and_unknown_truth_is_not_guessed) ... ok
+test_nonfinite_json_invalid_json_and_wrong_export_suffix_are_rejected (test_model_testing.ReportChecks.test_nonfinite_json_invalid_json_and_wrong_export_suffix_are_rejected) ... ok
+test_cancel_during_loading_and_process_failures_release_handles (test_model_testing.RunnerChecks.test_cancel_during_loading_and_process_failures_release_handles) ... ok
+test_invalid_setup_never_starts_a_process (test_model_testing.RunnerChecks.test_invalid_setup_never_starts_a_process) ... ok
+test_runner_uses_the_existing_tool_fixed_thresholds_and_unique_reports (test_model_testing.RunnerChecks.test_runner_uses_the_existing_tool_fixed_thresholds_and_unique_reports) ... ok
+test_spawn_failure_closes_log_and_creates_no_evidence (test_model_testing.RunnerChecks.test_spawn_failure_closes_log_and_creates_no_evidence) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.873s
+
+OK

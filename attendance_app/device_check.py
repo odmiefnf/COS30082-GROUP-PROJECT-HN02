@@ -7,6 +7,7 @@ import numpy as np
 from .video_stream import resolve_camera_backend
 
 os.environ.setdefault("OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS", "0")
+from .video_stream import resolve_camera_backend  # also disables slow MSMF hardware probing
 
 
 CAMERA_HELP = "Close other camera apps, check the selected index and Windows camera access, then try again."

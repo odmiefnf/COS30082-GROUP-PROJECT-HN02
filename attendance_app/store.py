@@ -110,7 +110,8 @@ class ProfileStore:
                                     "embedding": unit_vector(np.mean(original, axis=0), self.dimension),
                                     "sample_count": len(original)})
             variants = self.connection.execute(
-                "SELECT id,label FROM appearances WHERE person_id=? ORDER BY created_utc,id", (person_id,)).fetchall()
+                # rowid keeps insertion order when two appearances share a clock tick (ids are random).
+                "SELECT id,label FROM appearances WHERE person_id=? ORDER BY created_utc,rowid", (person_id,)).fetchall()
             for appearance_id, label in variants:
                 samples = groups.pop(appearance_id, [])
                 if not samples:
@@ -223,6 +224,16 @@ class ProfileStore:
                 self.connection.execute("DELETE FROM samples WHERE person_id=? AND appearance_id IS NULL", (person_id,))
             else:
                 self.connection.execute("DELETE FROM appearances WHERE id=? AND person_id=?", (appearance_id, person_id))
+        return backup
+
+    def delete_profile(self, person_id):
+        """Delete one person after backup; samples, appearances and attendance cascade."""
+        with self.connection:
+            self.connection.execute("BEGIN IMMEDIATE")
+            if not self.connection.execute("SELECT 1 FROM profiles WHERE id=?", (person_id,)).fetchone():
+                raise ValueError("The selected profile no longer exists.")
+            backup = self._backup_before_change()
+            self.connection.execute("DELETE FROM profiles WHERE id=?", (person_id,))
         return backup
 
     def record_attendance(self, session, person_id, cosine, live_score):

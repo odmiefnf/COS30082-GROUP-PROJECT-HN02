@@ -10,6 +10,7 @@ import sys
 from PIL import Image, ImageOps
 import torch
 
+from attendance_app.service import uses_pad_context
 from face_verification.verify import FaceVerifier
 
 
@@ -28,10 +29,20 @@ class AttendanceVerificationPipeline:
     def verify(
         self, probe_image, reference_image, *, bbox=None, is_face_crop: bool = False
     ) -> dict:
-        face_crop = self.liveness_detector.prepare_face(
-            probe_image, bbox=bbox, is_face_crop=is_face_crop
-        )
-        liveness = self.liveness_detector.predict_crop(face_crop)
+        if uses_pad_context(self.liveness_detector):
+            from anti_spoofing.data import crop_liveness_image
+
+            if bbox is None or is_face_crop:
+                raise ValueError("A context checkpoint requires the full probe image and its face box.")
+            if isinstance(probe_image, (str, Path)):
+                with Image.open(probe_image) as source:
+                    probe_image = source.convert("RGB")
+            face_crop = crop_liveness_image(probe_image, bbox=bbox)
+            pad_crop = crop_liveness_image(probe_image, bbox=bbox, context=True)
+        else:
+            face_crop = self.liveness_detector.prepare_face(probe_image, bbox=bbox, is_face_crop=is_face_crop)
+            pad_crop = face_crop
+        liveness = self.liveness_detector.predict_crop(pad_crop)
         result = {"accepted": False, "status": None, "liveness": liveness, "identity": None}
         if self.emotion_recognizer is not None:
             result["emotion"] = None

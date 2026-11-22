@@ -1,4 +1,6 @@
 # Versions used for Sections 2-4 on Python 3.11; webcam extras are separate.
 torch==2.5.1
+# ResNet-18 identity, MobileNetV3 liveness and MobileNetV3 expression models are built from torchvision.
+torchvision==0.20.1
 numpy==2.4.6
 Pillow==12.3.0

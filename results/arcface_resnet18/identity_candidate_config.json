@@ -1,0 +1,19 @@
+{
+  "checkpoint": "best_model.pt",
+  "checkpoint_sha256": "9e69766414121f380e12bcd3dae171bd42eae5b3076eef85722ba4616f984324",
+  "method": "arcface",
+  "image_size": 64,
+  "metric": "cosine",
+  "threshold": 0.5091312525160645,
+  "ambiguity_margin": 0.05,
+  "threshold_source": "verification_validation",
+  "max_validation_pair_fpr": 0.01,
+  "observed_validation_pair_fpr": 0.009799554565701559,
+  "observed_validation_pair_tpr": 0.32977983777520276,
+  "selected_model_validation_auc": 0.9147469721564851,
+  "pairs_file": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\face_recognition\\verification_pairs_val.txt",
+  "pairs_file_sha256": "55ecf1495188024f414e3b0faac2b7f4cc374000a809e3b98579ecd8f4f25fdd",
+  "pair_count": 8805,
+  "selection": "Highest original verification-validation cosine AUC; highest TPR with pair FPR <= target; strict threshold on ties.",
+  "scope": "In-sample validation operating point; 667 verification validation images match train pixels. Pair FPR is not a guarantee for 1:N gallery recognition. Classroom demo needs separate webcam calibration."
+}

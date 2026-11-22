@@ -1,0 +1,92 @@
+{
+  "protocol": "Offline 1:N search using a simulated single-photo gallery from classification_data/test_data.",
+  "scope": [
+    "Calibration and test use disjoint dataset identity labels and different enrollment/probe images.",
+    "Test images shared by decoded RGB digest with any other indexed archive image are excluded.",
+    "The official classification test identities also occur in encoder training.",
+    "Unknown means absent from this gallery, not unseen by the encoder.",
+    "The offline test uses one photo per gallery identity, one probe per person, and no webcam or liveness."
+  ],
+  "checkpoint_sha256": "c94e9eaaf4b44424c1744e03aabf53e9da128861c0701948a649af0a1797a815",
+  "archive_sha256": "a28890dea5179506d070e0d8a0d226172215d4deb97b4d8533e310c38c1ef32d",
+  "audit_index_sha256": "18b3f39159e0c095caa92de736685d2f746212ece898a72ff7320ae270a663b6",
+  "identity_config_sha256": "34423b42057c96a59ff69ed64758fd0b6c91573d6664dcbc1e104f9680e057b5",
+  "seed": 42,
+  "counts": {
+    "audit_images_indexed": 465735,
+    "official_classification_test_images": 8000,
+    "exact_pixel_duplicate_test_images_excluded": 176,
+    "eligible_identities_with_two_or_more_distinct_test_images": 3827
+  },
+  "ambiguity_margin": 0.05,
+  "calibration_unknown_false_identification_limit": 0.01,
+  "threshold_selection": "Maximize correct known matches on calibration within the unknown false-identification limit, then prefer fewer unknown false matches and higher cosine threshold.",
+  "current_app_threshold": 0.8695402108345607,
+  "gallery_calibrated_threshold": 1.0,
+  "splits": {
+    "calibration": {
+      "trial_sha256": "7fa2828940253be9885d370644fa2d8931cc33ddf7643b60e896e36882f8458e",
+      "gallery_identities": 20,
+      "unknown_identities": 300,
+      "identities_also_in_encoder_training": 320,
+      "current_app_threshold": {
+        "known_correct": 3,
+        "known_misidentified": 0,
+        "known_unknown": 16,
+        "known_ambiguous": 1,
+        "unknown_false_identifications": 11,
+        "unknown_unknown": 277,
+        "unknown_ambiguous": 12,
+        "known_probes": 20,
+        "unknown_probes": 300,
+        "correct_identification_rate": 0.15,
+        "unknown_false_identification_rate": 0.03666666666666667
+      },
+      "gallery_calibrated_threshold": {
+        "known_correct": 0,
+        "known_misidentified": 0,
+        "known_unknown": 20,
+        "known_ambiguous": 0,
+        "unknown_false_identifications": 0,
+        "unknown_unknown": 300,
+        "unknown_ambiguous": 0,
+        "known_probes": 20,
+        "unknown_probes": 300,
+        "correct_identification_rate": 0.0,
+        "unknown_false_identification_rate": 0.0
+      }
+    },
+    "test": {
+      "trial_sha256": "6f7cea2150011674a7c54248773e5f233970b48618e1abd6d81e5afa1af9a0f6",
+      "gallery_identities": 20,
+      "unknown_identities": 300,
+      "identities_also_in_encoder_training": 320,
+      "current_app_threshold": {
+        "known_correct": 2,
+        "known_misidentified": 0,
+        "known_unknown": 16,
+        "known_ambiguous": 2,
+        "unknown_false_identifications": 25,
+        "unknown_unknown": 269,
+        "unknown_ambiguous": 6,
+        "known_probes": 20,
+        "unknown_probes": 300,
+        "correct_identification_rate": 0.1,
+        "unknown_false_identification_rate": 0.08333333333333333
+      },
+      "gallery_calibrated_threshold": {
+        "known_correct": 0,
+        "known_misidentified": 0,
+        "known_unknown": 20,
+        "known_ambiguous": 0,
+        "unknown_false_identifications": 0,
+        "unknown_unknown": 300,
+        "unknown_ambiguous": 0,
+        "known_probes": 20,
+        "unknown_probes": 300,
+        "correct_identification_rate": 0.0,
+        "unknown_false_identification_rate": 0.0
+      }
+    }
+  }
+}

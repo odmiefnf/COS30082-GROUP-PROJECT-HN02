@@ -198,8 +198,13 @@ def read_celeba_bbox(
     return left, top, right - left, bottom - top
 
 
+IMAGENET_MEAN = np.array([0.485, 0.456, 0.406], dtype=np.float32)
+IMAGENET_STD = np.array([0.229, 0.224, 0.225], dtype=np.float32)
+
+
 def crop_liveness_image(
     image: Image.Image | np.ndarray, bbox: tuple[float, float, float, float] | None = None,
+    *, context: bool = False, crop_scale: float | None = None,
 ) -> Image.Image:
     """Return the RGB face crop used by both liveness and identity inference.
 
@@ -215,6 +220,8 @@ def crop_liveness_image(
     image = image.convert("RGB")
     if image.width < 1 or image.height < 1:
         raise ValueError("Image dimensions must be positive.")
+    if (context or crop_scale is not None) and bbox is None:
+        raise ValueError("Context cropping requires a box in the original image.")
     if bbox is not None:
         try:
             values = tuple(float(value) for value in bbox)
@@ -225,6 +232,11 @@ def crop_liveness_image(
         x, y, width, height = values
         if width <= 0 or height <= 0:
             raise ValueError("bbox width and height must be positive.")
+        scale = float(crop_scale) if crop_scale is not None else (2.0 if context else None)
+        if scale is not None:
+            side = scale * max(width, height)
+            x, y = x + (width - side) / 2, y + (height - side) / 2
+            width = height = side
         left, top = max(0, math.floor(x)), max(0, math.floor(y))
         right, bottom = min(image.width, math.ceil(x + width)), min(image.height, math.ceil(y + height))
         if right <= left or bottom <= top:
@@ -236,16 +248,25 @@ def crop_liveness_image(
 def preprocess_liveness_image(
     image: Image.Image | np.ndarray, image_size: int = 112,
     bbox: tuple[float, float, float, float] | None = None,
+    *, normalization: str = "minus_one_one",
 ) -> torch.Tensor:
-    """Return float32 RGB CHW in [-1,1]; no box means an already-cropped face."""
+    """Return float32 RGB CHW tensor; no box means an already-cropped face."""
     image_size = _image_size(image_size)
     image = crop_liveness_image(image, bbox=bbox)
     image = image.resize((image_size, image_size), Image.Resampling.BILINEAR)
-    pixels = np.asarray(image, dtype=np.float32) / 127.5 - 1.0
+    if normalization == "imagenet":
+        pixels = (np.asarray(image, dtype=np.float32) / 255.0 - IMAGENET_MEAN) / IMAGENET_STD
+    elif normalization == "minus_one_one":
+        pixels = np.asarray(image, dtype=np.float32) / 127.5 - 1.0
+    else:
+        raise ValueError(f"Unsupported normalization: {normalization!r}")
     return torch.from_numpy(pixels.transpose(2, 0, 1).copy())
 
 
-def load_liveness_image(path: str | Path, image_size: int = 112, crop_mode: str = "bbox") -> torch.Tensor:
+def load_liveness_image(
+    path: str | Path, image_size: int = 112, crop_mode: str = "bbox",
+    *, normalization: str = "minus_one_one",
+) -> torch.Tensor:
     """Load stored-orientation pixels, strictly cropping the official bbox by default."""
     if crop_mode not in ("bbox", "full"):
         raise ValueError("crop_mode must be 'bbox' or the explicit alternative 'full'.")
@@ -259,18 +280,20 @@ def load_liveness_image(path: str | Path, image_size: int = 112, crop_mode: str 
         raise ValueError(f"Cannot read liveness image {path}: {exc}") from exc
     bbox = (read_celeba_bbox(bbox_sidecar_path(path), image.width, image.height)
             if crop_mode == "bbox" else None)
-    return preprocess_liveness_image(image, image_size=image_size, bbox=bbox)
+    return preprocess_liveness_image(image, image_size=image_size, bbox=bbox, normalization=normalization)
 
 
 class LivenessDataset(Dataset):
     """Return ``(face_tensor, canonical_label)`` from a validated CSV manifest."""
 
-    def __init__(self, manifest_path: str | Path, image_size: int = 112, crop_mode: str = "bbox") -> None:
+    def __init__(self, manifest_path: str | Path, image_size: int = 112, crop_mode: str = "bbox",
+                 *, normalization: str = "minus_one_one") -> None:
         self.manifest_path = Path(manifest_path).expanduser().resolve()
         self.image_size = _image_size(image_size)
         if crop_mode not in ("bbox", "full"):
             raise ValueError("crop_mode must be 'bbox' or 'full'.")
         self.crop_mode = crop_mode
+        self.normalization = normalization
         self.samples = load_manifest(self.manifest_path)
         self.records = self.samples
         self.labels = [record["label"] for record in self.samples]
@@ -281,7 +304,8 @@ class LivenessDataset(Dataset):
         if self._cached_images is None:
             cached = []
             for index, record in enumerate(self.samples, 1):
-                cached.append(load_liveness_image(record["image_path"], self.image_size, self.crop_mode))
+                cached.append(load_liveness_image(record["image_path"], self.image_size, self.crop_mode,
+                                                  normalization=self.normalization))
                 if index % 1000 == 0:
                     print(f"Cached {index}/{len(self.samples)} images from {self.manifest_path.name}", flush=True)
             self._cached_images = cached
@@ -294,4 +318,5 @@ class LivenessDataset(Dataset):
         record = self.samples[index]
         if self._cached_images is not None:
             return self._cached_images[index], record["label"]
-        return load_liveness_image(record["image_path"], self.image_size, self.crop_mode), record["label"]
+        return load_liveness_image(record["image_path"], self.image_size, self.crop_mode,
+                                   normalization=self.normalization), record["label"]

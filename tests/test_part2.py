@@ -171,6 +171,46 @@ class DatasetChecks(unittest.TestCase):
         with torch.inference_mode():
             torch.testing.assert_close(first, loaded(images), rtol=0, atol=0)
 
+    def test_resnet18_backbone_freezes_stem_and_reloads_from_its_checkpoint(self):
+        from face_verification.evaluate import load_encoder
+        from face_verification.model import ResNet18FaceEncoder, build_encoder
+        from face_verification.train import _save_checkpoint
+        torch.manual_seed(23)
+        # pretrained=False keeps the test offline; training passes pretrained=True.
+        encoder = build_encoder("resnet18", 16).eval()
+        self.assertIsInstance(encoder, ResNet18FaceEncoder)
+        frozen = {name for name, p in encoder.named_parameters() if not p.requires_grad}
+        self.assertEqual(frozen, {"features.conv1.weight", "features.bn1.weight", "features.bn1.bias"})
+        images = torch.stack([
+            load_face_image(self.root / "verification_data/unseen_person_0/0.png", 64),
+            load_face_image(self.root / "verification_data/unseen_person_1/0.png", 64),
+        ])
+        with torch.inference_mode():
+            first = encoder(images)
+        self.assertEqual(tuple(first.shape), (2, 16))
+        torch.testing.assert_close(torch.linalg.vector_norm(first, dim=1), torch.ones(2))
+        checkpoint = self.root / "resnet_encoder.pt"
+        config = {"embedding_dim": 16, "image_size": 64, "method": "triplet", "backbone": "resnet18"}
+        _save_checkpoint(checkpoint, encoder, config, {"smoke_test": True})
+        loaded, loaded_config = load_encoder(checkpoint)
+        self.assertIsInstance(loaded, ResNet18FaceEncoder)
+        self.assertEqual(loaded_config["backbone"], "resnet18")
+        with torch.inference_mode():
+            torch.testing.assert_close(first, loaded(images), rtol=0, atol=0)
+
+    def test_arcface_margin_lowers_only_the_true_class_logit(self):
+        from face_verification.model import ArcFaceHead
+        torch.manual_seed(0)
+        head = ArcFaceHead(8, 5)
+        features, labels = torch.randn(4, 8), torch.tensor([0, 1, 2, 3])
+        plain, margin = head(features), head(features, labels)
+        rows = torch.arange(4)
+        self.assertTrue(torch.all(margin[rows, labels] < plain[rows, labels]))
+        others = torch.ones_like(plain, dtype=torch.bool)
+        others[rows, labels] = False
+        self.assertTrue(torch.allclose(margin[others], plain[others]))
+        self.assertLessEqual(plain.abs().max().item(), 32.0 + 1e-4)
+
     def test_single_trial_uses_calibrated_direction_and_no_guessed_threshold(self):
         from face_verification.verify import FaceVerifier
         checkpoint = self.root / "pair_encoder.pt"
@@ -213,9 +253,9 @@ class EndToEndChecks(unittest.TestCase):
             data_root = root / "synthetic_data"
             make_synthetic_dataset(data_root)
             checkpoints = []
-            for method in ("classification", "triplet"):
+            for method in ("classification", "arcface", "triplet"):
                 output = root / method
-                optional = ["--evaluate-test"] if method == "classification" else []
+                optional = ["--evaluate-test"] if method != "triplet" else []
                 self.run_cli(
                     "face_verification.train", "--method", method,
                     "--data-root", str(data_root), "--output-dir", str(output),
@@ -231,7 +271,7 @@ class EndToEndChecks(unittest.TestCase):
                 self.assertEqual(saved["config"]["embedding_dim"], 16)
                 self.assertFalse(saved["training"]["augmentation"]["train"]["enabled"])
                 self.assertFalse(saved["training"]["test_data_used_for_selection"])
-                if method == "classification":
+                if method != "triplet":
                     test_report = json.loads((output / "classification_test.json").read_text())
                     self.assertEqual(test_report["status"], "evaluated")
                     self.assertEqual(test_report["metrics"]["samples"], 3)
@@ -247,13 +287,13 @@ class EndToEndChecks(unittest.TestCase):
                 checkpoints.append(checkpoint)
             comparison = root / "evaluation"
             self.run_cli(
-                "face_verification.evaluate", "--checkpoint", str(checkpoints[0]),
-                "--checkpoint", str(checkpoints[1]), "--data-root", str(data_root),
+                "face_verification.evaluate", *(arg for c in checkpoints for arg in ("--checkpoint", str(c))),
+                "--data-root", str(data_root),
                 "--output-dir", str(comparison), "--device", "cpu", "--batch-size", "4",
             )
             with (comparison / "comparison.csv").open(newline="", encoding="utf-8") as handle:
                 rows = list(csv.DictReader(handle))
-            self.assertEqual(len(rows), 4, "Two models times two metrics must be reported.")
+            self.assertEqual(len(rows), 6, "Three models times two metrics must be reported.")
             for row in rows:
                 self.assertTrue(0 <= float(row["auc"]) <= 1)
             self.assertTrue(list(comparison.rglob("*.svg")))

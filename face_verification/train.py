@@ -20,7 +20,7 @@ from torch import nn
 from torch.utils.data import DataLoader
 
 from .data import IMAGE_EXTENSIONS, EmptyFaceDatasetError, FaceImageDataset, TripletFaceDataset
-from .model import FaceClassifier, FaceEncoder
+from .model import BACKBONES, FaceClassifier, FaceEncoder, ResNet18FaceEncoder, build_encoder
 
 
 def seed_everything(seed: int) -> None:
@@ -53,7 +53,8 @@ def _positive_float(value: str) -> float:
 def build_parser() -> argparse.ArgumentParser:
     """Build the public command-line interface."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--method", choices=("classification", "triplet"), default="classification")
+    parser.add_argument("--method", choices=("classification", "arcface", "triplet"), default="classification",
+                        help="arcface: classification with an additive angular margin head (s=32, m=0.3).")
     parser.add_argument("--data-root", type=Path, required=True,
                         help="Root containing classification_data/, or classification_data/ itself.")
     parser.add_argument("--output-dir", type=Path, required=True)
@@ -71,7 +72,20 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--evaluate-test", action="store_true",
                         help="Classification only: evaluate the selected best checkpoint on all known-ID test images once.")
     parser.add_argument("--image-cache", type=Path, help="Optional checksum-verified uint8 cache from image_cache.")
+    parser.add_argument("--backbone", choices=BACKBONES, default="compact",
+                        help="compact: small CNN from scratch; resnet18: ImageNet ResNet-18, fine-tuned.")
+    parser.add_argument("--hflip", action="store_true",
+                        help="Randomly mirror training faces (p=0.5); validation is never augmented.")
+    parser.add_argument("--cosine-lr", action="store_true",
+                        help="Decay the learning rate to zero over the requested epochs.")
     return parser
+
+
+def _hflip(images: torch.Tensor, enabled: bool) -> torch.Tensor:
+    if not enabled:
+        return images
+    flip = torch.rand(images.size(0), device=images.device) < .5
+    return torch.where(flip[:, None, None, None], images.flip(3), images)
 
 
 def _classification_root(data_root: Path) -> Path:
@@ -105,6 +119,8 @@ def _classification_epoch(
     device: torch.device,
     optimizer: torch.optim.Optimizer | None,
     max_batches: int | None,
+    hflip: bool = False,
+    scaler: torch.amp.GradScaler | None = None,
 ) -> dict[str, float | int]:
     """Run a weighted classification epoch with or without parameter updates."""
     model.train(optimizer is not None)
@@ -114,13 +130,21 @@ def _classification_epoch(
             images, labels = images.to(device), labels.to(device)
             if optimizer is not None:
                 optimizer.zero_grad(set_to_none=True)
-            logits = model(images)
-            loss = criterion(logits, labels)
+                images = _hflip(images, hflip)
+            with torch.autocast(device.type, dtype=torch.float16, enabled=scaler is not None):
+                # Labels reach the ArcFace margin only while training; a linear head ignores them.
+                logits = model(images, labels if optimizer is not None else None)
+                loss = criterion(logits.float(), labels)
             if not torch.isfinite(loss):
                 raise RuntimeError("Classification loss became non-finite; check the inputs and learning rate.")
             if optimizer is not None:
-                loss.backward()
-                optimizer.step()
+                if scaler is not None:
+                    scaler.scale(loss).backward()
+                    scaler.step(optimizer)
+                    scaler.update()
+                else:
+                    loss.backward()
+                    optimizer.step()
             batch_count = labels.size(0)
             total_loss += loss.item() * batch_count
             correct += (logits.argmax(dim=1) == labels).sum().item()
@@ -139,6 +163,8 @@ def _triplet_epoch(
     device: torch.device,
     optimizer: torch.optim.Optimizer,
     max_batches: int | None,
+    hflip: bool = False,
+    scaler: torch.amp.GradScaler | None = None,
 ) -> dict[str, float | int]:
     """Train using normalized anchor, positive, and negative embeddings."""
     model.train()
@@ -147,13 +173,19 @@ def _triplet_epoch(
         anchors, positives, negatives = (batch.to(device) for batch in (anchors, positives, negatives))
         optimizer.zero_grad(set_to_none=True)
         # One forward pass gives BatchNorm a common batch for all three roles.
-        embeddings = model(torch.cat((anchors, positives, negatives), dim=0))
-        anchor_embeddings, positive_embeddings, negative_embeddings = embeddings.chunk(3, dim=0)
+        with torch.autocast(device.type, dtype=torch.float16, enabled=scaler is not None):
+            embeddings = model(_hflip(torch.cat((anchors, positives, negatives), dim=0), hflip))
+        anchor_embeddings, positive_embeddings, negative_embeddings = embeddings.float().chunk(3, dim=0)
         loss = criterion(anchor_embeddings, positive_embeddings, negative_embeddings)
         if not torch.isfinite(loss):
             raise RuntimeError("Triplet loss became non-finite; check the inputs and learning rate.")
-        loss.backward()
-        optimizer.step()
+        if scaler is not None:
+            scaler.scale(loss).backward()
+            scaler.step(optimizer)
+            scaler.update()
+        else:
+            loss.backward()
+            optimizer.step()
         batch_count = anchors.size(0)
         total_loss += loss.item() * batch_count
         count += batch_count
@@ -172,7 +204,7 @@ def _save_checkpoint(
         "format_version": 1,
         "model_state": {name: tensor.detach().cpu().clone()
                         for name, tensor in encoder.state_dict().items()},
-        "config": {key: config[key] for key in ("embedding_dim", "image_size", "method")},
+        "config": {key: config[key] for key in ("embedding_dim", "image_size", "method", "backbone")},
         "training": metadata,
     }
     if classifier is not None:
@@ -255,8 +287,8 @@ def _evaluate_classification_test(
 
 def train(args: argparse.Namespace) -> Path:
     """Train on train_data and return the selected encoder checkpoint path."""
-    if args.evaluate_test and args.method != "classification":
-        raise ValueError("--evaluate-test is supported only with --method classification.")
+    if args.evaluate_test and args.method == "triplet":
+        raise ValueError("--evaluate-test needs a classification head (--method classification or arcface).")
     if args.seed < 0 or args.seed >= 2**32:
         raise ValueError("seed must be in the range 0 to 2**32 - 1.")
     if args.image_size < 32:
@@ -268,9 +300,13 @@ def train(args: argparse.Namespace) -> Path:
         # Large default thread pools are slower than a few threads for small CNN batches.
         torch.set_num_threads(min(args.num_threads, os.cpu_count() or 1))
     split_root = _classification_root(args.data_root)
+    backbone = getattr(args, "backbone", "compact")
+    pretrained = backbone == "resnet18"
+    hflip = getattr(args, "hflip", False)
+    cosine_lr = getattr(args, "cosine_lr", False)
     validation_dataset = None
     validation_summary = None
-    if args.method == "classification":
+    if args.method != "triplet":
         training_dataset = FaceImageDataset(split_root / "train_data", args.image_size, augment=False)
         if len(training_dataset.class_to_idx) < 2:
             raise ValueError("Classification training requires at least two identities in train_data.")
@@ -286,12 +322,14 @@ def train(args: argparse.Namespace) -> Path:
                 print(f"Validation skipped: {exc}", flush=True)
         else:
             print(f"Validation skipped: no val_data directory at {validation_path}.", flush=True)
-        model = FaceClassifier(len(training_dataset.class_to_idx), args.embedding_dim).to(device)
+        model = FaceClassifier(len(training_dataset.class_to_idx), args.embedding_dim,
+                               backbone=backbone, pretrained=pretrained,
+                               head="arcface" if args.method == "arcface" else "linear").to(device)
         encoder = model.encoder
         criterion = nn.CrossEntropyLoss()
     else:
         training_dataset = TripletFaceDataset(split_root / "train_data", args.image_size, seed=args.seed)
-        model = FaceEncoder(args.embedding_dim).to(device)
+        model = build_encoder(backbone, args.embedding_dim, pretrained).to(device)
         encoder = model
         criterion = nn.TripletMarginLoss(margin=0.2, p=2)
     if getattr(args, "image_cache", None) is not None:
@@ -299,8 +337,10 @@ def train(args: argparse.Namespace) -> Path:
         for dataset in (training_dataset, validation_dataset):
             if dataset is not None:
                 dataset.image_cache = ImageCache(args.image_cache, dataset)
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate,
+    optimizer = torch.optim.Adam((p for p in model.parameters() if p.requires_grad), lr=args.learning_rate,
                                  betas=(0.9, 0.999), eps=1e-8, weight_decay=0.0, amsgrad=False)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, args.epochs) if cosine_lr else None
+    scaler = torch.amp.GradScaler("cuda") if pretrained and device.type == "cuda" else None
     loader_generator = torch.Generator().manual_seed(args.seed)
     training_loader = DataLoader(training_dataset, batch_size=args.batch_size,
                                  shuffle=True, num_workers=0, generator=loader_generator)
@@ -321,7 +361,13 @@ def train(args: argparse.Namespace) -> Path:
         "num_threads": torch.get_num_threads(),
         "image_cache": (training_dataset.image_cache.provenance if training_dataset.image_cache is not None else None),
         "smoke_test": args.max_batches is not None,
-        "initialization": "random_from_scratch", "pretrained": False,
+        "backbone": backbone,
+        "initialization": "partial_fine_tuning_imagenet" if pretrained else "random_from_scratch",
+        "pretrained": pretrained,
+        "pretrained_weights": "torchvision ResNet18_Weights.IMAGENET1K_V1" if pretrained else None,
+        "frozen_parameters": list(ResNet18FaceEncoder.FROZEN) if pretrained else [],
+        "mixed_precision": scaler is not None,
+        "lr_schedule": "cosine_to_zero" if cosine_lr else "constant",
         "train_root": str(split_root / "train_data"),
         "training_examples": len(training_dataset),
         "class_to_idx": training_dataset.class_to_idx,
@@ -333,21 +379,25 @@ def train(args: argparse.Namespace) -> Path:
         "evaluate_test_requested": args.evaluate_test,
         "classification_test_report": "classification_test.json" if args.evaluate_test else None,
         "augmentation": {
-            "train": {"enabled": False, "operations": []},
+            "train": {"enabled": hflip, "operations": ["horizontal_flip_p0.5"] if hflip else []},
             "validation": {"enabled": False}, "test": {"enabled": False},
         },
-        "comparison_controls": "Both methods use the same encoder, preprocessing, seed, "
-                               "and requested epochs; training augmentation is disabled for both.",
+        "comparison_controls": "Both methods use the same encoder, preprocessing, seed, augmentation "
+                               "and requested epochs when run with the same flags.",
         "loss": ({"name": "CrossEntropyLoss", "input": "raw_identity_logits",
                   "label_smoothing": 0.0, "reduction": "mean"}
                  if args.method == "classification" else
+                 {"name": "CrossEntropyLoss", "input": "ArcFace_additive_angular_margin_logits",
+                  "scale": 32.0, "margin": 0.3, "margin_applied": "training_only", "reduction": "mean"}
+                 if args.method == "arcface" else
                  {"name": "TripletMarginLoss", "input": "L2_normalized_embeddings",
                   "margin": 0.2, "p": 2, "eps": 1e-6, "swap": False, "reduction": "mean"}),
         "optimizer": {"name": "Adam", "learning_rate": args.learning_rate,
                       "betas": [0.9, 0.999], "eps": 1e-8, "weight_decay": 0.0, "amsgrad": False},
     }
     (output_dir / "config.json").write_text(json.dumps(config, indent=2), encoding="utf-8")
-    print(f"Training {args.method} from scratch on {device}: "
+    start = "from ImageNet ResNet-18 (fine-tuning)" if pretrained else "from scratch"
+    print(f"Training {args.method} {start} on {device}: "
           f"{len(training_dataset)} examples; checkpoint selection = {selection_metric}.", flush=True)
     if args.max_batches is not None:
         print(f"Smoke test: capped at {args.max_batches} batches per split per epoch.", flush=True)
@@ -364,13 +414,16 @@ def train(args: argparse.Namespace) -> Path:
             if args.method == "triplet":
                 training_dataset.set_epoch(epoch - 1)
                 train_metrics = _triplet_epoch(model, training_loader, criterion, device,
-                                               optimizer, args.max_batches)
+                                               optimizer, args.max_batches, hflip, scaler)
             else:
                 train_metrics = _classification_epoch(model, training_loader, criterion,
-                                                      device, optimizer, args.max_batches)
+                                                      device, optimizer, args.max_batches, hflip, scaler)
             val_metrics = (_classification_epoch(model, validation_loader, criterion,
-                                                 device, None, args.max_batches)
+                                                 device, None, args.max_batches, scaler=scaler)
                            if validation_loader is not None else None)
+            learning_rate = optimizer.param_groups[0]["lr"]
+            if scheduler is not None:
+                scheduler.step()
             selected_loss = float(val_metrics["loss"] if val_metrics is not None else train_metrics["loss"])
             improved = selected_loss < best_loss
             if improved:
@@ -384,7 +437,7 @@ def train(args: argparse.Namespace) -> Path:
                 "val_samples": val_metrics["samples"] if val_metrics else 0,
                 "train_batches": train_metrics["batches"],
                 "val_batches": val_metrics["batches"] if val_metrics else 0,
-                "learning_rate": optimizer.param_groups[0]["lr"],
+                "learning_rate": learning_rate,
             }
             writer.writerow(row)
             history_file.flush()
@@ -397,9 +450,9 @@ def train(args: argparse.Namespace) -> Path:
             }
             if improved:
                 _save_checkpoint(best_path, encoder, config, metadata,
-                                 model.classifier if args.method == "classification" else None)
+                                 model.classifier if args.method != "triplet" else None)
             _save_checkpoint(output_dir / "last_model.pt", encoder, config, metadata,
-                             model.classifier if args.method == "classification" else None)
+                             model.classifier if args.method != "triplet" else None)
             details = f"train_loss={float(train_metrics['loss']):.6f}"
             if "accuracy" in train_metrics:
                 details += f" train_accuracy={float(train_metrics['accuracy']):.4f}"

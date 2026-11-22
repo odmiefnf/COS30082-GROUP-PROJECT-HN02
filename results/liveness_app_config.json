@@ -1,9 +1,17 @@
 {
-  "checkpoint": "liveness_camera_matched/best_model.pt",
-  "checkpoint_sha256": "fdbb5efc65a1df89c984a49afbada3734945523a6f0ef0b233e9391cf024cd2d",
+  "checkpoint": "liveness_mobilenetv3_webcam_20261120/best_model.pt",
+  "checkpoint_sha256": "13eedf6857021048f2808d511587d28af72ea16797095f7a134afb6e5588e98b",
+  "arch": "mobilenetv3_large",
+  "initialization": "partial_fine_tuning_imagenet",
+  "image_size": 224,
+  "crop_scale": 1.4,
+  "threshold": 0.5927,
   "threshold_source": "validation",
-  "calibration": "liveness_camera_matched/calibration.json",
-  "selection_report": "liveness_camera_aug/experiment_status.json",
+  "training_data": "LCC-FASD train + 872 webcam crops at 1.4x (data/pad_webcam, splits/scale-1.4x, webcam rows oversampled x8 on a class-balanced sampler)",
+  "calibration": "liveness_mobilenetv3_webcam_20261120/calibration.json",
+  "webcam_test_metrics": "liveness_mobilenetv3_webcam_20261120_on_test/metrics.json",
+  "lcc_test_metrics": "liveness_mobilenetv3_webcam_20261120_lcc_test/metrics.json",
+  "previous_app_checkpoint": "liveness_mobilenetv3_20261120/best_model.pt",
   "baseline_preserved": "liveness_lcc/best_model.pt",
-  "scope": "Experimental classroom demo; no independent eyeglasses/attack validation."
+  "scope": "Classroom demo on the recording webcam. Held-out webcam test (3 sessions): 0/52 phone-photo and 0/116 phone-video crops accepted, 96/96 live crops passed (previous model: 29/52, 67/116, 91/96). LCC-FASD test ACER 8.88% vs 5.72% for the previous model. One person, room and day; the same phone photo/video content appears in train and test sessions, and frames within a session are correlated."
 }

@@ -1,0 +1,30 @@
+{
+  "measured_utc": "2026-11-20T16:49:41.610505+00:00",
+  "scope": "Engineering check. Detector counts use genuine LCC-FASD evaluation frames (one face each); latency is a median of single calls, excluding capture, drawing and streaming.",
+  "detector_one_face_counts": {
+    "original": {
+      "haar": "294/300",
+      "yunet": "298/300"
+    },
+    "rotated_20": {
+      "haar": "234/300",
+      "yunet": "293/300"
+    },
+    "rotated_35": {
+      "haar": "38/300",
+      "yunet": "277/300"
+    }
+  },
+  "latency_ms": {
+    "yunet_detect_960x720_cpu": 25.4,
+    "haar_detect_960x720_cpu": 34.3,
+    "liveness": 12.6,
+    "identity_embed": 5.9,
+    "expression": 13.1
+  },
+  "model_device": "cuda",
+  "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+  "torch": "2.5.1+cu124",
+  "opencv": "4.13.0",
+  "python": "3.11.9"
+}

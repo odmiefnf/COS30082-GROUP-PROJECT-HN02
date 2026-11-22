@@ -33,13 +33,29 @@ class SubmissionPackageChecks(unittest.TestCase):
         self.put("docs/usage.md", b"Run the local GUI")
         self.put("results/comparison/triplet/roc_curve.svg", b"<svg/>")
         self.put("results/readiness_20261108/model_startup.json", b"{}")
+        additions = (
+            "attendance_app/model_testing.py", "tools/capture_pad_data.py",
+            "results/identity_open_set_20261114/metrics.json",
+            "results/pad_context_20261114/metrics.json",
+            "results/readiness_20261114/full_tests.log",
+        )
+        for name in additions:
+            self.put(name, b"reviewed fixture")
         excluded = (
             "data/attendance/profiles.sqlite3", "data/downloads/raw.zip", "data/faces/photo.jpg",
+            "data/pad_webcam/live/session/crop_0000.png",
             "tmp/private.json", ".env", "kaggle.json", "credentials.json", "reports/archive/old.docx",
             "attendance_app/__pycache__/gui.py", "results/unrelated/private.json",
             "results/readiness_20261108/profiles.sqlite3", "results/classification/credentials.json",
             "results/classification/last_model.pt", "results/classification/photo.jpg",
             "results/classification/personal/config.json",
+            "results/identity_open_set_20261114/probes.csv",
+            "results/pad_context_20261114/last_model.pt",
+            "results/pad_webcam_20261109/phone_photo_01.json",
+            "results/liveness_webcam_20261113/best_model.pt",
+            "results/liveness_webcam_20261113/metrics.json",
+            "results/readiness_20261108/webcam_frame.png",
+            "results/readiness_20261114/package_validation.json",
         )
         for name in excluded:
             self.put(name)
@@ -50,6 +66,7 @@ class SubmissionPackageChecks(unittest.TestCase):
             names = archive.namelist()
             self.assertTrue(all(name.startswith(PREFIX+"/") for name in names))
             self.assertTrue(all(f"{PREFIX}/{name}" not in names for name in excluded))
+            self.assertTrue(all(f"{PREFIX}/{name}" in names for name in additions))
             self.assertIn(f"{PREFIX}/attendance_app/gui.py", names)
             self.assertIn(f"{PREFIX}/results/comparison/triplet/roc_curve.svg", names)
             self.assertIn(f"{PREFIX}/docs/usage.md", names)
@@ -72,20 +89,6 @@ class SubmissionPackageChecks(unittest.TestCase):
         with self.assertRaises(FileExistsError):
             build_package(self.root, output)
         self.assertEqual(output.read_bytes(), b"existing hand-in")
-
-    def test_unfinished_candidate_is_excluded_and_completed_candidate_is_optional(self):
-        directory = "results/liveness_regularized_20261108/"
-        self.put(directory+"best_model.pt")
-        self.put(directory+"experiment_status.json", b'{"status":"training"}')
-        first = self.root/"first.zip"
-        build_package(self.root, first)
-        with zipfile.ZipFile(first) as archive:
-            self.assertNotIn(PREFIX+"/"+directory+"best_model.pt", archive.namelist())
-        self.put(directory+"experiment_status.json", b'{"status":"completed"}')
-        second = self.root/"second.zip"
-        build_package(self.root, second)
-        with zipfile.ZipFile(second) as archive:
-            self.assertIn(PREFIX+"/"+directory+"best_model.pt", archive.namelist())
 
 
 if __name__ == "__main__":

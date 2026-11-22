@@ -65,11 +65,19 @@ class LivenessDetector:
             if bbox is None and not is_face_crop and self.config["crop_mode"] == "bbox":
                 raise ValueError("A camera/image-array input needs a pixel bbox or is_face_crop=True.")
             rgb = image
-        return crop_liveness_image(rgb, bbox=bbox)
+        crop_scale = self.config.get("crop_scale")
+        return crop_liveness_image(
+            rgb, bbox=bbox,
+            context=self.config.get("context_crop", False) and not is_face_crop and crop_scale is None,
+            crop_scale=crop_scale if not is_face_crop else None,
+        )
 
     def predict_crop(self, face_crop: Image.Image | np.ndarray) -> dict:
         """Predict an explicitly prepared face crop; score is softmax P(live)."""
-        tensor = preprocess_liveness_image(face_crop, image_size=self.config["image_size"])
+        tensor = preprocess_liveness_image(
+            face_crop, image_size=self.config["image_size"],
+            normalization=self.config.get("normalization", "minus_one_one"),
+        )
         with torch.inference_mode():
             logits = self.model(tensor.unsqueeze(0).to(self.device))
             if tuple(logits.shape) != (1, 2) or not torch.isfinite(logits).all():

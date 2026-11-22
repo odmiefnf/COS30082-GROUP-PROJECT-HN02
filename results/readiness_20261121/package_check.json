@@ -1,0 +1,47 @@
+{
+  "checked_utc": "2026-11-21T01:44:00.472798+00:00",
+  "package": {
+    "files": 292,
+    "bytes": 171828501,
+    "sha256": "74855c60421b3cabfae49e53b34d2cccadc63a597d131cec58f25c6563782a4a",
+    "personal_data_included": false,
+    "note": "Built by tools/package_submission.py and extracted into a new empty folder; no data/ directory or profile database is inside."
+  },
+  "app_from_copy": {
+    "command": "python -m attendance_app.web --device cpu --database data/attendance/package_check.sqlite3 (new empty database)",
+    "models_ready": true,
+    "model_info": {
+      "identity_threshold": 0.6189294877475999,
+      "identity_margin": 0.05,
+      "identity_dim": 128,
+      "identity_checkpoint": "classification_resnet18/best_model.pt",
+      "liveness_threshold": 0.5927479726712884,
+      "liveness_checkpoint": "liveness_mobilenetv3_webcam_20261120/best_model.pt",
+      "emotion_checkpoint": "emotion_fer_mnv3/best_model.pt",
+      "stable_frames": 3,
+      "device": "cpu",
+      "num_threads": 4,
+      "identity_backbone": "resnet18",
+      "identity_method": "classification",
+      "liveness_arch": "mobilenetv3_large",
+      "liveness_crop_scale": 1.4,
+      "emotion_arch": "EmotionMobileNetV3-v1"
+    },
+    "components": {
+      "Runtime": "Ready",
+      "Identity": "Ready",
+      "Liveness": "Ready",
+      "Expression": "Ready",
+      "Detector": "Ready",
+      "Profiles": "Ready"
+    },
+    "profiles": 0,
+    "camera_started": false
+  },
+  "tests_in_copy": [
+    "Ran 267 tests in 106.358s",
+    "",
+    "OK"
+  ],
+  "not_checked": "A clean pip install on another computer (the project's existing .venv-gpu interpreter was reused) and a live camera run."
+}

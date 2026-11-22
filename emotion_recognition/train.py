@@ -1,4 +1,4 @@
-"""Train a fresh FER CNN; select by validation macro-F1, never PrivateTest."""
+"""Train a FER CNN (from scratch or ImageNet fine-tuning); select by validation macro-F1, never PrivateTest."""
 from __future__ import annotations
 import argparse
 import csv
@@ -15,7 +15,7 @@ from torch.utils.data import DataLoader
 from anti_spoofing.evaluate import _device,_sha256,_write_json
 from .data import CLASSES,EmotionDataset,validate_splits
 from .metrics import classification_metrics
-from .model import EmotionCNN
+from .model import EmotionCNN,EmotionMobileNetV3
 
 def augment(images):
     """Independent horizontal flips and integer shifts up to 2px, train only."""
@@ -60,16 +60,20 @@ def train(args):
     split_check=validate_splits({"train":training.records,"val":validation.records})
     counts=torch.bincount(training.labels,minlength=7).float()
     weights=(counts.sum()/(7*counts)).sqrt(); weights=weights/weights.mean()
-    model=EmotionCNN().to(device)
-    optimizer=torch.optim.Adam(model.parameters(),lr=args.learning_rate,weight_decay=1e-4)
+    pretrained=getattr(args,"arch","cnn")=="mobilenetv3"
+    model=(EmotionMobileNetV3(pretrained=True) if pretrained else EmotionCNN()).to(device)
+    optimizer=torch.optim.Adam((p for p in model.parameters() if p.requires_grad),lr=args.learning_rate,weight_decay=1e-4)
     scheduler=torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer,mode="max",factor=.5,patience=3)
     train_loss=nn.CrossEntropyLoss(weight=weights.to(device))
     val_loss=nn.CrossEntropyLoss()
     generator=torch.Generator().manual_seed(args.seed)
     train_loader=DataLoader(training,batch_size=args.batch_size,shuffle=True,generator=generator)
     val_loader=DataLoader(validation,batch_size=args.batch_size,shuffle=False)
-    config={"architecture":"EmotionCNN-v1","classes":list(CLASSES),"channels":1,"image_size":48,
-            "normalization":"[-1,1]","pretrained":False}
+    config={"architecture":"EmotionMobileNetV3-v1" if pretrained else "EmotionCNN-v1","classes":list(CLASSES),
+            "channels":1,"image_size":48,"normalization":"[-1,1]","pretrained":pretrained}
+    if pretrained:
+        config.update(pretrained_weights="torchvision MobileNet_V3_Large_Weights.IMAGENET1K_V2",
+                      frozen_feature_blocks=model.freeze_blocks,model_input_size=EmotionMobileNetV3.INPUT_SIZE)
     provenance={"train":training.records,"val":validation.records}
     recipe={"started_at_utc":started,"device":str(device),"num_threads":args.num_threads,
             "seed":args.seed,"epochs_requested":args.epochs,"batch_size":args.batch_size,
@@ -78,7 +82,8 @@ def train(args):
             "class_weighting":"normalized sqrt(N/(7*train_class_count))", "class_weights":weights.tolist(),
             "loss":"weighted cross-entropy in training; unweighted cross-entropy in validation",
             "augmentation":{"horizontal_flip_probability":.5,"translation_pixels":2,"validation_augmented":False},
-            "initialization":"random_from_scratch","smoke_test":False,"test_data_read":False,
+            "initialization":"partial_fine_tuning_imagenet" if pretrained else "random_from_scratch",
+            "smoke_test":False,"test_data_read":False,
             "selection":"maximum validation macro-F1, minimum validation loss as tie-breaker",
             "provenance":provenance,"split_check":split_check,
             "source_sha256":{name:_sha256(Path(__file__).parent/name) for name in ("data.py","model.py","train.py","metrics.py")},
@@ -90,7 +95,8 @@ def train(args):
                     "model_state":{key:value.detach().cpu().clone() for key,value in model.state_dict().items()},
                     "training":{**recipe,**metadata}},path)
     columns=("epoch","train_loss","val_loss","train_accuracy","val_accuracy","val_macro_f1","val_balanced_accuracy","learning_rate","best_epoch")
-    print(f"Training FER CNN from scratch: {len(training)} train, {len(validation)} validation; {device}.",flush=True)
+    start="fine-tuning ImageNet MobileNetV3" if pretrained else "FER CNN from scratch"
+    print(f"Training {start}: {len(training)} train, {len(validation)} validation; {device}.",flush=True)
     with (output/"history.csv").open("w",encoding="utf-8",newline="") as handle:
         writer=csv.DictWriter(handle,fieldnames=columns); writer.writeheader()
         for index in range(1,args.epochs+1):
@@ -124,6 +130,8 @@ def main(argv=None):
     parser.add_argument("--epochs",type=int,default=15); parser.add_argument("--batch-size",type=int,default=64)
     parser.add_argument("--learning-rate",type=float,default=.001); parser.add_argument("--seed",type=int,default=42)
     parser.add_argument("--num-threads",type=int,default=4); parser.add_argument("--device",choices=("auto","cpu","cuda"),default="auto")
+    parser.add_argument("--arch",choices=("cnn","mobilenetv3"),default="cnn",
+                        help="cnn: small CNN from scratch; mobilenetv3: ImageNet MobileNetV3-Large, first 4 blocks frozen.")
     try: train(parser.parse_args(argv))
     except (OSError,ValueError,RuntimeError) as exc: parser.exit(2,f"Emotion training failed: {exc}\n")
     return 0

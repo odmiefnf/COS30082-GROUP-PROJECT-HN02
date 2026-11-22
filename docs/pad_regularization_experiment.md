@@ -1,5 +1,7 @@
 # PAD regularization experiment
 
+> **Note, 21 November 2026:** this experiment's result folders and checkpoints were deleted because neither the app nor the report uses them. The numbers below are kept as history only.
+
 Completed on 8 November 2026 using the existing training code. The experiment
 tested whether stronger weight decay and a lower learning rate would improve
 the validation operating point. It did not meet its predeclared promotion

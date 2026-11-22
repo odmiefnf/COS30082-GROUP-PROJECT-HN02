@@ -1,6 +1,8 @@
-"""Compact CNNs trained from scratch for identity learning and verification."""
+"""Identity encoders: a compact CNN from scratch, or a fine-tuned ImageNet ResNet-18."""
 
 from __future__ import annotations
+
+import math
 
 import torch
 from torch import nn
@@ -50,16 +52,97 @@ class FaceEncoder(nn.Module):
         return F.normalize(self.forward_raw(images), p=2, dim=1, eps=1e-12)
 
 
+class ResNet18FaceEncoder(nn.Module):
+    """ImageNet ResNet-18 adapted to small face crops and fine-tuned for embeddings.
+
+    The max-pool is removed so a 64 px face still leaves a 4x4 map after layer4.
+    The stem (conv1/bn1) parameters stay frozen; every residual stage and the new
+    projection are trained, so the network is fine-tuned rather than used as-is.
+    """
+
+    FROZEN = ("conv1", "bn1")
+
+    def __init__(self, embedding_dim: int = 128, pretrained: bool = False) -> None:
+        super().__init__()
+        if not isinstance(embedding_dim, int) or embedding_dim < 1:
+            raise ValueError("embedding_dim must be a positive integer.")
+        from torchvision.models import ResNet18_Weights, resnet18
+
+        net = resnet18(weights=ResNet18_Weights.IMAGENET1K_V1 if pretrained else None)
+        net.maxpool = nn.Identity()
+        net.fc = nn.Identity()
+        for name in self.FROZEN:
+            for param in getattr(net, name).parameters():
+                param.requires_grad = False
+        self.embedding_dim = embedding_dim
+        self.features = net
+        self.projection = nn.Linear(512, embedding_dim)
+        # Shared preprocessing yields [-1, 1]; ImageNet weights expect mean/std inputs.
+        self.register_buffer("mean", torch.tensor([.485, .456, .406]).view(1, 3, 1, 1), persistent=False)
+        self.register_buffer("std", torch.tensor([.229, .224, .225]).view(1, 3, 1, 1), persistent=False)
+
+    def forward_raw(self, images: torch.Tensor) -> torch.Tensor:
+        if images.ndim != 4 or images.shape[1] != 3:
+            raise ValueError("Expected an image batch with shape (N, 3, H, W).")
+        return self.projection(self.features(((images + 1) / 2 - self.mean) / self.std))
+
+    def forward(self, images: torch.Tensor) -> torch.Tensor:
+        return F.normalize(self.forward_raw(images), p=2, dim=1, eps=1e-12)
+
+
+BACKBONES = ("compact", "resnet18")
+
+
+def build_encoder(backbone: str = "compact", embedding_dim: int = 128, pretrained: bool = False) -> nn.Module:
+    if backbone == "compact":
+        return FaceEncoder(embedding_dim=embedding_dim)
+    if backbone == "resnet18":
+        return ResNet18FaceEncoder(embedding_dim=embedding_dim, pretrained=pretrained)
+    raise ValueError(f"Unsupported identity backbone: {backbone!r}")
+
+
+class ArcFaceHead(nn.Module):
+    """Additive angular margin head (Deng et al., 2019): scale * cos(theta + m) for the true class.
+
+    Without labels it returns scale * cos(theta), so validation and test accuracy use no margin.
+    """
+
+    def __init__(self, embedding_dim: int, num_classes: int, scale: float = 32.0, margin: float = 0.3) -> None:
+        super().__init__()
+        self.weight = nn.Parameter(torch.empty(num_classes, embedding_dim))
+        nn.init.xavier_uniform_(self.weight)
+        self.scale, self.margin = scale, margin
+        self.cos_m, self.sin_m = math.cos(margin), math.sin(margin)
+        # Past theta = pi - m, cos(theta + m) stops decreasing; use the usual linear fallback there.
+        self.threshold, self.fallback = math.cos(math.pi - margin), math.sin(math.pi - margin) * margin
+
+    def forward(self, features: torch.Tensor, labels: torch.Tensor | None = None) -> torch.Tensor:
+        with torch.autocast(features.device.type, enabled=False):
+            cosine = F.linear(F.normalize(features.float()), F.normalize(self.weight.float()))
+            if labels is None:
+                return self.scale * cosine
+            sine = torch.sqrt((1 - cosine * cosine).clamp_min(1e-7))
+            target = cosine * self.cos_m - sine * self.sin_m
+            target = torch.where(cosine > self.threshold, target, cosine - self.fallback)
+            true_class = F.one_hot(labels, cosine.size(1)).bool()
+            return self.scale * torch.where(true_class, target, cosine)
+
+
 class FaceClassifier(nn.Module):
     """Train an encoder through identity classification using raw logits."""
 
-    def __init__(self, num_classes: int, embedding_dim: int = 128) -> None:
+    def __init__(self, num_classes: int, embedding_dim: int = 128,
+                 backbone: str = "compact", pretrained: bool = False, head: str = "linear") -> None:
         super().__init__()
         if not isinstance(num_classes, int) or num_classes < 1:
             raise ValueError("num_classes must be a positive integer.")
-        self.encoder = FaceEncoder(embedding_dim=embedding_dim)
-        self.classifier = nn.Linear(embedding_dim, num_classes)
+        self.encoder = build_encoder(backbone, embedding_dim, pretrained)
+        self.classifier = (ArcFaceHead(embedding_dim, num_classes) if head == "arcface"
+                           else nn.Linear(embedding_dim, num_classes))
 
-    def forward(self, images: torch.Tensor) -> torch.Tensor:
-        """Return logits suitable for torch.nn.CrossEntropyLoss."""
-        return self.classifier(self.encoder.forward_raw(images))
+    def forward(self, images: torch.Tensor, labels: torch.Tensor | None = None) -> torch.Tensor:
+        """Return logits suitable for torch.nn.CrossEntropyLoss (ArcFace adds its margin only with labels)."""
+        features = self.encoder.forward_raw(images)
+        if isinstance(self.classifier, ArcFaceHead):
+            return self.classifier(features, labels)
+        return self.classifier(features)

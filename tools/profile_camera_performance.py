@@ -83,7 +83,7 @@ def main(argv=None):
             cv2.setNumThreads(args.opencv_threads)
         setup = time.perf_counter()
         recognizer = FaceRecognizer(ROOT/"results/identity_app_config.json", args.device)
-        liveness = LivenessDetector(ROOT/"results/liveness_camera_matched/best_model.pt", device=args.device)
+        liveness = LivenessDetector(ROOT/"results/liveness_lcc/best_model.pt", device=args.device)
         emotion = EmotionRecognizer(ROOT/"results/emotion_fer/best_model.pt", args.device)
         if liveness.threshold is None:
             raise ValueError("A validation-calibrated liveness threshold is required.")

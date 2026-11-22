@@ -34,8 +34,9 @@ class FaceRecognizer:
             raise ValueError("Invalid or unavailable identity device.")
         self.device = torch.device("cuda" if device == "auto" and torch.cuda.is_available() else "cpu" if device == "auto" else device)
         self.encoder, self.config = load_encoder(self.checkpoint, self.device)
-        if self.config.get("smoke_test") is not False or self.config.get("training", {}).get("initialization") != "random_from_scratch":
-            raise ValueError("The attendance app requires a completed from-scratch training checkpoint.")
+        if (self.config.get("smoke_test") is not False or self.config.get("training", {}).get("initialization")
+                not in ("random_from_scratch", "partial_fine_tuning_imagenet")):
+            raise ValueError("The attendance app requires a completed trained identity checkpoint.")
         self.dimension = self.config["embedding_dim"]
 
     def embed(self, crop):
@@ -46,7 +47,8 @@ class FaceRecognizer:
 
     def match(self, embedding, profiles):
         if not profiles:
-            return {"status": "unknown", "person_id": None, "name": None, "cosine": None, "gap": None}
+            return {"status": "unknown", "person_id": None, "name": None, "cosine": None, "gap": None,
+                    "threshold": self.threshold, "top_matches": []}
         query = unit_vector(embedding, self.dimension)
         # Compare appearance templates within a person first. The ambiguity
         # runner-up must be a different person, never their second appearance.
@@ -55,5 +57,8 @@ class FaceRecognizer:
         best = int(order[0]); value = float(scores[best])
         gap = float(value - scores[order[1]]) if len(order) > 1 else None
         status = "unknown" if value < self.threshold else "ambiguous" if gap is not None and gap < self.margin else "known"
+        top_matches = [{"person_id": profiles[int(i)]["id"], "name": profiles[int(i)]["name"],
+                        "cosine": float(scores[int(i)])} for i in order[:3]]
         return {"status": status, "person_id": profiles[best]["id"] if status == "known" else None,
-                "name": profiles[best]["name"] if status == "known" else None, "cosine": value, "gap": gap}
+                "name": profiles[best]["name"] if status == "known" else None, "cosine": value, "gap": gap,
+                "threshold": self.threshold, "top_matches": top_matches}

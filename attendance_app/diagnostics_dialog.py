@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from .diagnostics import COMPONENTS
+from .theme import BG, CARD, FONT, INK, MUTED, FlatButton, card
 
 
 class DiagnosticsDialog:
@@ -12,20 +13,24 @@ class DiagnosticsDialog:
         self.window.title("Diagnostics · PREVIEW DATA" if preview else "Diagnostics · COS30082")
         self.window.geometry("880x650")
         self.window.minsize(650, 480)
-        self.window.configure(bg="#eef3f8")
+        self.window.configure(bg=BG)
         self.window.protocol("WM_DELETE_WINDOW", self.close)
-        body = tk.Frame(self.window, bg="#eef3f8", padx=20, pady=18)
+        body = tk.Frame(self.window, bg=BG, padx=20, pady=18)
         body.pack(fill="both", expand=True)
-        tk.Label(body, text="Camera and model diagnostics", bg="#eef3f8", fg="#172b45",
-                 font=("Segoe UI", 15, "bold"), anchor="w").pack(fill="x", pady=(0, 10))
-        actions = tk.Frame(body, bg="#eef3f8")
+        tk.Label(body, text="Camera and model diagnostics", bg=BG, fg=INK,
+                 font=(FONT, 16, "bold"), anchor="w").pack(fill="x")
+        tk.Label(body, text="Read-only component status, runtime details, and the latest frame summary.",
+                 bg=BG, fg=MUTED, font=(FONT, 10), anchor="w").pack(fill="x", pady=(2, 12))
+        actions = tk.Frame(body, bg=BG)
         actions.pack(side="bottom", fill="x", pady=(12, 0))
-        self.retry = ttk.Button(actions, text="Retry model setup", command=retry)
+        self.retry = FlatButton(actions, "Retry model setup", retry, "primary", 10)
         self.retry.pack(side="left")
-        ttk.Button(actions, text="Close", command=self.close).pack(side="right")
-        self.text = tk.Text(body, font=("Segoe UI", 11), wrap="word", bg="white", fg="#172b45",
-                            padx=12, pady=12, relief="flat", state="disabled")
-        scroll = ttk.Scrollbar(body, orient="vertical", command=self.text.yview)
+        FlatButton(actions, "Close", self.close, "secondary", 10).pack(side="right")
+        panel = card(body, padx=2, pady=2)
+        panel.pack(fill="both", expand=True)
+        self.text = tk.Text(panel, font=("Consolas", 10), wrap="word", bg=CARD, fg=INK,
+                            padx=14, pady=12, relief="flat", bd=0, state="disabled")
+        scroll = ttk.Scrollbar(panel, orient="vertical", command=self.text.yview)
         scroll.pack(side="right", fill="y")
         self.text.configure(yscrollcommand=scroll.set)
         self.text.pack(fill="both", expand=True)
