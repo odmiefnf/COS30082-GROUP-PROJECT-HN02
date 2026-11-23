@@ -314,14 +314,14 @@ class GuidedEnrollmentChecks(unittest.TestCase):
                 self.assertEqual(len(svc.guided_shots), 0)
                 self.assertEqual(len(store.profiles()[0]["appearances"]), 2)
 
-                # Person A's shots can never become an appearance of another profile
+                # No cross-person check: the operator-confirmed profile gets the look even if
+                # the shots score closer to someone else (the model often does for a new look)
                 other = store.enroll("Tran Thi B", [[0.0, 0.0, 1.0, 0.0]] * 3)
                 for seed, tilt in ((110, .01), (120, .03), (130, .05)):
                     shoot(seed, [1.0, tilt, 0.0, 0.0])
-                with self.assertRaisesRegex(ValueError, "match Nguyen Van A"):
-                    svc.commit_guided_registration(appearance_person_id=other, appearance_label="Glasses")
-                self.assertEqual(len(svc.guided_shots), 3)
-                self.assertEqual(len(next(p for p in store.profiles() if p["id"] == other)["appearances"]), 1)
+                app = svc.commit_guided_registration(appearance_person_id=other, appearance_label="With mask")
+                self.assertEqual(app["name"], "Tran Thi B")
+                self.assertEqual(len(next(p for p in store.profiles() if p["id"] == other)["appearances"]), 2)
             finally:
                 store.close()
 

@@ -122,11 +122,9 @@ class ReferenceImportChecks(unittest.TestCase):
         self.recognizer.dimension, self.recognizer.threshold, self.recognizer.margin = 3, .8, .05
         self.recognizer.fingerprint = "a"*64
         self.recognizer.embed = Mock(return_value=np.array([0., 1., 0.], dtype=np.float32))
-        self.live = Mock()
-        self.live.predict_crop.return_value = {"is_live": True, "live_score": .9}
         self.locator = Mock()
         self.locator.detect.return_value = [(20, 20, 120, 120)]
-        self.importer = ReferenceImporter(self.store, self.recognizer, self.live, self.locator)
+        self.importer = ReferenceImporter(self.store, self.recognizer, self.locator)
         self.files = []
         rng = np.random.default_rng(42)
         for index in range(3):
@@ -160,52 +158,66 @@ class ReferenceImportChecks(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.commit(checked)
 
-    def test_context_pad_import_preserves_tight_identity_crop(self):
-        self.live.config = {"context_crop": True}
-        self.importer = ReferenceImporter(self.store, self.recognizer, self.live, self.locator)
+    def test_three_to_ten_photos_are_accepted_and_all_are_stored(self):
+        rng = np.random.default_rng(7)
+        for index in range(3, 11):
+            path = self.root/f"photo{index}.png"
+            Image.fromarray(rng.integers(0, 256, (180, 180, 3), dtype=np.uint8)).save(path)
+            self.files.append(str(path))
+        for count in (2, 11):
+            with self.assertRaises(ValueError):
+                self.prepare(files=self.files[:count])
+        checked = self.prepare(files=self.files[:10])
+        self.assertTrue(checked["valid"], checked["message"])
+        self.commit(checked)
+        self.assertEqual(self.store.profiles()[0]["sample_count"], 13)
+
+    def test_identity_uses_the_tight_face_crop_and_no_liveness_model(self):
         self.assertTrue(self.prepare()["valid"])
         with Image.open(self.files[0]) as image:
             pixels = np.asarray(image)
-        pad_crop = self.live.predict_crop.call_args_list[0].args[0]
         identity_crop = self.recognizer.embed.call_args_list[0].args[0]
-        np.testing.assert_array_equal(np.asarray(pad_crop), pixels)
         np.testing.assert_array_equal(np.asarray(identity_crop), pixels[20:140, 20:140])
+        self.assertFalse(hasattr(self.importer, "liveness"))
 
-    def test_new_person_and_duplicate_existing_identity_handling(self):
+    def test_new_person_duplicate_name_is_blocked_but_a_similar_face_is_not(self):
         checked = self.prepare(person_id=None, name="New person")
         result = self.commit(checked)
         self.assertNotEqual(result["person_id"], self.person)
         self.assertEqual(len(self.store.profiles()), 2)
         with self.assertRaises(ValueError):
             self.prepare(person_id=None, name="NEW PERSON")
-        self.assertFalse(self.prepare(person_id=None, name="Duplicate face")["valid"])
+        # No match check by design: the operator verifies in use and deletes a wrong profile.
+        self.assertTrue(self.prepare(person_id=None, name="Duplicate face")["valid"])
 
-    def test_duplicate_pixels_or_any_failed_gate_prevent_partial_writes(self):
-        duplicate = self.root/"copy.png"
-        duplicate.write_bytes(Path(self.files[0]).read_bytes())
-        self.assertFalse(self.prepare(files=[self.files[0], str(duplicate), self.files[2]])["valid"])
-        for result in (False, None):
-            self.live.predict_crop.return_value = {"is_live": result}
-            self.assertFalse(self.prepare()["valid"])
+    def test_photos_without_a_face_are_skipped_and_fewer_than_three_save_nothing(self):
+        self.locator.detect.side_effect = [[(20, 20, 120, 120)], [], [(20, 20, 120, 120)], [(20, 20, 120, 120)]]
+        extra = self.root/"extra.png"
+        Image.new("RGB", (180, 180), "white").save(extra)
+        checked = self.prepare(files=self.files+[str(extra)])
+        self.assertTrue(checked["valid"])
+        self.assertEqual([item["passed"] for item in checked["items"]], [True, False, True, True])
+        self.locator.detect.side_effect = None
+        self.locator.detect.return_value = []
+        self.assertFalse(self.prepare()["valid"])
         self.assertEqual(self.store.profiles()[0]["sample_count"], 3)
-
-    def test_missing_multi_face_low_quality_and_roi_are_rejected(self):
-        for boxes in ([], [(0, 0, 100, 100)]*2, [(0, 0, 20, 20)]):
-            self.locator.detect.return_value = boxes
-            self.assertFalse(self.prepare()["valid"])
-        self.locator.detect.return_value = [(20, 20, 120, 120)]
-        blank = self.root/"blank.png"
-        Image.new("RGB", (180, 180)).save(blank)
-        self.assertFalse(self.prepare(files=[str(blank), self.files[1], self.files[2]])["valid"])
         self.locator.mode = "roi"
         self.assertFalse(self.prepare()["valid"])
 
-    def test_inconsistent_or_other_known_person_is_not_attached(self):
-        self.recognizer.embed.side_effect = [np.array(v, dtype=np.float32) for v in ([0,1,0],[0,0,1],[0,1,0])]
-        self.assertFalse(self.prepare()["valid"])
-        self.recognizer.embed.side_effect = None
+    def test_no_quality_consistency_duplicate_or_match_checks_and_largest_face_is_used(self):
+        duplicate = self.root/"copy.png"
+        duplicate.write_bytes(Path(self.files[0]).read_bytes())
+        blank = self.root/"blank.png"
+        Image.new("RGB", (180, 180)).save(blank)
+        self.recognizer.embed.side_effect = [np.array(v, dtype=np.float32) for v in ([0,1,0],[0,0,1],[1,0,0])]
         self.store.enroll("Other person", [[0., 1., 0.]]*3)
-        self.assertFalse(self.prepare()["valid"])
+        # Tiny face partly outside the photo, plus a larger face: the larger one is cropped.
+        self.locator.detect.return_value = [(-10, -10, 20, 20), (20, 20, 120, 120)]
+        checked = self.prepare(files=[self.files[0], str(duplicate), str(blank)])
+        self.assertTrue(checked["valid"], checked["message"])
+        self.assertEqual(self.recognizer.embed.call_args_list[0].args[0].size, (120, 120))
+        self.commit(checked)
+        self.assertEqual(next(p for p in self.store.profiles() if p["id"] == self.person)["sample_count"], 6)
 
     def test_confirmation_token_expiry_and_cancellation_are_enforced(self):
         checked = self.prepare()
@@ -229,13 +241,9 @@ class ReferenceImportChecks(unittest.TestCase):
         self.assertEqual(self.store.profiles()[0]["sample_count"], 6)
         self.assertEqual(len(list(self.root.glob("*.png"))), 3)
 
-    def test_target_rename_or_new_conflict_after_check_requires_recheck(self):
+    def test_target_rename_after_check_requires_recheck(self):
         checked = self.prepare()
         self.store.rename_profile(self.person, "Renamed")
-        with self.assertRaises(ValueError):
-            self.commit(checked)
-        checked = self.prepare()
-        self.store.enroll("Other person", [[0., 1., 0.]]*3)
         with self.assertRaises(ValueError):
             self.commit(checked)
         self.assertEqual(next(p for p in self.store.profiles() if p["id"]==self.person)["sample_count"], 3)

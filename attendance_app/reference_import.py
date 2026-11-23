@@ -1,7 +1,11 @@
-"""Operator-reviewed import of three reference photos, never attendance/training."""
+"""Import of 3-10 reference photos straight into a profile, never attendance/training.
+
+By the operator's choice there are no photo checks (liveness, quality, consistency or
+match against other profiles): a wrong profile is found in use and deleted. The face is
+still located, because the identity model needs a face crop.
+"""
 from __future__ import annotations
 
-import hashlib
 from pathlib import Path
 import secrets
 import time
@@ -10,15 +14,14 @@ import cv2
 import numpy as np
 from PIL import Image, ImageOps
 
-from anti_spoofing.data import crop_liveness_image
-from .service import uses_pad_context
 from .store import clean_text
+
+MIN_PHOTOS, MAX_PHOTOS = 3, 10  # 3 = the store's minimum per appearance; 10 = one camera registration
 
 
 class ReferenceImporter:
-    def __init__(self, store, recognizer, liveness, locator):
-        self.store, self.recognizer, self.liveness, self.locator = store, recognizer, liveness, locator
-        self.pad_context = uses_pad_context(liveness)
+    def __init__(self, store, recognizer, locator):
+        self.store, self.recognizer, self.locator = store, recognizer, locator
         self.pending = None
         self._check_encoder()
 
@@ -48,9 +51,9 @@ class ReferenceImporter:
             raise ValueError("Use a different appearance label; this label already exists.")
         return person["name"], label
 
-    def _read_and_check(self, path):
+    def _read_face(self, path):
         if getattr(self.locator, "mode", None) == "roi":
-            raise ValueError("Photo import requires automatic face checks; ROI mode is for camera enrollment.")
+            raise ValueError("Photo import needs automatic face detection; ROI mode is for camera enrollment.")
         path = Path(path).expanduser().resolve()
         if not path.is_file() or path.suffix.casefold() not in (".jpg", ".jpeg", ".png", ".bmp", ".webp"):
             raise ValueError("Choose a readable JPG, PNG, BMP or WebP photo.")
@@ -60,66 +63,41 @@ class ReferenceImporter:
             if source.width*source.height > 50_000_000:
                 raise ValueError("Photo exceeds the 50 megapixel limit.")
             image = ImageOps.exif_transpose(source).convert("RGB")
-            digest = hashlib.sha256(np.asarray(image).tobytes()).hexdigest()
             image.thumbnail((1600, 1600), Image.Resampling.BILINEAR)
             rgb = np.asarray(image)
         boxes = self.locator.detect(rgb)
-        if len(boxes) != 1:
-            raise ValueError("Expected one face; found none or multiple faces.")
-        x, y, width, height = boxes[0]
-        if min(width, height) < 80 or min(x, y) < 0 or x+width > rgb.shape[1] or y+height > rgb.shape[0]:
-            raise ValueError("The face is too small or outside the image.")
-        crop = Image.fromarray(rgb[y:y+height, x:x+width].copy())
-        gray = cv2.cvtColor(np.asarray(crop), cv2.COLOR_RGB2GRAY)
-        if cv2.Laplacian(gray, cv2.CV_64F).var() < 20 or not 20 <= gray.mean() <= 235:
-            raise ValueError("The face is too blurry, dark or bright.")
-        pad_crop = crop_liveness_image(rgb, (x, y, width, height), context=True) if self.pad_context else crop
-        live = self.liveness.predict_crop(pad_crop)
-        if live.get("is_live") is not True:
-            raise ValueError("PAD model check not passed. This does not establish live presence from a photo.")
-        return self.recognizer.embed(crop), digest
-
-    def _check_matches(self, embeddings, profiles, person_id):
-        for embedding in embeddings:
-            match = self.recognizer.match(embedding, profiles)
-            if (match["status"] == "ambiguous" or match["status"] == "known"
-                    and (person_id is None or match["person_id"] != person_id)):
-                raise ValueError("A photo matches an existing/different profile or is ambiguous. Verify the selected person.")
-        for index, embedding in enumerate(embeddings):
-            if any(float(np.dot(embedding, other)) < self.recognizer.threshold for other in embeddings[:index]):
-                raise ValueError("The three photos are inconsistent. Use the same person and appearance in all three.")
+        if not boxes:
+            raise ValueError("No face found; photo skipped.")
+        # Largest face, like the camera's main face; clipped so faces at the photo edge still work.
+        x, y, width, height = max(boxes, key=lambda box: box[2]*box[3])
+        left, top = max(int(x), 0), max(int(y), 0)
+        right, bottom = min(int(x+width), rgb.shape[1]), min(int(y+height), rgb.shape[0])
+        if right <= left or bottom <= top:
+            raise ValueError("No face found; photo skipped.")
+        return self.recognizer.embed(Image.fromarray(rgb[top:bottom, left:right].copy()))
 
     def prepare(self, *, operation_id, files, person_id=None, name="", label="", now=None):
         self.pending = None
         self._check_encoder()
         if not isinstance(operation_id, str) or not 16 <= len(operation_id) <= 100:
             raise ValueError("Invalid import operation ID.")
-        if not isinstance(files, (list, tuple)) or len(files) != 3:
-            raise ValueError("Choose exactly three distinct photos for one appearance.")
+        if not isinstance(files, (list, tuple)) or not MIN_PHOTOS <= len(files) <= MAX_PHOTOS:
+            raise ValueError(f"Choose {MIN_PHOTOS} to {MAX_PHOTOS} distinct photos for one appearance.")
         profiles = self.store.profiles()
         name, label = self._validate_target(person_id, name, label, profiles)
-        items, vectors, digests = [], [], set()
+        items, vectors = [], []
         for file in files:
             item = {"file": Path(file).name, "passed": False}
             try:
-                vector, digest = self._read_and_check(file)
-                if digest in digests:
-                    raise ValueError("Duplicate photo pixels. Choose three different photographs.")
-                digests.add(digest)
-                vectors.append(vector.copy())
-                item.update(passed=True, message="Face, quality and PAD checks passed")
+                vectors.append(self._read_face(file).copy())
+                item.update(passed=True, message="Face found")
             except (OSError, ValueError, RuntimeError, cv2.error, Image.DecompressionBombError) as exc:
                 item["message"] = str(exc)
             items.append(item)
-        valid = all(item["passed"] for item in items)
-        message = "All three photos passed. Review the selected person, then confirm import."
-        if valid:
-            try:
-                self._check_matches(vectors, profiles, person_id)
-            except ValueError as exc:
-                valid, message = False, str(exc)
-        else:
-            message = "No samples saved. Replace the rejected photos and check again."
+        skipped = len(items)-len(vectors)
+        valid = len(vectors) >= MIN_PHOTOS
+        message = (f"{len(vectors)} photos ready" + (f"; {skipped} skipped." if skipped else ".") if valid else
+                   f"Only {len(vectors)} photos had a face; at least {MIN_PHOTOS} are needed. Nothing was saved.")
         now = time.monotonic() if now is None else float(now)
         if not np.isfinite(now):
             raise ValueError("Import clock must be finite.")
@@ -133,7 +111,7 @@ class ReferenceImporter:
 
     def commit(self, *, operation_id, token, confirmed, now=None):
         if confirmed is not True:
-            raise ValueError("Verify the person and permission to use all three photos before importing.")
+            raise ValueError("Verify the person and permission to use all photos before importing.")
         pending = self.pending
         if (pending is None or pending["operation_id"] != operation_id
                 or not secrets.compare_digest(str(token), pending["token"])):
@@ -147,7 +125,6 @@ class ReferenceImporter:
         name, label = self._validate_target(pending["person_id"], pending["name"], pending["label"], profiles)
         if name != pending["name"]:
             raise ValueError("The selected profile was renamed. Check the photos again.")
-        self._check_matches(pending["embeddings"], profiles, pending["person_id"])
         if pending["person_id"] is None:
             person_id = self.store.enroll(name, pending["embeddings"])
             appearance_id = "original:"+person_id
