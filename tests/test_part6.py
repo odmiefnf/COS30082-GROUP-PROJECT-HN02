@@ -288,6 +288,25 @@ class Fixture(unittest.TestCase):
         self.assertEqual(faces[0]["status"], "unknown")
         self.assertEqual((faces[1]["status"], faces[1]["identity"]["name"]), ("known", "Hiếu"))
 
+    def test_stronger_matching_bystander_wins_identity_and_stranger_cannot_hijack_lock(self):
+        a = self.enroll("Hiếu")
+        self.service.profiles = self.store.profiles()
+        self.recognizer.threshold = 0.51
+        crop_h, crop_f = Image.new("RGB", (100, 100), "red"), Image.new("RGB", (100, 100), "blue")
+        vec_h = np.array([1.0, 0.0, 0.0], dtype=np.float32)
+        # Friend shares 0.58 cosine with Hiếu (above 0.51 threshold, below 0.72 lock floor).
+        vec_f = np.array([0.58, float(np.sqrt(1.0 - 0.58 ** 2)), 0.0], dtype=np.float32)
+        self.recognizer.embed.side_effect = lambda c: vec_h if c is crop_h else vec_f
+        self.recognizer.match.side_effect = lambda emb, profiles: (
+            {"status": "known", "person_id": a, "name": "Hiếu", "cosine": float(np.dot(emb, vec_h))})
+        for now in (0.0, 0.2, 0.4):
+            res = self.service.analyze(crop_h, now)
+        self.assertEqual(res["status"], "attendance_confirmed")
+        # Friend steps closer (index 0) with cosine 0.58 while real Hiếu is index 1 with cosine 1.0.
+        faces = self.service.analyze_faces([(crop_f, None), (crop_h, None)], now=0.6)
+        self.assertEqual(faces[0]["status"], "unknown")
+        self.assertEqual((faces[1]["status"], faces[1]["identity"]["name"]), ("known", "Hiếu"))
+
     def test_no_face_multiple_faces_or_quality_failure_skip_all_models(self):
         locator = Mock()
         processor = FrameProcessor(locator, self.service)
