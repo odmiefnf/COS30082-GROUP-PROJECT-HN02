@@ -389,7 +389,7 @@ class CameraWorker(threading.Thread):
                             result = self.reference_importer.commit(**value)
                             self.service.cancel_registration()
                             self.publish(event="profile_import_done", operation_id=value["operation_id"])
-                            self.publish_profiles("Three reference samples imported. No attendance recorded.", result["person_id"])
+                            self.publish_profiles(f"{result['samples']} reference samples imported. No attendance recorded.", result["person_id"])
                     except (OSError, ValueError, RuntimeError, sqlite3.Error, cv2.error) as exc:
                         operation_id = value.get("operation_id") if isinstance(value, dict) else None
                         if operation_id:

@@ -169,7 +169,7 @@ class ReferenceImportChecks(unittest.TestCase):
                 self.prepare(files=self.files[:count])
         checked = self.prepare(files=self.files[:10])
         self.assertTrue(checked["valid"], checked["message"])
-        self.commit(checked)
+        self.assertEqual(self.commit(checked)["samples"], 10)
         self.assertEqual(self.store.profiles()[0]["sample_count"], 13)
 
     def test_identity_uses_the_tight_face_crop_and_no_liveness_model(self):

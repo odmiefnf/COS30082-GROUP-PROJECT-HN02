@@ -132,4 +132,4 @@ class ReferenceImporter:
             person_id = pending["person_id"]
             appearance_id = self.store.add_appearance(person_id, label, pending["embeddings"])
         self.pending = None
-        return {"person_id": person_id, "appearance_id": appearance_id, "name": name}
+        return {"person_id": person_id, "appearance_id": appearance_id, "name": name, "samples": len(pending["embeddings"])}
