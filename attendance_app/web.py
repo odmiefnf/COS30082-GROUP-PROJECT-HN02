@@ -976,8 +976,9 @@ class WebController:
             shutil.rmtree(path, ignore_errors=True)
 
     def import_check(self, person_id, name, label, files):
-        if len(files) != 3:
-            raise ValueError("Choose exactly 3 reference photos.")
+        from .reference_import import MAX_PHOTOS, MIN_PHOTOS
+        if not MIN_PHOTOS <= len(files) <= MAX_PHOTOS:
+            raise ValueError(f"Choose {MIN_PHOTOS} to {MAX_PHOTOS} reference photos.")
         op_id = uuid.uuid4().hex
         temp_dir = Path(tempfile.mkdtemp(prefix="ref_import_"))
         self._import_dirs[op_id] = temp_dir
@@ -1121,7 +1122,7 @@ def make_handler(controller: WebController):
             length = int(self.headers.get("Content-Length", "0"))
             if length <= 0:
                 return {}
-            if length > 25 * 1024 * 1024:
+            if length > 160 * 1024 * 1024:  # up to 10 phone photos, base64-encoded
                 raise ValueError("Request body is too large.")
             return json.loads(self.rfile.read(length).decode("utf-8"))
 

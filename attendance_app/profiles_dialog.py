@@ -220,7 +220,7 @@ class PhotoImportDialog:
         body = tk.Frame(self.window, bg=BG, padx=20, pady=18)
         body.pack(fill="both", expand=True)
         label(body, f"Add reference photos: {person['name']}" if person else "New person from reference photos", bold=True, size=15)
-        label(body, "Choose exactly 3 clear photos of the same person and look. Checks do not prove live presence or record attendance.",
+        label(body, "Choose 3 to 10 clear photos of the same person and look. Checks do not prove live presence or record attendance.",
               fg=MUTED)
         form = card(body, padx=16, pady=14)
         form.pack(fill="x", pady=(4, 12))
@@ -229,7 +229,7 @@ class PhotoImportDialog:
         self.target_text = tk.StringVar()
         self.target_entry = entry(form, self.target_text, 11)
         self.target_entry.pack(fill="x", ipady=5, ipadx=6, pady=(0, 10))
-        self.choose_button = FlatButton(form, "Choose 3 photos…", self.choose_files, "secondary", 10)
+        self.choose_button = FlatButton(form, "Choose 3–10 photos…", self.choose_files, "secondary", 10)
         self.choose_button.pack(anchor="w")
         self.status = tk.StringVar(value="No photos selected. Nothing is saved until you confirm the checked photos.")
         actions = tk.Frame(body, bg=BG)
@@ -242,7 +242,7 @@ class PhotoImportDialog:
         tk.Label(body, textvariable=self.status, bg=BG, fg=MUTED, font=(FONT, 9), wraplength=680, justify="left",
                  anchor="w").pack(side="bottom", fill="x", pady=10)
         self.confirmed = tk.BooleanVar(value=False)
-        tk.Checkbutton(body, text="I verified that all 3 photos show this person and may be used as reference images.",
+        tk.Checkbutton(body, text="I verified that all photos show this person and may be used as reference images.",
                        variable=self.confirmed, command=self.controls, bg=BG, activebackground=BG, fg=INK,
                        activeforeground=INK, selectcolor=SURFACE,
                        font=(FONT, 10), wraplength=680, justify="left", anchor="w").pack(side="bottom", fill="x", pady=(10, 0))
@@ -272,12 +272,13 @@ class PhotoImportDialog:
             messagebox.showinfo("Photo check", f"{values[0]}\n\n{values[1]}", parent=self.window)
 
     def choose_files(self):
-        files = filedialog.askopenfilenames(parent=self.window, title="Choose exactly 3 reference photos",
+        files = filedialog.askopenfilenames(parent=self.window, title="Choose 3 to 10 reference photos",
             filetypes=[("Face photos", "*.jpg *.jpeg *.png *.bmp *.webp")])
         if not files:
             return
-        if len(files) != 3:
-            self.status.set("Choose exactly 3 photos for one appearance.")
+        from .reference_import import MAX_PHOTOS, MIN_PHOTOS
+        if not MIN_PHOTOS <= len(files) <= MAX_PHOTOS:
+            self.status.set(f"Choose {MIN_PHOTOS} to {MAX_PHOTOS} photos for one appearance.")
             return
         self.send("profile_import_cancel", self.operation_id)
         self.operation_id, self.files, self.token = uuid.uuid4().hex, list(files), None
@@ -299,7 +300,7 @@ class PhotoImportDialog:
             return
         self.busy, self.token = True, None
         self.confirmed.set(False)
-        self.status.set("Checking three photos…")
+        self.status.set(f"Checking {len(self.files)} photos…")
         self.controls()
         self.send("profile_import_check", {"operation_id": self.operation_id, "files": list(self.files),
             "person_id": self.person["id"] if self.person else None,

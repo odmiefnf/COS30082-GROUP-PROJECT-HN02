@@ -271,7 +271,7 @@ HTML_PAGE = r"""<!doctype html>
     background: var(--amber-soft); border: 1px solid #fde68a; font-size: 12.5px; color: var(--amber-ink);
   }
   .dup-box.open { display: block; }
-  .dup-box input[type="text"] { height: 34px; font-size: 12.5px; margin-top: 8px; width: 100%; }
+  .dup-box input[type="text"], .dup-box select { height: 34px; font-size: 12.5px; margin-top: 8px; width: 100%; }
   .btn-auto-on { background: var(--mint-soft); color: var(--mint-ink); border-color: var(--mint); }
   .match-row { display: grid; grid-template-columns: 1fr auto; gap: 6px; align-items: center; margin-bottom: 6px; font-size: 12px; }
   .match-bar { grid-column: 1 / -1; height: 5px; background: #edf1f5; border-radius: 999px; overflow: hidden; }
@@ -464,6 +464,27 @@ HTML_PAGE = r"""<!doctype html>
   .check-line { display: flex; align-items: flex-start; gap: 9px; font-size: 13px; margin: 12px 0; cursor: pointer; }
   .check-line input { margin-top: 3px; accent-color: var(--mint); }
   .err-text { color: var(--rose-ink); font-size: 12.5px; font-weight: 600; min-height: 18px; margin-bottom: 6px; }
+  .drop-zone {
+    border: 1.5px dashed var(--border-strong); border-radius: 14px; background: var(--surface);
+    padding: 18px 12px; margin-bottom: 10px; text-align: center; cursor: pointer;
+    color: var(--muted); font-size: 13px; transition: all .18s ease;
+  }
+  .drop-zone:hover, .drop-zone:focus-visible, .drop-zone.over { border-color: var(--mint); background: var(--mint-soft); outline: none; }
+  .drop-zone.over { box-shadow: 0 0 0 3px rgba(18,184,150,.15); }
+  .drop-zone .plus { display: block; font-size: 30px; line-height: 1; font-weight: 300; color: var(--mint-ink); margin-bottom: 4px; }
+  .drop-zone b { color: var(--ink); }
+  .drop-zone .link { color: var(--mint-ink); font-weight: 600; text-decoration: underline; }
+  .drop-sub { margin-top: 4px; font-size: 12px; }
+  .drop-count { font-weight: 700; font-variant-numeric: tabular-nums; }
+  #importBody tr { cursor: default; }
+  .photo-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 220px; }
+  #importBody td { padding: 6px 12px; vertical-align: middle; }
+  .res-ok { color: var(--mint-ink); } .res-bad { color: var(--rose-ink); }
+  .row-remove {
+    width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--border); background: var(--card);
+    color: var(--muted); font-size: 16px; line-height: 1; padding: 0; cursor: pointer;
+  }
+  .row-remove:hover, .row-remove:focus-visible { border-color: var(--rose); color: var(--rose-ink); background: var(--rose-soft); }
   .toast {
     position: fixed; right: 22px; bottom: 22px; z-index: 60;
     background: #111827; color: #fff; padding: 11px 16px; border-radius: 12px;
@@ -719,8 +740,8 @@ HTML_PAGE = r"""<!doctype html>
                 <select id="regLookProfile" style="width:100%"><option value="">Select a person…</option></select>
               </div>
               <div class="form-group">
-                <label class="caption" for="regLookLabel">Appearance label</label>
-                <input type="text" id="regLookLabel" style="width:100%" placeholder="e.g. Without glasses">
+                <label class="caption" for="regLookLabel">Look</label>
+                <select id="regLookLabel" class="look-select" style="width:100%"></select>
               </div>
               <label class="check-line"><input type="checkbox" id="regLookConfirm"> I checked that the person in front of the camera is the selected profile.</label>
             </div>
@@ -738,7 +759,7 @@ HTML_PAGE = r"""<!doctype html>
 
             <div class="dup-box" id="regDupBox" role="alert">
               <div id="regDupMsg">This face already matches an existing profile.</div>
-              <input type="text" id="dupAppLabel" placeholder="Appearance label (e.g. Without glasses)">
+              <select id="dupAppLabel" class="look-select" aria-label="Look"></select>
               <div class="btn-row" style="margin-top:8px;">
                 <button type="button" class="btn btn-primary btn-sm" id="btnDupAddApp">Add as appearance</button>
                 <button type="button" class="btn btn-secondary btn-sm" id="btnDupForce">Register separately</button>
@@ -970,8 +991,8 @@ HTML_PAGE = r"""<!doctype html>
       <select id="appProfile" style="width:100%"></select>
     </div>
     <div class="form-group">
-      <label class="caption" for="appLabel">Appearance label</label>
-      <input type="text" id="appLabel" style="width:100%" placeholder="e.g. Without glasses">
+      <label class="caption" for="appLabel">Look</label>
+      <select id="appLabel" class="look-select" style="width:100%"></select>
     </div>
     <label class="check-line"><input type="checkbox" id="appConfirmBox"> I have verified this is the person in the selected profile.</label>
     <div class="err-text" id="appErr"></div>
@@ -987,25 +1008,26 @@ HTML_PAGE = r"""<!doctype html>
 <div class="backdrop" id="modalImport">
   <div class="modal">
     <h2 id="importTitle">Import reference photos</h2>
-    <p class="modal-sub">Choose exactly 3 clear photos of the same person and look. Checks do not prove live presence or record attendance.</p>
+    <p class="modal-sub">Add 3 to 10 photos of the same person and look; the profile is saved straight away. Photos are not checked (only the face is located, and photos without a face are skipped), so test recognition on the camera and delete the profile if it is wrong. Photos never record attendance.</p>
     <div class="form-group">
       <label class="caption" id="importFieldLabel" for="importTarget">Name / student ID</label>
       <input type="text" id="importTarget" style="width:100%">
     </div>
-    <div class="form-group">
-      <input type="file" id="importFiles" accept="image/*" multiple>
+    <div class="drop-zone" id="importDrop" role="button" tabindex="0" aria-label="Add photos: drag and drop, or press Enter to choose files">
+      <span class="plus">+</span>
+      <b>Drag &amp; drop photos here</b>
+      <div class="drop-sub">or <span class="link">click to choose from your computer</span></div>
+      <div class="drop-sub">JPG, PNG, BMP or WebP · 3 to 10 photos · <span class="drop-count" id="importCount">0 / 10</span> added</div>
+      <input type="file" id="importFiles" accept=".jpg,.jpeg,.png,.bmp,.webp" multiple hidden>
     </div>
-    <div class="table-wrap" style="max-height:160px;margin-bottom:10px;">
+    <div class="table-wrap" id="importList" style="max-height:230px;margin-bottom:10px;display:none;">
       <table>
-        <thead><tr><th>Photo</th><th>Check result</th></tr></thead>
-        <tbody id="importBody"><tr><td colspan="2" class="empty-row">Select 3 photos, then click Check photos</td></tr></tbody>
+        <tbody id="importBody"></tbody>
       </table>
     </div>
-    <label class="check-line"><input type="checkbox" id="importConfirmBox"> I verified all 3 photos show this person and may be used as reference images.</label>
     <div class="err-text" id="importErr"></div>
     <div class="btn-row">
-      <button class="btn btn-secondary" id="btnImportCheck">Check photos</button>
-      <button class="btn btn-primary" id="btnImportCommit" disabled>Import checked photos</button>
+      <button class="btn btn-primary" id="btnImportCommit" disabled>Import photos</button>
       <button class="btn btn-secondary" id="btnImportClose" style="flex:0 0 auto;">Cancel</button>
     </div>
   </div>
@@ -1019,7 +1041,7 @@ const $ = id => document.getElementById(id);
 let lastState = null, lastNoticeId = 0, videoActive = false, currentPage = "live";
 let profilesCache = [], selectedProfileId = null, histRows = [];
 let activeReviewId = null, activeAppId = null;
-let importPerson = null, importToken = null, importOpId = null;
+let importPerson = null, importBusy = false;
 const GUIDED_MIN = 10, GUIDED_MAX = 10, GUIDED_MIN_LIVE = 3;  // GUIDED_MIN_LIVE mirrors service.GUIDED_MIN_SHOTS
 const GUIDED_POSES = [
   {short: "Front 1", hint: "Look straight at the camera"},
@@ -1196,6 +1218,7 @@ function showDuplicateBox(dup) {
   regDuplicate = dup;
   $("regDupMsg").innerHTML = `This face already matches <strong>${escapeHtml(dup.name)}</strong> (cosine ${Number(dup.cosine).toFixed(3)}). Add these shots as a new appearance, or register separately?`;
   $("dupAppLabel").value = "";
+  fillLooks($("dupAppLabel"), lookProfiles.find(p => p.id === dup.person_id));
   $("regDupBox").classList.add("open");
 }
 
@@ -1686,17 +1709,32 @@ $("registerForm").onsubmit = (ev) => {
 };
 
 // "Add appearance" uses the same guided camera shots, saved as a new look of an existing profile.
+// Looks are picked from a fixed list; one each per person, next to the registration's Original.
+const LOOKS = ["With glasses", "Without glasses", "With mask"];
+const usedLooks = p => new Set((p && p.appearances || []).map(a => String(a.label).toLowerCase()));
+function fillLooks(sel, person) {
+  const used = usedLooks(person), keep = sel.value;
+  sel.innerHTML = '<option value="">Select a look…</option>' + LOOKS.map(l => used.has(l.toLowerCase())
+    ? `<option value="${l}" disabled>${l} (already added)</option>` : `<option value="${l}">${l}</option>`).join("");
+  sel.value = LOOKS.includes(keep) && !used.has(keep.toLowerCase()) ? keep : "";
+}
+document.querySelectorAll(".look-select").forEach(sel => fillLooks(sel, null));
+let lookProfiles = [];
 function lookFormReady() {
-  return !!$("regLookProfile").value && !!$("regLookLabel").value.trim() && $("regLookConfirm").checked;
+  return !!$("regLookProfile").value && !!$("regLookLabel").value && $("regLookConfirm").checked;
 }
 async function loadLookProfiles(selectId) {
   try {
     const data = await api("/api/profiles");
+    lookProfiles = data.profiles || [];
     const sel = $("regLookProfile"), keep = selectId || sel.value;
-    sel.innerHTML = '<option value="">Select a person…</option>' + (data.profiles || []).map(p =>
-      `<option value="${escapeHtml(p.id)}" ${p.appearances.length >= 4 ? "disabled" : ""}>${escapeHtml(p.name)} (${p.appearances.length}/4 looks)</option>`).join("");
+    sel.innerHTML = '<option value="">Select a person…</option>' + lookProfiles.map(p => {
+      const full = LOOKS.every(l => usedLooks(p).has(l.toLowerCase())) || p.appearances.length >= 4;
+      return `<option value="${escapeHtml(p.id)}" ${full ? "disabled" : ""}>${escapeHtml(p.name)}${full ? " (all looks added)" : ""}</option>`;
+    }).join("");
     sel.value = [...sel.options].some(o => o.value === keep && !o.disabled) ? keep : "";
   } catch (e) { toast(e.message); }
+  fillLooks($("regLookLabel"), lookProfiles.find(p => p.id === $("regLookProfile").value));
   updateRegisterReadiness(lastState);
 }
 function setRegMode(mode, selectId) {
@@ -1714,11 +1752,13 @@ function setRegMode(mode, selectId) {
 }
 $("regModeNew").onclick = () => setRegMode("new");
 $("regModeLook").onclick = () => setRegMode("look");
-["regLookProfile", "regLookConfirm"].forEach(id => $(id).addEventListener("change", () => updateRegisterReadiness(lastState)));
-$("regLookLabel").addEventListener("input", () => updateRegisterReadiness(lastState));
+$("regLookProfile").addEventListener("change", () =>
+  fillLooks($("regLookLabel"), lookProfiles.find(p => p.id === $("regLookProfile").value)));
+["regLookProfile", "regLookConfirm", "regLookLabel"].forEach(id => $(id).addEventListener("change", () => updateRegisterReadiness(lastState)));
 $("btnDupAddApp").onclick = () => {
   if (!regDuplicate) return;
-  const label = $("dupAppLabel").value.trim() || "Additional look";
+  const label = $("dupAppLabel").value;
+  if (!label) { toast("Select a look first."); return; }
   commitGuidedRegistration({appearance_person_id: regDuplicate.person_id, appearance_label: label});
 };
 $("btnDupForce").onclick = () => commitGuidedRegistration({force: true});
@@ -1850,19 +1890,75 @@ async function removeLook(pid, aid, label) {
 
 // Photo import modal
 function openImportModal(person) {
-  importPerson = person; importToken = null; importOpId = null;
+  importPerson = person;
   $("importTitle").textContent = person ? `Add reference photos: ${person.name}` : "New person from reference photos";
   $("importFieldLabel").textContent = person ? "Appearance label (e.g. Without glasses)" : "Name / student ID";
-  $("importTarget").value = ""; $("importFiles").value = "";
-  $("importConfirmBox").checked = false; $("importErr").textContent = "";
-  $("btnImportCommit").disabled = true;
-  $("importBody").innerHTML = '<tr><td colspan="2" class="empty-row">Select exactly 3 photos, then click Check photos</td></tr>';
+  $("importTarget").value = "";
+  $("importErr").textContent = "";
+  clearImportPhotos();
   $("modalImport").classList.add("open");
 }
+
+// 3-10 photos, added by drag & drop or the file picker. Any change voids the token; results of kept photos stay.
+const IMPORT_TYPES = /\.(jpe?g|png|bmp|webp)$/i, IMPORT_MIN = 3, IMPORT_MAX = 10;
+let importPhotos = [];
+function renderImportPhotos() {
+  $("importCount").textContent = `${importPhotos.length} / ${IMPORT_MAX}`;
+  $("importList").style.display = importPhotos.length ? "" : "none";
+  $("importBody").innerHTML = importPhotos.map((p, i) => {
+    const name = escapeHtml(p.file.name);
+    const res = p.result ? `<span class="${p.result.passed ? "res-ok" : "res-bad"}">${escapeHtml(p.result.message)}</span>` : "";
+    return `<tr><td><div class="photo-name" title="${name}">${name}</div></td><td>${res}</td>
+      <td style="width:44px"><button type="button" class="row-remove" data-i="${i}" aria-label="Remove ${name}">×</button></td></tr>`;
+  }).join("");
+}
+function photosChanged() {
+  updateImportButton();
+  renderImportPhotos();
+}
+function clearImportPhotos() {
+  importPhotos = [];
+  photosChanged();
+}
+function addImportFiles(list) {
+  const incoming = Array.from(list || []);
+  const valid = incoming.filter(f => IMPORT_TYPES.test(f.name));
+  let overflow = 0;
+  for (const f of valid) {
+    if (importPhotos.some(p => p.file.name === f.name && p.file.size === f.size && p.file.lastModified === f.lastModified)) continue;
+    if (importPhotos.length < IMPORT_MAX) importPhotos.push({file: f, result: null});
+    else overflow++;
+  }
+  photosChanged();
+  const notes = [];
+  if (valid.length < incoming.length) notes.push("Only JPG, PNG, BMP or WebP photos can be used.");
+  if (overflow) notes.push(`At most ${IMPORT_MAX} photos; ${overflow} extra photo${overflow > 1 ? "s were" : " was"} not added.`);
+  $("importErr").textContent = notes.join(" ");
+}
+$("importDrop").onclick = () => $("importFiles").click();
+$("importDrop").onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); $("importFiles").click(); } };
+$("importFiles").onclick = e => e.stopPropagation();  // the hidden input sits inside the zone; don't re-trigger the zone
+$("importFiles").onchange = e => { addImportFiles(e.target.files); e.target.value = ""; };
+$("importBody").onclick = e => {
+  const remove = e.target.closest(".row-remove");
+  if (!remove) return;
+  importPhotos.splice(Number(remove.dataset.i), 1);
+  photosChanged();
+  $("importErr").textContent = "";
+};
+// The whole dialog accepts drops, so a near miss never makes the browser open the photo and leave the app.
+const importModal = document.querySelector("#modalImport .modal");
+importModal.addEventListener("dragover", e => { e.preventDefault(); $("importDrop").classList.add("over"); });
+importModal.addEventListener("dragleave", e => { if (!importModal.contains(e.relatedTarget)) $("importDrop").classList.remove("over"); });
+importModal.addEventListener("drop", e => { e.preventDefault(); $("importDrop").classList.remove("over"); addImportFiles(e.dataTransfer.files); });
+window.addEventListener("dragover", e => e.preventDefault());
+window.addEventListener("drop", e => e.preventDefault());
 $("btnNewPhotoImport").onclick = () => openImportModal(null);
 $("btnImportLook").onclick = () => { const id = selectedProfileId; switchPage("register"); setRegMode("look", id); };
 $("btnImportClose").onclick = () => $("modalImport").classList.remove("open");
-$("importConfirmBox").onchange = () => { $("btnImportCommit").disabled = !(importToken && $("importConfirmBox").checked); };
+function updateImportButton() {
+  $("btnImportCommit").disabled = importBusy || importPhotos.length < IMPORT_MIN;
+}
 
 function readFileB64(file) {
   return new Promise((resolve, reject) => {
@@ -1872,10 +1968,14 @@ function readFileB64(file) {
     r.readAsDataURL(file);
   });
 }
-$("btnImportCheck").onclick = async () => {
-  $("importErr").textContent = ""; importToken = null; $("btnImportCommit").disabled = true;
-  const files = Array.from($("importFiles").files || []);
-  if (files.length !== 3) { $("importErr").textContent = "Please choose exactly 3 photos."; return; }
+// One click: the server checks every photo, and only if all pass is the profile saved (check + commit).
+$("btnImportCommit").onclick = async () => {
+  const files = importPhotos.map(p => p.file);
+  if (files.length < IMPORT_MIN || files.length > IMPORT_MAX) {
+    $("importErr").textContent = `Please add ${IMPORT_MIN} to ${IMPORT_MAX} photos (now ${files.length}).`; return;
+  }
+  $("importErr").textContent = ""; importBusy = true; updateImportButton();
+  $("btnImportCommit").textContent = "Importing…";
   try {
     const encoded = await Promise.all(files.map(readFileB64));
     const rep = await api("/api/profiles/import-check", {
@@ -1884,21 +1984,20 @@ $("btnImportCheck").onclick = async () => {
       label: importPerson ? $("importTarget").value : "",
       files: encoded
     });
-    importToken = rep.token; importOpId = rep.operation_id;
-    $("importBody").innerHTML = (rep.items || []).map(it =>
-      `<tr><td>${escapeHtml(it.file)}</td><td>${escapeHtml(it.message)}</td></tr>`).join("");
-    if (!rep.token) $("importErr").textContent = rep.message || "Photo checks did not pass.";
-    else toast(rep.message || "Photos passed checks. Confirm and click Import.");
-    $("btnImportCommit").disabled = !(importToken && $("importConfirmBox").checked);
-  } catch (e) { $("importErr").textContent = e.message; }
-};
-$("btnImportCommit").onclick = async () => {
-  try {
-    const res = await api("/api/profiles/import-commit", {operation_id: importOpId, token: importToken, confirmed: true});
+    if (importPhotos.length !== files.length || importPhotos.some((p, i) => p.file !== files[i])) {
+      $("importErr").textContent = "Photos changed during the import. Nothing was saved; click Import photos again."; return;
+    }
+    (rep.items || []).forEach((it, i) => { if (importPhotos[i]) importPhotos[i].result = {passed: !!it.passed, message: it.message || ""}; });
+    renderImportPhotos();
+    if (!rep.token) { $("importErr").textContent = rep.message || "Nothing was saved."; return; }
+    await api("/api/profiles/import-commit", {operation_id: rep.operation_id, token: rep.token, confirmed: true});
     $("modalImport").classList.remove("open");
-    toast(res.message || "Reference samples imported.");
+    toast(`Profile saved: ${rep.message}`);
     await loadProfiles();
   } catch (e) { $("importErr").textContent = e.message; }
+  finally {
+    importBusy = false; $("btnImportCommit").textContent = "Import photos"; updateImportButton();
+  }
 };
 
 // Settings handlers
