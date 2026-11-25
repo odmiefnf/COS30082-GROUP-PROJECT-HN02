@@ -9,7 +9,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
 from .history import (SOURCE_LABELS, export_attendance_csv, filter_attendance, local_timestamp,
-                      read_attendance_snapshot, summarize_attendance)
+                      preview_history_rows, read_attendance_snapshot, summarize_attendance)
 from .theme import BG, CARD, FONT, INK, MUTED, SURFACE, FlatButton, card, entry
 
 
@@ -155,16 +155,3 @@ class HistoryDialog:
             self.closed = True
             self.window.destroy()
             self.on_close()
-
-
-def preview_history_rows():
-    """Clearly fictional rows for layout QA, not model or attendance results."""
-    return [
-        {"session": "Demo session A", "person_id": "fictional-a", "name": "Demo student A",
-         "recorded_utc": "2026-10-30T02:00:00+00:00", "source": "automatic", "reviewer": None, "reason": None},
-        {"session": "Demo session A", "person_id": "fictional-b", "name": "Demo student B",
-         "recorded_utc": "2026-10-30T02:05:00+00:00", "source": "manual_review", "reviewer": "Demo operator",
-         "reason": "Fictional layout example"},
-        {"session": "Demo session B", "person_id": "fictional-a", "name": "Demo student A",
-         "recorded_utc": "2026-10-29T02:00:00+00:00", "source": "legacy_unrecorded", "reviewer": None, "reason": None},
-    ]

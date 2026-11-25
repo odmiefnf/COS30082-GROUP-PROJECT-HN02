@@ -123,3 +123,16 @@ def export_attendance_csv(destination, rows, *, overwrite=False):
     with destination.open("w" if overwrite else "x", encoding="utf-8-sig", newline="") as handle:
         handle.write(buffer.getvalue())
     return count
+
+
+def preview_history_rows():
+    """Clearly fictional rows for layout QA, not model or attendance results."""
+    return [
+        {"session": "Demo session A", "person_id": "fictional-a", "name": "Demo student A",
+         "recorded_utc": "2026-10-30T02:00:00+00:00", "source": "automatic", "reviewer": None, "reason": None},
+        {"session": "Demo session A", "person_id": "fictional-b", "name": "Demo student B",
+         "recorded_utc": "2026-10-30T02:05:00+00:00", "source": "manual_review", "reviewer": "Demo operator",
+         "reason": "Fictional layout example"},
+        {"session": "Demo session B", "person_id": "fictional-a", "name": "Demo student A",
+         "recorded_utc": "2026-10-29T02:00:00+00:00", "source": "legacy_unrecorded", "reviewer": None, "reason": None},
+    ]

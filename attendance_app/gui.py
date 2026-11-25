@@ -10,7 +10,11 @@ import threading
 import time
 
 import numpy as np
-from PIL import Image, ImageDraw, ImageTk
+from PIL import Image, ImageDraw
+try:
+    from PIL import ImageTk
+except ImportError:
+    ImageTk = None
 
 from .device_check import CAMERA_HELP, camera_index, probe_camera
 from .diagnostics import COMPONENTS, frame_details, frame_guidance

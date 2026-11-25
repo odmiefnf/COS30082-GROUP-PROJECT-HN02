@@ -17,6 +17,36 @@ YUNET_TO_HAAR = .91
 MAX_FACES = 10
 
 
+def _load_yunet(cv2, model_path):
+    """Load YuNet from bytes first so non-ASCII/Vietnamese clone paths work on Windows."""
+    data = Path(model_path).read_bytes()
+    try:
+        return cv2.FaceDetectorYN.create("onnx", data, b"", (320, 320), YUNET_SCORE)
+    except (TypeError, cv2.error):
+        return cv2.FaceDetectorYN.create(str(model_path), "", (320, 320), YUNET_SCORE)
+
+
+def _load_cascade(cv2, xml_path):
+    """Load a Haar cascade even when the OpenCV package sits under a non-ASCII path."""
+    path = Path(xml_path)
+    text_path = str(path)
+    if text_path.isascii():
+        cascade = cv2.CascadeClassifier(text_path)
+        if not cascade.empty():
+            return cascade
+    if not path.is_file():
+        return cv2.CascadeClassifier()
+    storage = cv2.FileStorage(path.read_text(encoding="utf-8"), cv2.FILE_STORAGE_READ | cv2.FILE_STORAGE_MEMORY)
+    cascade = cv2.CascadeClassifier()
+    try:
+        node = storage.getFirstTopLevelNode()
+        if not node.empty():
+            cascade.read(node)
+    finally:
+        storage.release()
+    return cascade
+
+
 class FaceLocator:
     """Localize current-frame faces, never identities.
 
@@ -38,13 +68,13 @@ class FaceLocator:
         if mode == "yunet":
             if not YUNET_MODEL.is_file():
                 raise RuntimeError(f"YuNet face detector is missing: {YUNET_MODEL}")
-            self.net = cv2.FaceDetectorYN.create(str(YUNET_MODEL), "", (320, 320), YUNET_SCORE)
+            self.net = _load_yunet(cv2, YUNET_MODEL)
             # Warm up at load time so the first camera frame is not delayed (one-off initialisation).
             self.net.setInputSize((64, 64))
             self.net.detect(np.zeros((64, 64, 3), dtype=np.uint8))
         if mode == "haar":
-            self.cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
-            self.alternate = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_alt2.xml")
+            self.cascade = _load_cascade(cv2, Path(cv2.data.haarcascades) / "haarcascade_frontalface_default.xml")
+            self.alternate = _load_cascade(cv2, Path(cv2.data.haarcascades) / "haarcascade_frontalface_alt2.xml")
             self.contrast = cv2.createCLAHE(clipLimit=2., tileGridSize=(8, 8))
             if self.cascade.empty() or self.alternate.empty():
                 raise RuntimeError("OpenCV Haar face localization data is missing.")

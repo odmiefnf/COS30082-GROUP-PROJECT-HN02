@@ -200,6 +200,16 @@ class LocalhostWebServerChecks(unittest.TestCase):
         self.assertIn("\"'=SUM(1,2)\"", csv_text)
         self.assertIn("\"'@evil\"", csv_text)
 
+    def test_web_module_imports_without_tkinter(self):
+        import subprocess
+        import sys
+        code = (
+            "import sys; sys.modules['tkinter'] = None; sys.modules['_tkinter'] = None; "
+            "import attendance_app.web as w; assert hasattr(w, 'WebController')"
+        )
+        proc = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, check=False)
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+
 
 class _StubRecognizer:
     dimension = 4

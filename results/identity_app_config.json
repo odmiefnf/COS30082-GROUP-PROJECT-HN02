@@ -11,7 +11,7 @@
   "observed_validation_pair_fpr": 0.009799554565701559,
   "observed_validation_pair_tpr": 0.32977983777520276,
   "selected_model_validation_auc": 0.9147469721564851,
-  "pairs_file": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\data\\face_recognition\\verification_pairs_val.txt",
+  "pairs_file": "data/face_recognition/verification_pairs_val.txt",
   "pairs_file_sha256": "55ecf1495188024f414e3b0faac2b7f4cc374000a809e3b98579ecd8f4f25fdd",
   "pair_count": 8805,
   "selection": "Highest original verification-validation cosine AUC; highest TPR with pair FPR <= target; strict threshold on ties.",

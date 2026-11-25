@@ -1,2 +1,2 @@
 -r requirements.txt
-opencv-python==4.13.0.92
+opencv-python>=4.8.0

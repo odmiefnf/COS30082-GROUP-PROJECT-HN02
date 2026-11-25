@@ -17,11 +17,17 @@ remaining demonstration tasks.
 - **Ổn định làm mượt Liveness:** nới cửa sổ trượt từ `0.6s` lên **`0.85s`**, bật làm mượt cho cả khuôn mặt chính trong chế độ nhiều người và không xóa lịch sử `_live_scores` khi tụt điểm ngắn 1 khung hình.
 - **Sạch log server web:** `_QuietThreadingHTTPServer` trong `attendance_app/web.py` tự bỏ qua các ngắt kết nối keep-alive vô hại của trình duyệt trên Windows (`WinError 10053/10054`).
 
-### Lệnh cài đặt & sử dụng nhanh (PowerShell tại thư mục dự án)
+### Lệnh cài đặt & sử dụng nhanh (cho thành viên mới clone về)
+
+**Cách 1 — Chạy ngay 1 bước (khuyên dùng, tự tạo `.venv` và tự cài thư viện lần đầu):**
+- **Windows:** `git clone https://github.com/odmiefnf/COS30082-GROUP-PROJECT-HN02.git` → mở thư mục → nhấp đúp **`start_attendance.cmd`** (cần cài sẵn Python 3.10–3.13 từ python.org).
+- **macOS / Linux:** `git clone https://github.com/odmiefnf/COS30082-GROUP-PROJECT-HN02.git && cd COS30082-GROUP-PROJECT-HN02 && chmod +x start_attendance.sh && ./start_attendance.sh`
+
+**Cách 2 — Chạy thủ công (PowerShell tại thư mục dự án):**
 
 ```powershell
-# 1. Tạo môi trường Python 3.11 và cài đầy đủ thư viện (PyTorch, torchvision, OpenCV, Pillow, NumPy)
-py -3.11 -m venv .venv
+# 1. Tạo môi trường Python (3.10-3.13, khuyến nghị 3.11) và cài đầy đủ thư viện
+python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements-webcam.txt
 
 # 2. Chạy Web App trên trình duyệt (mặc định mới, hoặc nhấp đúp start_attendance.cmd)

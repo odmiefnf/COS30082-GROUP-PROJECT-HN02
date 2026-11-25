@@ -32,8 +32,8 @@ from .diagnostics import COMPONENTS, frame_details, frame_guidance
 from .gui import (BOX_MAX_AGE, CameraWorker, DEFAULT_LIVENESS_CHECKPOINT, FACE_PENDING, FACE_RECOGNIZED,
                   MESSAGES, PROJECT, force_exit, format_expression, message_tone, stat_tone)
 from .history import (CSV_COLUMNS, SOURCE_LABELS, filter_attendance, local_timestamp,
-                      read_attendance_snapshot, read_profile_names, spreadsheet_text, summarize_attendance)
-from .history_dialog import preview_history_rows
+                      preview_history_rows, read_attendance_snapshot, read_profile_names,
+                      spreadsheet_text, summarize_attendance)
 from .web_ui import HTML_PAGE
 
 
@@ -115,10 +115,25 @@ _LABEL_FONT = []
 
 def _label_font():
     if not _LABEL_FONT:
-        try:
-            _LABEL_FONT.append(ImageFont.truetype("arial.ttf", 20))  # covers Vietnamese names on Windows
-        except OSError:
-            _LABEL_FONT.append(ImageFont.load_default())
+        font = None
+        for candidate in (
+            "arial.ttf",
+            "DejaVuSans.ttf",
+            "/System/Library/Fonts/Supplemental/Arial.ttf",
+            "/Library/Fonts/Arial.ttf",
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        ):
+            try:
+                font = ImageFont.truetype(candidate, 20)
+                break
+            except OSError:
+                continue
+        if font is None:
+            try:
+                font = ImageFont.load_default(size=20)
+            except TypeError:
+                font = ImageFont.load_default()
+        _LABEL_FONT.append(font)
     return _LABEL_FONT[0]
 
 

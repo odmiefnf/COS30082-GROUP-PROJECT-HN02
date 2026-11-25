@@ -5,8 +5,11 @@ attendance decisions.
 """
 from __future__ import annotations
 
-import tkinter as tk
-from tkinter import ttk
+try:
+    import tkinter as tk
+    from tkinter import ttk
+except ImportError:
+    tk = ttk = None
 
 FONT = "Segoe UI"
 
@@ -49,7 +52,7 @@ BUTTON_VARIANTS = {
 }
 
 
-class FlatButton(tk.Button):
+class FlatButton(tk.Button if tk is not None else object):
     """A clean flat button whose colours follow its state (normal/disabled) and hover."""
 
     def __init__(self, parent, text, command, variant="secondary", size=10, **kwargs):

@@ -107,6 +107,26 @@ class YuNetLocatorChecks(unittest.TestCase):
     def test_real_model_loads_and_finds_no_face_in_a_blank_frame(self):
         self.assertEqual(FaceLocator().detect(np.zeros((480, 640, 3), dtype=np.uint8)), [])
 
+    def test_detectors_load_from_non_ascii_paths(self):
+        import shutil
+        import tempfile
+        from pathlib import Path
+        import cv2
+        from attendance_app.camera import YUNET_MODEL, _load_cascade, _load_yunet
+
+        with tempfile.TemporaryDirectory(prefix="việt_nam_") as tmp:
+            root = Path(tmp)
+            yunet_copy = root / "yunet.onnx"
+            shutil.copy2(YUNET_MODEL, yunet_copy)
+            net = _load_yunet(cv2, yunet_copy)
+            net.setInputSize((64, 64))
+            net.detect(np.zeros((64, 64, 3), dtype=np.uint8))
+
+            haar_copy = root / "haar.xml"
+            shutil.copy2(Path(cv2.data.haarcascades) / "haarcascade_frontalface_default.xml", haar_copy)
+            cascade = _load_cascade(cv2, haar_copy)
+            self.assertFalse(cascade.empty())
+
     def test_boxes_become_native_haar_sized_squares_and_small_faces_are_dropped(self):
         locator = FaceLocator()
         locator.net = Mock()
