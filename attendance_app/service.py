@@ -68,9 +68,14 @@ class AttendanceService:
         self.face_lock = None  # the main face confirmed for attendance; see _still_locked
         self.face_locks = {}  # person_id -> per-person lock so bystanders keep their names
 
+    def _lock_similarity_floor(self):
+        # Consecutive frames of the same person sit far above 0.72; keeping a strict floor
+        # prevents a bystander with a borderline ArcFace score (~0.52) from hijacking the lock.
+        return max(float(self.recognizer.threshold), 0.72)
+
     def _lock_face(self, identity, live, embedding, now):
         lock = {"person_id": identity["person_id"], "identity": dict(identity),
-                "liveness": dict(live, locked=True), "embedding": embedding,
+                "liveness": dict(live, locked=True), "embedding": embedding, "anchor": embedding,
                 "seen": now, "session": self.session}
         self.face_lock = lock
         self.face_locks[identity["person_id"]] = lock
@@ -90,12 +95,14 @@ class AttendanceService:
     def _match_locked_person(self, embedding, now, exclude_ids=()):
         """Match a face embedding against active per-person locks (frame-to-frame continuity)."""
         self._prune_face_locks(now)
-        best_lock, best_sim = None, self.recognizer.threshold
+        floor = self._lock_similarity_floor()
+        best_lock, best_sim = None, floor
         for pid, lock in self.face_locks.items():
             if pid in exclude_ids:
                 continue
             sim = float(np.dot(lock["embedding"], embedding))
-            if sim >= best_sim:
+            anchor_sim = float(np.dot(lock.get("anchor", lock["embedding"]), embedding))
+            if sim >= best_sim and anchor_sim >= floor:
                 best_lock, best_sim = lock, sim
         if best_lock is not None:
             best_lock["embedding"], best_lock["seen"] = embedding, now
@@ -128,13 +135,15 @@ class AttendanceService:
         lock = self.face_lock
         if lock is None:
             return False
+        floor = self._lock_similarity_floor()
         if (now - lock["seen"] > LOCK_GRACE_SECONDS or self.session != lock["session"]
                 or identity["status"] == "known" and identity["person_id"] != lock["person_id"]
                 or lock["person_id"] not in {p["id"] for p in self.profiles}
                 or self.pending_name is not None or self.pending_appearance is not None
                 or self.review_open or self.appearance_dialog_open
-                # Frame-to-frame continuity: consecutive frames of one face sit far above the threshold.
-                or float(np.dot(lock["embedding"], embedding)) < self.recognizer.threshold):
+                # Frame-to-frame + anchor continuity: prevents a different person from hijacking the lock.
+                or float(np.dot(lock["embedding"], embedding)) < floor
+                or float(np.dot(lock.get("anchor", lock["embedding"]), embedding)) < floor):
             self.face_lock = None
             return False
         lock["embedding"], lock["seen"] = embedding, now
@@ -456,18 +465,42 @@ class AttendanceService:
         self._live_scores = saved_live_scores
         self.last_frame_time = now
         self._prune_face_locks(now)
-        results, seen, claimed_ids = [], {}, set()
+        # Pre-compute embeddings and gallery matches so that if two faces match the same
+        # registered person_id, ONLY the face with the highest cosine similarity claims it.
+        main_crop, main_context = faces[0]
+        if self.pad_context and main_context is None:
+            raise ValueError("This PAD checkpoint requires a context crop from the original frame.")
+        main_live = self._smooth_liveness(
+            dict(self.liveness.predict_crop(main_context if self.pad_context else main_crop)), now)
+        embeddings, raw_matches = [None] * len(faces), [None] * len(faces)
+        for index, (crop, _) in enumerate(faces):
+            emb = self.recognizer.embed(crop)
+            embeddings[index] = emb
+            raw_matches[index] = self.recognizer.match(emb, self.profiles)
+
+        # Deduplicate person_id claims across all faces in the frame: strongest cosine wins.
+        best_for_person = {}
+        for index, match in enumerate(raw_matches):
+            if match is not None and match["status"] == "known" and match["person_id"] is not None:
+                pid = match["person_id"]
+                score = float(match.get("cosine") or 0.0)
+                if pid not in best_for_person or score > best_for_person[pid][1]:
+                    best_for_person[pid] = (index, score)
+        for index, match in enumerate(raw_matches):
+            if match is not None and match["status"] == "known" and match["person_id"] is not None:
+                if best_for_person[match["person_id"]][0] != index:
+                    raw_matches[index] = {**match, "status": "unknown", "person_id": None, "name": None}
+
+        results, seen, claimed_ids = [], {}, {pid for pid in best_for_person}
         for index, (crop, context_crop) in enumerate(faces):
             if index > 0:  # bystanders: name only, no PAD, never recorded
-                embedding = self.recognizer.embed(crop)
-                identity = self.recognizer.match(embedding, self.profiles)
-                if identity["status"] == "known" and identity["person_id"] not in claimed_ids:
+                embedding, identity = embeddings[index], raw_matches[index]
+                if identity["status"] == "known":
                     pid = identity["person_id"]
-                    claimed_ids.add(pid)
                     if pid in self.face_locks:
                         self.face_locks[pid]["embedding"] = embedding
                         self.face_locks[pid]["seen"] = now
-                elif identity["status"] != "known":
+                else:
                     locked = self._match_locked_person(embedding, now, exclude_ids=claimed_ids)
                     if locked is not None:
                         identity = dict(locked["identity"])
@@ -475,23 +508,26 @@ class AttendanceService:
                 results.append({"status": identity["status"], "liveness": None, "identity": identity,
                                 "expression": None, "attendance_recorded": False})
                 continue
-            if self.pad_context and context_crop is None:
-                raise ValueError("This PAD checkpoint requires a context crop from the original frame.")
-            live = self._smooth_liveness(dict(self.liveness.predict_crop(context_crop if self.pad_context else crop)), now)
+            live = main_live
             face = {"status": "spoof" if live.get("is_live") is False else "liveness_unavailable",
                     "liveness": live, "identity": None, "expression": None, "attendance_recorded": False}
             try:
                 face["expression"] = self.emotion.predict_crop(crop)
             except (OSError, ValueError, RuntimeError) as exc:
                 face["expression_error"] = str(exc)
-            if live.get("is_live") is True or self.face_lock is not None or self.face_locks:
-                embedding = self.recognizer.embed(crop)
-                identity = self.recognizer.match(embedding, self.profiles)
-            if self.face_lock is not None and self._still_locked(embedding, identity, now):
+            embedding, identity = embeddings[0], raw_matches[0]
+            lock_claimed_elsewhere = (
+                self.face_lock is not None
+                and self.face_lock["person_id"] in best_for_person
+                and best_for_person[self.face_lock["person_id"]][0] != 0
+            )
+            if (self.face_lock is not None and not lock_claimed_elsewhere
+                    and embedding is not None and identity is not None
+                    and self._still_locked(embedding, identity, now)):
                 claimed_ids.add(self.face_lock["person_id"])
                 face.update(status="attendance_confirmed", identity=self.face_lock["identity"],
                             liveness=self.face_lock["liveness"])
-            elif live.get("is_live") is True:
+            elif live.get("is_live") is True and identity is not None:
                 face.update(status=identity["status"], identity=identity)
                 if identity["status"] == "known":
                     person = identity["person_id"]
