@@ -1,5 +1,12 @@
 # Webcam performance and stable layout — 8 November 2026
 
+Update on 25 November 2026 (CPU preview stability, multi-face lock, and quiet localhost server):
+
+- **Adaptive face-box retention on CPU:** both `attendance_app/web.py` and `attendance_app/gui.py` compute `box_age_limit = min(1.0, max(BOX_MAX_AGE, 2.2 * processing_seconds))` instead of a fixed `0.5s` cutoff, preventing the face box from blinking between consecutive CPU inference cycles (~250–350 ms) while keeping the `<= 1.0s` staleness bound and preserving `BOX_MAX_AGE = 0.5s` on fast GPUs.
+- **Per-person multi-face locks:** `AttendanceService` maintains `face_locks` per confirmed `person_id` (2.0 s grace window) so a confirmed person keeps their name tag as a bystander even if a stranger steps closer to the camera.
+- **CPU-friendly liveness smoothing:** `liveness_window_seconds` is `0.85s` (still `< 1.0s` so stale frames cannot rescue a spoof), `_smooth_liveness` runs for the primary face in both single-face and multi-face modes, and brief single-frame dips no longer wipe `_live_scores`.
+- **Quiet Windows HTTP server:** `_QuietThreadingHTTPServer` in `attendance_app/web.py` suppresses harmless browser keep-alive disconnects (`WinError 10053/10054`).
+
 Update on 20 November 2026 (Hiếu's camera and stability changes, ported to the current app):
 
 - **Fast camera open on Windows:** `OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS=0` is set before OpenCV loads in `start_attendance.cmd`, `attendance_app/video_stream.py`, `attendance_app/device_check.py` (via `video_stream`) and `emotion_recognition/webcam.py`, avoiding the Media Foundation hardware-transform probing stall Hiếu measured at about 2.4–3.1 seconds. `--camera-backend auto|dshow|msmf` is accepted by both `attendance_app.web` and `attendance_app.gui`, and `CAP_PROP_BUFFERSIZE = 1` is set immediately after opening, before size and FPS.

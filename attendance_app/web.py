@@ -635,11 +635,13 @@ class WebController:
         if mirror:  # mirror before drawing so name labels read normally
             image = image.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
         plain = image.copy() if self.plain_viewers else None
+        box_age_limit = (min(1.0, max(BOX_MAX_AGE, 2.2 * float(analysis.get("processing_seconds", 0.0) or 0.0)))
+                         if analysis is not None else BOX_MAX_AGE)
         if (analysis is not None and analysis["stream_id"] == update["stream_id"]
                 and analysis["rgb"].shape == sample.rgb.shape
                 and sample.sequence >= analysis["sequence"]
-                and 0 <= sample.captured_at - analysis["captured_at"] <= BOX_MAX_AGE
-                and 0 <= now - analysis["captured_at"] <= BOX_MAX_AGE):
+                and 0 <= sample.captured_at - analysis["captured_at"] <= box_age_limit
+                and 0 <= now - analysis["captured_at"] <= box_age_limit):
             draw = ImageDraw.Draw(image)
             for box, color, name in _face_marks(analysis["result"]):
                 x, y, w, h = box
@@ -1274,6 +1276,19 @@ def make_handler(controller: WebController):
     return Handler
 
 
+class _QuietThreadingHTTPServer(ThreadingHTTPServer):
+    """Suppress normal browser keep-alive disconnects on Windows (WinError 10053/10054)."""
+
+    def handle_error(self, request, client_address):
+        import sys
+        _, exc, _ = sys.exc_info()
+        if isinstance(exc, (BrokenPipeError, ConnectionAbortedError, ConnectionResetError)):
+            return
+        if isinstance(exc, OSError) and getattr(exc, "winerror", None) in (10053, 10054):
+            return
+        super().handle_error(request, client_address)
+
+
 def _pick_port(host: str, preferred: int) -> int:
     for port in (preferred, *range(preferred + 1, preferred + 15)):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
@@ -1309,7 +1324,7 @@ def main(argv=None):
 
     port = _pick_port(args.host, args.port)
     controller = WebController(args)
-    server = ThreadingHTTPServer((args.host, port), make_handler(controller))
+    server = _QuietThreadingHTTPServer((args.host, port), make_handler(controller))
     url = f"http://{args.host}:{port}"
     print(f"Face Attendance localhost server running at {url}", flush=True)
     print("Press Ctrl+C to stop.", flush=True)

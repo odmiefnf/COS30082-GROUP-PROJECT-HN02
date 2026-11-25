@@ -1,6 +1,16 @@
 # Phần 6: Webcam, đăng ký và giao diện điểm danh
 
-## Trạng thái hiện tại (21/11/2026)
+**Cập nhật ngày 14/11/2026:**
+- **Mở camera nhanh hơn trên Windows:** tắt hardware-transform probing của MSMF (`OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS=0`), hỗ trợ tham số `--camera-backend auto|dshow|msmf` và warmup sẵn hai bộ Haar cascade ngay khi nạp ứng dụng.
+- **Hiển thị icon kèm nhãn cảm xúc:** thẻ `EXPRESSION` hiển thị cả biểu tượng cảm xúc, nhãn và độ tự tin (`😊 Happy`, `😠 Angry`, `😢 Sad`, `😮 Surprise`, `😨 Fear`, `🤢 Disgust`, `😐 Neutral`) theo mục 4 của đề bài.
+- **Làm mượt điểm Liveness & lọc box lồng nhau:** `AttendanceService` lấy trung bình trượt tối đa 3 khung liên tiếp trong 0,6 giây (`_smooth_liveness`) cho điểm `live_score` đã hiệu chỉnh, đồng thời `FaceLocator._deduplicate` loại bỏ khung con lồng bên trong khung chính trên cùng một khuôn mặt (`overlap / smaller >= 0,75`), giúp trạng thái `Passed` ổn định và không bị nhấp nháy do lóa kính 1 frame.
+## Trạng thái hiện tại (25/11/2026)
+
+**Cập nhật 25/11/2026:**
+- **Chống nháy khung trên CPU:** cả bản web (`attendance_app/web.py`) và desktop (`attendance_app/gui.py`) dùng thời hạn giữ khung thích ứng `min(1.0s, max(0.5s, 2.2 × processing_seconds))` để khung không tắt/bật liên tục giữa các khung phân tích trên máy không có GPU.
+- **Khoá tên độc lập nhiều người (`face_locks`):** khi một người đã được xác nhận mà có người lạ bước vào gần camera hơn (chiếm vị trí mặt lớn nhất), người đã đăng ký vẫn giữ nhãn tên của mình trên khung phụ trong 2 giây thay vì bị nhảy sang *Unknown*.
+- **Làm mượt Liveness ổn định hơn:** cửa sổ thời gian nâng lên `0,85s`, áp dụng cho cả khuôn mặt chính ở chế độ nhiều người và giữ lại lịch sử `_live_scores` khi điểm liveness tụt ngắn 1 khung hình.
+- **Server web sạch log:** `_QuietThreadingHTTPServer` bỏ qua các ngắt kết nối keep-alive vô hại của trình duyệt trên Windows (`WinError 10053/10054`).
 
 Phần này thay các mô tả cũ bên dưới ở những điểm khác nhau; các mục ngày 27–30/10 còn lại là lịch sử.
 

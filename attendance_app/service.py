@@ -32,7 +32,7 @@ def pad_crop_scale(liveness):
 
 class AttendanceService:
     def __init__(self, store, recognizer, liveness, emotion, session, stable_frames=3, liveness_smooth_window=1,
-                 liveness_window_seconds=0.6):
+                 liveness_window_seconds=0.85):
         if stable_frames < 1:
             raise ValueError("stable_frames must be positive.")
         if liveness_smooth_window < 1 or not liveness_window_seconds > 0:
@@ -66,11 +66,55 @@ class AttendanceService:
         self.guided_shots = []
         self.multi_streaks = {}  # person_id -> consecutive multi-face frames seen live and recognized
         self.face_lock = None  # the main face confirmed for attendance; see _still_locked
+        self.face_locks = {}  # person_id -> per-person lock so bystanders keep their names
 
     def _lock_face(self, identity, live, embedding, now):
-        self.face_lock = {"person_id": identity["person_id"], "identity": dict(identity),
-                          "liveness": dict(live, locked=True), "embedding": embedding,
-                          "seen": now, "session": self.session}
+        lock = {"person_id": identity["person_id"], "identity": dict(identity),
+                "liveness": dict(live, locked=True), "embedding": embedding,
+                "seen": now, "session": self.session}
+        self.face_lock = lock
+        self.face_locks[identity["person_id"]] = lock
+
+    def _prune_face_locks(self, now):
+        if (self.pending_name is not None or self.pending_appearance is not None
+                or self.review_open or self.appearance_dialog_open):
+            self.face_locks.clear()
+            return
+        valid_ids = {p["id"] for p in self.profiles}
+        for pid in list(self.face_locks):
+            lock = self.face_locks[pid]
+            if (now - lock["seen"] > LOCK_GRACE_SECONDS or self.session != lock["session"]
+                    or pid not in valid_ids):
+                del self.face_locks[pid]
+
+    def _match_locked_person(self, embedding, now, exclude_ids=()):
+        """Match a face embedding against active per-person locks (frame-to-frame continuity)."""
+        self._prune_face_locks(now)
+        best_lock, best_sim = None, self.recognizer.threshold
+        for pid, lock in self.face_locks.items():
+            if pid in exclude_ids:
+                continue
+            sim = float(np.dot(lock["embedding"], embedding))
+            if sim >= best_sim:
+                best_lock, best_sim = lock, sim
+        if best_lock is not None:
+            best_lock["embedding"], best_lock["seen"] = embedding, now
+        return best_lock
+
+    def _smooth_liveness(self, live, now):
+        score, threshold = live.get("live_score"), live.get("threshold")
+        if (self.liveness_smooth_window > 1 and isinstance(score, (int, float)) and isinstance(threshold, (int, float))
+                and np.isfinite([score, threshold]).all()):
+            self._live_scores = [(t, v) for t, v in self._live_scores if 0 <= now - t <= self.liveness_window_seconds]
+            self._live_scores.append((now, float(score)))
+            del self._live_scores[:-self.liveness_smooth_window]
+            avg_score = float(sum(v for _, v in self._live_scores) / len(self._live_scores))
+            passed = avg_score >= float(live["threshold"])
+            live.update(raw_live_score=float(live["live_score"]), live_score=avg_score,
+                        spoof_score=1.0 - avg_score, is_live=passed,
+                        status="live" if passed else "spoof",
+                        smooth_window=len(self._live_scores))
+        return live
 
     def _still_locked(self, embedding, identity, now):
         """Keep a confirmed face's name and liveness result while the same face stays in view.
@@ -226,6 +270,10 @@ class AttendanceService:
             self.appearance_request = None
             self.appearance_request_reason = "The face changed. Cancel and start again with the same person."
             raise ValueError(self.appearance_request_reason)
+        identity = self.recognizer.match(latest.embedding, self.profiles)
+        if (identity["status"] not in ("unknown", "known")
+                or identity["status"] == "known" and identity["person_id"] != person_id):
+            raise ValueError("This face matches another profile or is ambiguous. Check the selected person.")
         anchor = request["anchor"].copy()
         self.appearance_dialog_open = False
         self.appearance_dialog_id = self.appearance_request = None
@@ -340,8 +388,13 @@ class AttendanceService:
             selected = next((p for p in self.profiles if p["id"] == appearance_person_id), None)
             if selected is None:
                 raise ValueError("The selected profile no longer exists.")
-            # No "matches someone else" check: the operator confirms the person, because the
-            # identity model often scores a new look (e.g. glasses off) closer to another profile.
+            # A new look may not match its own profile yet (e.g. glasses off), but it must
+            # never be attached to one person while clearly matching someone else.
+            centroid = unit_vector(np.mean(embeddings, axis=0), self.recognizer.dimension)
+            match = self.recognizer.match(centroid, self.profiles)
+            if match["status"] == "known" and match["person_id"] != appearance_person_id:
+                raise ValueError(f"These shots match {match['name']}, not {selected['name']}. "
+                                 "Check the selected profile or retake with the right person.")
             appearance_id = self.store.add_appearance(appearance_person_id, label, embeddings)
             self.profiles = self.store.profiles()
             self.guided_shots.clear()
@@ -395,35 +448,54 @@ class AttendanceService:
             return None
         if self.last_frame_time is not None and now - self.last_frame_time > 1.5:
             self.multi_streaks = {}
-        # Single-face state (smoothing, streak, review observation) must not carry across.
+            self._live_scores.clear()
+        # Single-face state (streak, enrollment, review observation) must not carry across,
+        # but keep _live_scores smoothing active for the main face in multi-face view.
+        saved_live_scores = list(self._live_scores)
         self.reset_tracking("Several faces are in view. Keep one person in front of the camera.")
+        self._live_scores = saved_live_scores
         self.last_frame_time = now
-        results, seen = [], {}
+        self._prune_face_locks(now)
+        results, seen, claimed_ids = [], {}, set()
         for index, (crop, context_crop) in enumerate(faces):
             if index > 0:  # bystanders: name only, no PAD, never recorded
-                identity = self.recognizer.match(self.recognizer.embed(crop), self.profiles)
+                embedding = self.recognizer.embed(crop)
+                identity = self.recognizer.match(embedding, self.profiles)
+                if identity["status"] == "known" and identity["person_id"] not in claimed_ids:
+                    pid = identity["person_id"]
+                    claimed_ids.add(pid)
+                    if pid in self.face_locks:
+                        self.face_locks[pid]["embedding"] = embedding
+                        self.face_locks[pid]["seen"] = now
+                elif identity["status"] != "known":
+                    locked = self._match_locked_person(embedding, now, exclude_ids=claimed_ids)
+                    if locked is not None:
+                        identity = dict(locked["identity"])
+                        claimed_ids.add(locked["person_id"])
                 results.append({"status": identity["status"], "liveness": None, "identity": identity,
                                 "expression": None, "attendance_recorded": False})
                 continue
             if self.pad_context and context_crop is None:
                 raise ValueError("This PAD checkpoint requires a context crop from the original frame.")
-            live = dict(self.liveness.predict_crop(context_crop if self.pad_context else crop))
+            live = self._smooth_liveness(dict(self.liveness.predict_crop(context_crop if self.pad_context else crop)), now)
             face = {"status": "spoof" if live.get("is_live") is False else "liveness_unavailable",
                     "liveness": live, "identity": None, "expression": None, "attendance_recorded": False}
             try:
                 face["expression"] = self.emotion.predict_crop(crop)
             except (OSError, ValueError, RuntimeError) as exc:
                 face["expression_error"] = str(exc)
-            if live.get("is_live") is True or self.face_lock is not None:
+            if live.get("is_live") is True or self.face_lock is not None or self.face_locks:
                 embedding = self.recognizer.embed(crop)
                 identity = self.recognizer.match(embedding, self.profiles)
             if self.face_lock is not None and self._still_locked(embedding, identity, now):
+                claimed_ids.add(self.face_lock["person_id"])
                 face.update(status="attendance_confirmed", identity=self.face_lock["identity"],
                             liveness=self.face_lock["liveness"])
             elif live.get("is_live") is True:
                 face.update(status=identity["status"], identity=identity)
                 if identity["status"] == "known":
                     person = identity["person_id"]
+                    claimed_ids.add(person)
                     seen[person] = self.multi_streaks.get(person, 0) + 1
                     if seen[person] >= self.stable_frames:
                         face["attendance_recorded"] = self.store.record_attendance(
@@ -445,19 +517,7 @@ class AttendanceService:
         if self.last_frame_time is not None and now - self.last_frame_time > 1.5:
             self.reset_tracking()
         self.last_frame_time = now
-        live = dict(self.liveness.predict_crop(context_crop if self.pad_context else crop))
-        score, threshold = live.get("live_score"), live.get("threshold")
-        if (self.liveness_smooth_window > 1 and isinstance(score, (int, float)) and isinstance(threshold, (int, float))
-                and np.isfinite([score, threshold]).all()):
-            self._live_scores = [(t, v) for t, v in self._live_scores if 0 <= now - t <= self.liveness_window_seconds]
-            self._live_scores.append((now, float(score)))
-            del self._live_scores[:-self.liveness_smooth_window]
-            avg_score = float(sum(v for _, v in self._live_scores) / len(self._live_scores))
-            passed = avg_score >= float(live["threshold"])
-            live.update(raw_live_score=float(live["live_score"]), live_score=avg_score,
-                        spoof_score=1.0 - avg_score, is_live=passed,
-                        status="live" if passed else "spoof",
-                        smooth_window=len(self._live_scores))
+        live = self._smooth_liveness(dict(self.liveness.predict_crop(context_crop if self.pad_context else crop)), now)
         result = {"status": "spoof" if live.get("is_live") is False else "liveness_unavailable",
                   "liveness": live, "identity": None, "expression": None,
                   "registered": False, "attendance_recorded": False, "registration_samples": 0,
@@ -487,7 +547,10 @@ class AttendanceService:
             result.update(self.frame_state(now))
             return result
         if live.get("is_live") is not True:
+            saved_live_scores = list(self._live_scores)
             self.reset_tracking("Liveness no longer passes. Cancel and capture a new observation.")
+            self._live_scores = saved_live_scores
+            self.last_frame_time = now
             result.update(self.frame_state(now))
             return result
         self.review.observe(crop, embedding, live["live_score"], identity["status"], self.session, now)
@@ -513,7 +576,10 @@ class AttendanceService:
             if now >= pending["expires"] or self.session != pending["session"]:
                 self.cancel_registration()
                 return {**result, "status": "appearance_expired", "appearance_pending": False, "enrollment_pending": False}
-            # Only a change of face ends the capture; a match to another profile does not (operator-confirmed).
+            if (identity["status"] == "ambiguous"
+                    or identity["status"] == "known" and identity["person_id"] != pending["person_id"]):
+                self.cancel_registration()
+                return {**result, "status": "appearance_conflict", "appearance_pending": False, "enrollment_pending": False}
             if float(np.dot(pending["anchor"], embedding)) < self.recognizer.threshold:
                 self.cancel_registration()
                 return {**result, "status": "appearance_person_changed", "appearance_pending": False, "enrollment_pending": False}

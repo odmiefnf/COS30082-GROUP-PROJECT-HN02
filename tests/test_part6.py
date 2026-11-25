@@ -268,6 +268,26 @@ class Fixture(unittest.TestCase):
         self.service.pending_name = "New person"
         self.assertIsNone(self.service.analyze_faces([(crop_a, None), (crop_b, None)], now=1.7))
 
+    def test_confirmed_person_keeps_name_as_bystander_when_stranger_steps_in_front(self):
+        a = self.enroll("Hiếu")
+        self.service.profiles = self.store.profiles()
+        crop_a, stranger = Image.new("RGB", (100, 100), "red"), Image.new("RGB", (100, 100), "blue")
+        vec_a = np.array([1., 0., 0.], dtype=np.float32)
+        vec_s = np.array([0., 1., 0.], dtype=np.float32)
+        self.recognizer.embed.side_effect = lambda c: vec_a if c is crop_a else vec_s
+        self.recognizer.match.side_effect = lambda emb, profiles: (
+            {"status": "known", "person_id": a, "name": "Hiếu", "cosine": .92}
+            if emb[0] > 0.5 else {"status": "unknown", "person_id": None, "name": None, "cosine": .1})
+        for now in (0.0, 0.2, 0.4):
+            res = self.service.analyze(crop_a, now)
+        self.assertEqual(res["status"], "attendance_confirmed")
+        # Now stranger walks closer (becomes main face index 0) and Hiếu's gallery score dips below threshold.
+        self.recognizer.match.side_effect = lambda emb, profiles: {
+            "status": "unknown", "person_id": None, "name": None, "cosine": .4}
+        faces = self.service.analyze_faces([(stranger, None), (crop_a, None)], now=0.6)
+        self.assertEqual(faces[0]["status"], "unknown")
+        self.assertEqual((faces[1]["status"], faces[1]["identity"]["name"]), ("known", "Hiếu"))
+
     def test_no_face_multiple_faces_or_quality_failure_skip_all_models(self):
         locator = Mock()
         processor = FrameProcessor(locator, self.service)

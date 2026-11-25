@@ -63,6 +63,7 @@ MESSAGES = {
     "registration_person_changed": "Samples are inconsistent · Keep one person in view",
     "appearance_capturing": "Capturing an additional appearance · Keep the same person in view",
     "appearance_added": "Appearance added · Keep looking at the camera to test recognition",
+    "appearance_conflict": "Cannot add this appearance: it matches another profile",
     "appearance_person_changed": "Samples are inconsistent · Keep the same person in view",
     "appearance_expired": "Appearance capture expired · Start again",
 }
@@ -70,7 +71,7 @@ MESSAGES = {
 # Presentation-only colour coding of the feedback banner and result cards.
 _SUCCESS = {MESSAGES[key] for key in ("known", "attendance_confirmed", "registered", "appearance_added")}
 _DANGER = {MESSAGES[key] for key in ("spoof", "liveness_unavailable", "registration_existing_or_ambiguous",
-                                     "registration_person_changed",
+                                     "registration_person_changed", "appearance_conflict",
                                      "appearance_person_changed", "appearance_expired")}
 _WARNING = {MESSAGES[key] for key in ("unknown", "ambiguous", "registering", "appearance_capturing",
                                       "observation_stale", "multiple_faces", "face_too_small_or_outside",
@@ -234,7 +235,7 @@ class CameraWorker(threading.Thread):
             # 3-frame PAD smoothing by default; the web app sends its own window setting on start.
             self.service = AttendanceService(store, recognizer, liveness, emotion, self.args.session,
                                              liveness_smooth_window=3)
-            self.reference_importer = ReferenceImporter(store, recognizer, locator)
+            self.reference_importer = ReferenceImporter(store, recognizer, liveness, locator)
             scale = pad_crop_scale(liveness)
             crop_options = ({"pad_scale": scale} if scale is not None
                             else {"pad_context": True} if uses_pad_context(liveness) else {})
@@ -1316,11 +1317,13 @@ class AttendanceWindow:
         # The outline reflects only the latest fresh analysis. Recognition/PAD
         # decisions still come exclusively from the analyzed original crop.
         # Never put a previous run, resolution or future frame's box here.
+        box_age_limit = (min(1.0, max(BOX_MAX_AGE, 2.2 * float(analysis.get("processing_seconds", 0.0) or 0.0)))
+                         if analysis is not None else BOX_MAX_AGE)
         if (analysis is not None and analysis["stream_id"] == update["stream_id"]
                 and analysis["rgb"].shape == sample.rgb.shape
                 and sample.sequence >= analysis["sequence"]
-                and 0 <= sample.captured_at-analysis["captured_at"] <= BOX_MAX_AGE
-                and 0 <= now-analysis["captured_at"] <= BOX_MAX_AGE):
+                and 0 <= sample.captured_at-analysis["captured_at"] <= box_age_limit
+                and 0 <= now-analysis["captured_at"] <= box_age_limit):
             draw = ImageDraw.Draw(image)
             result = analysis["result"]
             identity = result.get("identity") or {}
