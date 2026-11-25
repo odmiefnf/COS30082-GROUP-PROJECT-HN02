@@ -11,6 +11,34 @@ app is `python -m attendance_app.gui`. A new local gallery starts empty. See
 [submission readiness](docs/submission_readiness.md) for the setup, results and
 remaining demonstration tasks.
 
+**Cập nhật 25/11/2026:** ổn định trải nghiệm chạy trên máy CPU và chế độ nhiều người:
+- **Khung detect không nháy trên CPU** (`attendance_app/web.py`, `attendance_app/gui.py`): thời gian giữ khung mặt tự thích ứng theo tốc độ suy luận thực tế (`min(1.0s, max(0.5s, 2.2 × thời gian xử lý))`) thay vì cố định `0.5s`.
+- **Giữ tên độc lập cho từng người khi có nhiều người** (`attendance_app/service.py`): bổ sung `face_locks` theo từng `person_id` (giữ trong `2.0s`), giúp người đã xác nhận vẫn giữ tên khi người lạ bước vào gần camera hơn (có thêm kiểm thử tự động trong `tests/test_part6.py`).
+- **Ổn định làm mượt Liveness:** nới cửa sổ trượt từ `0.6s` lên **`0.85s`**, bật làm mượt cho cả khuôn mặt chính trong chế độ nhiều người và không xóa lịch sử `_live_scores` khi tụt điểm ngắn 1 khung hình.
+- **Sạch log server web:** `_QuietThreadingHTTPServer` trong `attendance_app/web.py` tự bỏ qua các ngắt kết nối keep-alive vô hại của trình duyệt trên Windows (`WinError 10053/10054`).
+
+### Lệnh cài đặt & sử dụng nhanh (PowerShell tại thư mục dự án)
+
+```powershell
+# 1. Tạo môi trường Python 3.11 và cài đầy đủ thư viện (PyTorch, torchvision, OpenCV, Pillow, NumPy)
+py -3.11 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements-webcam.txt
+
+# 2. Chạy Web App trên trình duyệt (mặc định mới, hoặc nhấp đúp start_attendance.cmd)
+.\.venv\Scripts\python.exe -m attendance_app.web --open
+
+# 3. Chạy Desktop App (Tkinter)
+.\.venv\Scripts\python.exe -m attendance_app.gui
+
+# 4. Tùy chọn thêm cho máy CPU / đổi backend camera / đổi model liveness hoặc database riêng
+.\.venv\Scripts\python.exe -m attendance_app.web --open --num-threads 8 --camera-backend auto --liveness-checkpoint results/liveness_mobilenetv3_20261120/best_model.pt --database data/attendance/demo.sqlite3
+
+# 5. Chạy toàn bộ bộ kiểm thử tự động
+.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+```
+
+*(Lưu ý: Nếu đổi từ model nhận diện cũ sang ResNet-18 ArcFace và gặp báo lỗi tương thích database cũ, hãy sao lưu `data\attendance\profiles.sqlite3` sang tên khác rồi mở lại app để tự tạo database mới).*
+
 **Trạng thái hiện tại (21/11/2026).** App dùng ba model fine-tune từ ImageNet (được phép theo mục P1-07: có huấn luyện thêm trên dữ liệu của đề):
 
 | Phần | Model trong app | Kết quả chính | Model trước |
