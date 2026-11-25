@@ -1,0 +1,206 @@
+...................................................................Cached train_data: 4 images
+Cached val_data: 4 images
+Cached test_data: 4 images
+............................................Fingerprinting 6 training and 4 validation images...
+Caching train/validation tensors in CPU RAM; preprocessing is unchanged.
+Cached tensors occupy 0.000 GiB.
+Training liveness CNN from scratch on cpu; labels: 0=spoof, 1=live.
+Epoch 1/2: train_loss=1.315254, val_loss=0.735735, val_accuracy=0.5000; best epoch=1
+Validation ACER=0.0000, APCER=0.0000, BPCER=0.0000
+Epoch 2/2: train_loss=0.850214, val_loss=0.750780, val_accuracy=0.5000; best epoch=1
+Validation ACER=0.0000, APCER=0.0000, BPCER=0.0000
+Calibrated threshold 0.357035 on ALL 4 validation images using best epoch 1; saved C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tmp\tmpglf85kab\out\best_model.pt
+.Fingerprinting 6 training and 4 validation images...
+Training liveness CNN from scratch on cpu; labels: 0=spoof, 1=live.
+Epoch 1/1: train_loss=0.685550, val_loss=0.730040, val_accuracy=0.5000; best epoch=1
+Calibrated threshold 0.366682 on ALL 4 validation images using best epoch 1; saved C:\Users\kiet1\OneDrive\Desktop\cos30082\grp_project\tmp\tmpnzzkv1c1\out\best_model.pt
+...............................................Training FER CNN from scratch: 21 train, 21 validation; cpu.
+Epoch 1/1: train_loss=2.0267, val_loss=1.9480, val_accuracy=0.1429, val_macro_f1=0.0357; best=1
+Saved best epoch 1: C:\Users\kiet1\AppData\Local\Temp\fer_synthetic_2yr7cvb3\model\best_model.pt
+{
+  "metrics": {
+    "accuracy": 0.14285714285714285,
+    "macro_f1": 0.03571428571428571,
+    "balanced_accuracy": 0.14285714285714285,
+    "sample_count": 21,
+    "labels": [
+      "angry",
+      "disgust",
+      "fear",
+      "happy",
+      "sad",
+      "surprise",
+      "neutral"
+    ],
+    "confusion_matrix": [
+      [
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "per_class": [
+      {
+        "label": "angry",
+        "precision": 0.14285714285714285,
+        "recall": 1.0,
+        "f1": 0.25,
+        "support": 3
+      },
+      {
+        "label": "disgust",
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 3
+      },
+      {
+        "label": "fear",
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 3
+      },
+      {
+        "label": "happy",
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 3
+      },
+      {
+        "label": "sad",
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 3
+      },
+      {
+        "label": "surprise",
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 3
+      },
+      {
+        "label": "neutral",
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 3
+      }
+    ],
+    "confusion_order": "rows=true, columns=predicted; fixed FER label order",
+    "zero_division": 0
+  },
+  "checkpoint": "C:\\Users\\kiet1\\AppData\\Local\\Temp\\fer_synthetic_2yr7cvb3\\model\\best_model.pt",
+  "checkpoint_sha256": "23a467c85368496b42a099385406efe0ee55e267f813344dc999b021199dcabd",
+  "manifest_sha256": "2368256e2dbe79c9b82e0911dbe2d0bd601ae51b06680dedd311cdce9b96886e",
+  "training_smoke_test": false,
+  "selected_epoch": 1,
+  "evaluation_samples": 21,
+  "evaluation_scope": "Filtered PrivateTest; disjoint paths and decoded pixels, subject separation unverified",
+  "test_used_for_model_selection": false,
+  "checkpoint_changed": false,
+  "subject_disjoint_verified": false,
+  "device": "cpu"
+}
+Emotion evaluation failed: Evaluation must be PrivateTest, with paths/pixels absent from train/validation.
+...............{"status": "checking_zip", "source": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic__mvvkkon\\official.zip", "output_dir": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic__mvvkkon\\imported", "files_processed": 0, "files_total": null, "elapsed_seconds": 0.0}
+{"status": "extracting", "source": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic__mvvkkon\\official.zip", "output_dir": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic__mvvkkon\\imported", "files_processed": 0, "files_total": 15, "elapsed_seconds": 0.0}
+{"status": "checking_zip", "source": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic__mvvkkon\\official.zip", "output_dir": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic__mvvkkon\\imported", "files_processed": 0, "files_total": null, "elapsed_seconds": 0.0}
+{"status": "extracting", "source": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic__mvvkkon\\official.zip", "output_dir": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic__mvvkkon\\imported", "files_processed": 0, "files_total": 15, "elapsed_seconds": 0.0}
+.{"status": "checking_zip", "source": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_bqmxcurp\\unsafe0.zip", "output_dir": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_bqmxcurp\\out0", "files_processed": 0, "files_total": null, "elapsed_seconds": 0.0}
+{"status": "checking_zip", "source": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_bqmxcurp\\unsafe1.zip", "output_dir": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_bqmxcurp\\out1", "files_processed": 0, "files_total": null, "elapsed_seconds": 0.0}
+{"status": "checking_zip", "source": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_bqmxcurp\\unsafe2.zip", "output_dir": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_bqmxcurp\\out2", "files_processed": 0, "files_total": null, "elapsed_seconds": 0.0}
+{"status": "checking_zip", "source": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_bqmxcurp\\unsafe3.zip", "output_dir": "C:\\Users\\kiet1\\OneDrive\\Desktop\\cos30082\\grp_project\\tmp\\identity_import_synthetic_bqmxcurp\\out3", "files_processed": 0, "files_total": null, "elapsed_seconds": 0.0}
+.......................................invalid command name "2596572774528poll"
+    while executing
+"2596572774528poll"
+    ("after" script)
+invalid command name "2596572740160placeholder"
+    while executing
+"2596572740160placeholder"
+    ("after" script)
+can't invoke "event" command: application has been destroyed
+    while executing
+"event generate $w <<ThemeChanged>>"
+    (procedure "ttk::ThemeChanged" line 6)
+    invoked from within
+"ttk::ThemeChanged"
+can't invoke "event" command: application has been destroyed
+    while executing
+"event generate $w <<ThemeChanged>>"
+    (procedure "ttk::ThemeChanged" line 6)
+    invoked from within
+"ttk::ThemeChanged"
+.invalid command name "2596782526528poll"
+    while executing
+"2596782526528poll"
+    ("after" script)
+............................................CAPTURE_STARTED: keep the declared person/condition in view.
+.CAPTURE_STARTED: keep the declared person/condition in view.
+CAPTURE_STARTED: keep the declared person/condition in view.
+...........
+----------------------------------------------------------------------
+Ran 271 tests in 92.210s
+
+OK

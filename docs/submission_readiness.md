@@ -113,7 +113,7 @@ model component before recording.
   folder; the web app loaded all three models and YuNet on CPU with an empty database,
   and 267 tests passed inside the copy (`results/readiness_20261121/package_check.json`), before the cleanup below.
   A clean `pip install` on another computer has not been tried.
-- [x] Full software suite: 269 tests passed after the 21 November cleanup (old liveness experiments, unused results and the temporary LCC launcher removed; one obsolete package test dropped) and the confirmed-face lock (three new tests). See `results/readiness_20261121/full_tests.log`.
+- [x] Full software suite: 269 tests passed after the 21 November cleanup (old liveness experiments, unused results and the temporary LCC launcher removed; one obsolete package test dropped) and the confirmed-face lock (three new tests). On 25 November, after the photo-import and appearance changes and Hieu's multi-face lock update, 271 tests pass: `results/readiness_20261125/full_tests.log`.
 - [x] Re-register profiles for the new identity encoder and try the app live.
   On 21 November 2026 one profile was registered with the ArcFace encoder and the
   user tested the new app (ArcFace and the confirmed-face lock) live: it ran stably,

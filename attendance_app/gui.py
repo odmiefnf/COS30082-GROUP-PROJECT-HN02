@@ -63,7 +63,6 @@ MESSAGES = {
     "registration_person_changed": "Samples are inconsistent · Keep one person in view",
     "appearance_capturing": "Capturing an additional appearance · Keep the same person in view",
     "appearance_added": "Appearance added · Keep looking at the camera to test recognition",
-    "appearance_conflict": "Cannot add this appearance: it matches another profile",
     "appearance_person_changed": "Samples are inconsistent · Keep the same person in view",
     "appearance_expired": "Appearance capture expired · Start again",
 }
@@ -71,7 +70,7 @@ MESSAGES = {
 # Presentation-only colour coding of the feedback banner and result cards.
 _SUCCESS = {MESSAGES[key] for key in ("known", "attendance_confirmed", "registered", "appearance_added")}
 _DANGER = {MESSAGES[key] for key in ("spoof", "liveness_unavailable", "registration_existing_or_ambiguous",
-                                     "registration_person_changed", "appearance_conflict",
+                                     "registration_person_changed",
                                      "appearance_person_changed", "appearance_expired")}
 _WARNING = {MESSAGES[key] for key in ("unknown", "ambiguous", "registering", "appearance_capturing",
                                       "observation_stale", "multiple_faces", "face_too_small_or_outside",
@@ -235,7 +234,7 @@ class CameraWorker(threading.Thread):
             # 3-frame PAD smoothing by default; the web app sends its own window setting on start.
             self.service = AttendanceService(store, recognizer, liveness, emotion, self.args.session,
                                              liveness_smooth_window=3)
-            self.reference_importer = ReferenceImporter(store, recognizer, liveness, locator)
+            self.reference_importer = ReferenceImporter(store, recognizer, locator)
             scale = pad_crop_scale(liveness)
             crop_options = ({"pad_scale": scale} if scale is not None
                             else {"pad_context": True} if uses_pad_context(liveness) else {})

@@ -9,7 +9,7 @@
 - **Discussion:** lý do chọn ArcFace (TPR cao nhất ở FPR thấp; ba AUC ResNet-18 chênh dưới 0,001), PAD bị chuyên biệt cho camera của nhóm, giới hạn dữ liệu webcam một người/một phòng/một ngày, trùng dữ liệu identity và quy định về trọng số ImageNet.
 - **13 tài liệu tham khảo**, gồm YuNet, ResNet, ArcFace, MobileNetV3 và ImageNet.
 
-Nguồn dựng: `tools/build_group_report.py`, chạy bằng môi trường `tmp/report_tools/venv` (python-docx, matplotlib, pymupdf). Công cụ kiểm tra SHA-256 của file cặp verification, các checkpoint identity, checkpoint identity và liveness của app trước khi dựng, rồi ghi SHA-256 các file nguồn vào `tmp/group_report/build_evidence.json`. Số đo detector và độ trễ do `tools/measure_app_pipeline.py` tạo (`results/app_update_20261120/pipeline_metrics.json`); log kiểm thử ở `results/readiness_20261121/full_tests.log`.
+Nguồn dựng: `tools/build_group_report.py`, chạy bằng môi trường `tmp/report_tools/venv` (python-docx, matplotlib, pymupdf). Công cụ kiểm tra SHA-256 của file cặp verification, các checkpoint identity, checkpoint identity và liveness của app trước khi dựng, rồi ghi SHA-256 các file nguồn vào `tmp/group_report/build_evidence.json`. Số đo detector và độ trễ do `tools/measure_app_pipeline.py` tạo (`results/app_update_20261120/pipeline_metrics.json`); log kiểm thử ở `results/readiness_20261125/full_tests.log` (271 bài, 25/11/2026).
 
 Báo cáo vẫn tách YuNet (định vị có sẵn) khỏi ba mạng được fine-tune và không mô tả manual review là cải thiện độ chính xác của CNN. Phần bên dưới là lịch sử các bản 30/10 và 14/11 với mô hình cũ; số liệu ở đó không còn là số của app.
 

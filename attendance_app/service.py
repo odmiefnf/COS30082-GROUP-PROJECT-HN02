@@ -279,10 +279,6 @@ class AttendanceService:
             self.appearance_request = None
             self.appearance_request_reason = "The face changed. Cancel and start again with the same person."
             raise ValueError(self.appearance_request_reason)
-        identity = self.recognizer.match(latest.embedding, self.profiles)
-        if (identity["status"] not in ("unknown", "known")
-                or identity["status"] == "known" and identity["person_id"] != person_id):
-            raise ValueError("This face matches another profile or is ambiguous. Check the selected person.")
         anchor = request["anchor"].copy()
         self.appearance_dialog_open = False
         self.appearance_dialog_id = self.appearance_request = None
@@ -397,13 +393,8 @@ class AttendanceService:
             selected = next((p for p in self.profiles if p["id"] == appearance_person_id), None)
             if selected is None:
                 raise ValueError("The selected profile no longer exists.")
-            # A new look may not match its own profile yet (e.g. glasses off), but it must
-            # never be attached to one person while clearly matching someone else.
-            centroid = unit_vector(np.mean(embeddings, axis=0), self.recognizer.dimension)
-            match = self.recognizer.match(centroid, self.profiles)
-            if match["status"] == "known" and match["person_id"] != appearance_person_id:
-                raise ValueError(f"These shots match {match['name']}, not {selected['name']}. "
-                                 "Check the selected profile or retake with the right person.")
+            # No "matches someone else" check: the operator confirms the person, because the
+            # identity model often scores a new look (e.g. glasses off) closer to another profile.
             appearance_id = self.store.add_appearance(appearance_person_id, label, embeddings)
             self.profiles = self.store.profiles()
             self.guided_shots.clear()
@@ -612,10 +603,7 @@ class AttendanceService:
             if now >= pending["expires"] or self.session != pending["session"]:
                 self.cancel_registration()
                 return {**result, "status": "appearance_expired", "appearance_pending": False, "enrollment_pending": False}
-            if (identity["status"] == "ambiguous"
-                    or identity["status"] == "known" and identity["person_id"] != pending["person_id"]):
-                self.cancel_registration()
-                return {**result, "status": "appearance_conflict", "appearance_pending": False, "enrollment_pending": False}
+            # Only a change of face ends the capture; a match to another profile does not (operator-confirmed).
             if float(np.dot(pending["anchor"], embedding)) < self.recognizer.threshold:
                 self.cancel_registration()
                 return {**result, "status": "appearance_person_changed", "appearance_pending": False, "enrollment_pending": False}

@@ -1,9 +1,5 @@
 # Phần 6: Webcam, đăng ký và giao diện điểm danh
 
-**Cập nhật ngày 14/11/2026:**
-- **Mở camera nhanh hơn trên Windows:** tắt hardware-transform probing của MSMF (`OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS=0`), hỗ trợ tham số `--camera-backend auto|dshow|msmf` và warmup sẵn hai bộ Haar cascade ngay khi nạp ứng dụng.
-- **Hiển thị icon kèm nhãn cảm xúc:** thẻ `EXPRESSION` hiển thị cả biểu tượng cảm xúc, nhãn và độ tự tin (`😊 Happy`, `😠 Angry`, `😢 Sad`, `😮 Surprise`, `😨 Fear`, `🤢 Disgust`, `😐 Neutral`) theo mục 4 của đề bài.
-- **Làm mượt điểm Liveness & lọc box lồng nhau:** `AttendanceService` lấy trung bình trượt tối đa 3 khung liên tiếp trong 0,6 giây (`_smooth_liveness`) cho điểm `live_score` đã hiệu chỉnh, đồng thời `FaceLocator._deduplicate` loại bỏ khung con lồng bên trong khung chính trên cùng một khuôn mặt (`overlap / smaller >= 0,75`), giúp trạng thái `Passed` ổn định và không bị nhấp nháy do lóa kính 1 frame.
 ## Trạng thái hiện tại (25/11/2026)
 
 **Cập nhật 25/11/2026:**
