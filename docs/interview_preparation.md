@@ -88,8 +88,9 @@ blank until the group supplies them.
     Guided registration captures ten poses; each shot is liveness checked on its
     own frame and only live shots (at least three) are stored as embeddings. The
     app matches embeddings instead of adding a class to the classifier head.
-    Appearance templates (for example with and without glasses) are added through
-    the same flow and refused if the shots clearly match another person.
+    Appearance templates (with glasses, without glasses, with mask) are added
+    through the same flow; the operator confirms the person, because a new look
+    can score closer to another profile than to its own.
 12a. **Is using ImageNet weights allowed?**
     The brief prohibits pretrained models used without further training. All
     three app networks are fine-tuned on the task data, and the from-scratch

@@ -66,7 +66,7 @@ class AppearanceServiceChecks(unittest.TestCase):
         self.service.cancel_registration()
         self.assertEqual(len(self.store.profiles()[0]["appearances"]), 1)
 
-    def test_explicit_confirmation_fresh_live_evidence_and_nonconflicting_identity_required(self):
+    def test_explicit_confirmation_and_fresh_live_evidence_required_but_no_identity_conflict_check(self):
         for confirmed in (False, 1):
             with self.assertRaises(ValueError):
                 self.service.begin_appearance(self.person, "Without glasses", confirmed, now=10.)
@@ -75,10 +75,13 @@ class AppearanceServiceChecks(unittest.TestCase):
         self.service.analyze(self.crop(1), now=10.)
         with self.assertRaises(ValueError):
             self.service.begin_appearance(self.person, "Without glasses", True, now=12.)
+        # The live face matches "Other" better than "Sample"; the operator's confirmation decides.
         self.store.enroll("Other", [[0., 1., 0.]]*3)
+        self.service.profiles = self.store.profiles()
         self.service.analyze(self.crop(1), now=13.)
-        with self.assertRaises(ValueError):
-            self.service.begin_appearance(self.person, "Without glasses", True, now=13.1)
+        request = self.service.request_appearance(now=13.05)
+        self.service.begin_appearance(self.person, "Without glasses", True, request_id=request["id"], now=13.1)
+        self.assertEqual(self.service.pending_appearance["person_id"], self.person)
 
     def test_switch_person_expiry_and_session_change_do_not_add_samples(self):
         for mode in ("person", "expired", "session"):

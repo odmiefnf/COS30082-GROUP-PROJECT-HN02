@@ -16,7 +16,6 @@ Menu có chỉ số `0–9` và giá trị khởi động. Nếu cần chỉ s�
 .\.venv-gpu\Scripts\python.exe -m attendance_app.gui --camera 10 --camera-backend dshow
 ```
 
-Mặc định ứng dụng đã tắt hardware-transform probing của Windows Media Foundation (`OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS=0`) trước khi nạp OpenCV để tăng tốc độ mở camera trên Windows. Lựa chọn áp dụng cho lần chạy hiện tại; chưa lưu thành thiết lập cho lần mở sau. Test camera chạy ngoài luồng Tk để cửa sổ vẫn phản hồi. OpenCV/driver có thể chậm ở lệnh mở/đọc; chưa có bảo đảm timeout ở mức driver. Đóng app trong lúc thử sẽ chờ tác vụ nhả thiết bị.
 App đặt `OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS=0` trước khi nạp OpenCV để camera mở nhanh hơn trên Windows. Lựa chọn áp dụng cho lần chạy hiện tại; chưa lưu thành thiết lập cho lần mở sau. Test camera chạy ngoài luồng Tk để cửa sổ vẫn phản hồi. OpenCV/driver có thể chậm ở lệnh mở/đọc; chưa có bảo đảm timeout ở mức driver. Đóng app trong lúc thử sẽ chờ tác vụ nhả thiết bị.
 
 ## Đọc Diagnostics

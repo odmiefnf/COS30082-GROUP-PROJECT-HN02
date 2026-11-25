@@ -1,7 +1,7 @@
 """Bounded integration check on local training fixtures, never the user's gallery.
 
-This checks software wiring with the real models. It is not a PAD/identity
-benchmark: the photos come from training data and the second group repeats
+This checks software wiring with the real models (photo import runs no PAD).
+It is not an identity benchmark: the photos come from training data and the second group repeats
 the first group's inputs deliberately to check the add-appearance transaction.
 """
 from collections import defaultdict
@@ -12,7 +12,6 @@ import tempfile
 
 import torch
 
-from anti_spoofing.infer import LivenessDetector
 from attendance_app.camera import FaceLocator
 from attendance_app.recognition import FaceRecognizer
 from attendance_app.reference_import import ReferenceImporter
@@ -23,8 +22,6 @@ def main():
     root = Path(__file__).resolve().parents[1]
     torch.set_num_threads(4)
     recognizer = FaceRecognizer(root/"results/identity_app_config.json")
-    from attendance_app.gui import DEFAULT_LIVENESS_CHECKPOINT
-    live = LivenessDetector(DEFAULT_LIVENESS_CHECKPOINT)
     locator = FaceLocator()
     groups = defaultdict(list)
     with (root/"data/lcc_fasd_manifests/train.csv").open(encoding="utf-8", newline="") as source:
@@ -39,7 +36,7 @@ def main():
     with tempfile.TemporaryDirectory(dir=temporary_root) as directory:
         store = ProfileStore(Path(directory)/"fixture.sqlite3", recognizer.fingerprint, recognizer.dimension)
         try:
-            importer = ReferenceImporter(store, recognizer, live, locator)
+            importer = ReferenceImporter(store, recognizer, locator)
             for prefix, files in list((p, f) for p, f in groups.items() if len(f) >= 3)[:12]:
                 selected = files[:3]
                 operation = "fixture-new-person-"+prefix
