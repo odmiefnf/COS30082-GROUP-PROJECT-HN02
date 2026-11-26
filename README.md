@@ -22,6 +22,7 @@ remaining demonstration tasks.
 **Cách 1 — Chạy ngay 1 bước (khuyên dùng, tự tạo `.venv` và tự cài thư viện lần đầu):**
 - **Windows:** `git clone https://github.com/odmiefnf/COS30082-GROUP-PROJECT-HN02.git` → mở thư mục → nhấp đúp **`start_attendance.cmd`** (cần cài sẵn Python 3.10–3.13 từ python.org).
 - **macOS / Linux:** `git clone https://github.com/odmiefnf/COS30082-GROUP-PROJECT-HN02.git && cd COS30082-GROUP-PROJECT-HN02 && chmod +x start_attendance.sh && ./start_attendance.sh`
+- **Hai bản model liveness:** `start_attendance.cmd` dùng model webcam (chặn ảnh/video điện thoại, nhưng mới train ở một phòng nên có thể chặn nhầm mặt thật ở phòng khác). Nếu ở nhà liveness không qua, dùng **`start_attendance_lcc.cmd`** (macOS/Linux: `./start_attendance.sh --liveness-checkpoint results/liveness_mobilenetv3_20261120/best_model.pt`): model LCC nhận mặt thật dễ hơn nhưng khi thử đã để lọt khoảng một nửa ảnh và video điện thoại, nên chỉ dùng để demo và quay video.
 
 **Cách 2 — Chạy thủ công (PowerShell tại thư mục dự án):**
 
