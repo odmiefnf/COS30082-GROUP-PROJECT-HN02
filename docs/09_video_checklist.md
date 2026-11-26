@@ -70,3 +70,4 @@ Nếu thao tác nhận diện/liveness không đạt trong lượt quay, mô t�
 - [ ] Chuẩn bị giải thích mã, loss, dữ liệu, chọn mô hình/ngưỡng, sai số và đóng góp trong **phỏng vấn tutorial tuần 12**. Đề không ghi ngày nộp cụ thể; xem mốc được công bố trong môn/Canvas.
 
 Checklist này không chứng minh đã quay, tải lên hoặc hoàn tất các đầu việc cá nhân. Duy trì trạng thái còn chờ thay vì tự điền tên thành viên, đóng góp hay kết quả chưa được xác nhận.
+

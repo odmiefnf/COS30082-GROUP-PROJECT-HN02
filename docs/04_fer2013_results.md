@@ -101,3 +101,4 @@ Phép đo gồm chuyển grayscale/resize + CNN + softmax và tạo dictionary. 
 Biểu cảm ngoài đời khác ảnh FER2013 đã căn mặt; nhãn có nhiễu, lớp mất cân bằng, mô hình có thể nhầm. Chưa có đo chất lượng đa dạng ánh sáng/góc mặt/thiết bị webcam. Kết quả này là baseline phân loại biểu cảm, không xác định trạng thái nội tâm hoặc năng lực làm việc.
 
 Đã hoàn thành bước triển khai, huấn luyện và đánh giá baseline phần 4. Dừng để người dùng xem; chưa chuyển sang phần 5 hoặc GUI/đăng ký/chấm công phần 6.
+

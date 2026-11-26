@@ -84,7 +84,7 @@ Màn hình: **Live**, thử vài biểu cảm (vui, ngạc nhiên, buồn), rồ
 
 Màn hình: **Register → Add appearance**, sau đó **Profiles**, **Manual review** nếu có tình huống hợp lệ.
 
-> "Our extensions focus on real attendance problems. Add appearance stores extra templates for an existing person, chosen from with glasses, without glasses or with mask; the operator confirms the person, because a new look can score closer to someone else. Profiles can be renamed, given reference photos, or deleted after a database backup. When a live person is unknown or ambiguous, an operator can do a manual review; it is recorded with the reviewer and reason, and marked Manual, not Automatic. Finally, once a person is confirmed, the app keeps their name and liveness result until they leave the frame for two seconds, so one bad frame no longer drops them; it never adds a second record."
+> "Our extensions focus on real attendance problems. Add appearance stores extra templates for an existing person, for example without glasses, and refuses shots that clearly match someone else. Profiles can be renamed, given reference photos, or deleted after a database backup. When a live person is unknown or ambiguous, an operator can do a manual review; it is recorded with the reviewer and reason, and marked Manual, not Automatic. Finally, once a person is confirmed, the app keeps their name and liveness result until they leave the frame for two seconds, so one bad frame no longer drops them; it never adds a second record."
 
 Lâm bỏ kính để Huỳnh Quốc Hiếu thêm appearance không kính cho Lâm. Rời khung ít nhất 2 giây, rồi quay lại không đeo kính để app nhận ra từ đầu; nếu bỏ kính ngay trước camera thì tên còn hiện chỉ vì khoá tên, không chứng minh appearance có tác dụng.
 
