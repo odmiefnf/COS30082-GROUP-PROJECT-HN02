@@ -375,7 +375,7 @@ def build():
     P("COS30082 Applied Machine Learning Group Report", "Subtitle")
     P("21 November 2026", size=10)
     P("Group HN02", size=11)
-    P("Nguyen Van Tuan Kiet - 104772099     Huynh Quoc Hieu - 104848408", size=8)
+    P("Nguyen Van Tuan Kiet - 104772099 (Leader)     Huynh Quoc Hieu - 104848408", size=8)
     P("Nguyen Phuc Lam - 105006540     Bùi Minh Hiếu - 105006582", size=8)
     P("Nguyễn Huy Hoàng Việt - 104992509     Vũ Bá Hiển - 104995634", size=8)
     report.link_line("Demonstration video:", "https://youtu.be/j6G3C0v6YX0", size=9, space_after=2)
