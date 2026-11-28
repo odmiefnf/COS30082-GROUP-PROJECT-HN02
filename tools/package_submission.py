@@ -97,7 +97,11 @@ EVIDENCE_FILES = (
     "identity_open_set_20261121_arcface_resnet18/metrics.json",
     "app_update_20261120/pipeline_metrics.json",
     "readiness_20261120/full_tests.log",
+    "comparison_identity_20261121/comparison.json",
+    "comparison_identity_20261121/comparison.csv",
+    "readiness_20261125/full_tests.log",
 )
+OPTIONAL_ROOT = ("start_attendance.sh", "start_attendance_lcc.cmd", "reports/COS30082_Group_Report.pdf")
 SKIP_PARTS = {"__pycache__", "backup", "backups", "archive", "archives"}
 
 
@@ -107,6 +111,7 @@ def submission_files(root):
     if missing:
         raise FileNotFoundError("Missing submission essentials: " + ", ".join(missing))
     selected = {root/name for name in REQUIRED}
+    selected.update(root/name for name in OPTIONAL_ROOT if (root/name).is_file())
     for directory in SOURCE_DIRS:
         selected.update(path for path in (root/directory).rglob("*.py")
                         if not SKIP_PARTS.intersection(path.relative_to(root).parts))

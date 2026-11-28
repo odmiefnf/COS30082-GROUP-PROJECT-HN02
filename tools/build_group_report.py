@@ -330,6 +330,19 @@ class Report:
             run.append(props); token = OxmlElement("w:t"); token.text = "Source"; run.append(token)
             link.append(run); p._p.append(link)
 
+    def link_line(self, label, url, size=9, space_after=4):
+        p = self.p(f"{label} ", size=size)
+        p.paragraph_format.space_after = Pt(space_after)
+        rel = self.doc.part.relate_to(url, "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink", is_external=True)
+        link = OxmlElement("w:hyperlink"); link.set(qn("r:id"), rel)
+        run = OxmlElement("w:r"); props = OxmlElement("w:rPr")
+        color = OxmlElement("w:color"); color.set(qn("w:val"), "234F78"); props.append(color)
+        underline = OxmlElement("w:u"); underline.set(qn("w:val"), "single"); props.append(underline)
+        sz = OxmlElement("w:sz"); sz.set(qn("w:val"), str(size * 2)); props.append(sz)
+        run.append(props); token = OxmlElement("w:t"); token.text = url; run.append(token)
+        link.append(run); p._p.append(link)
+        return p
+
 
 def build():
     identity, app, gallery, pads, expressions = evidence()
@@ -365,6 +378,8 @@ def build():
     P("Nguyen Van Tuan Kiet - 104772099     Huynh Quoc Hieu - 104848408", size=8)
     P("Nguyen Phuc Lam - 105006540     Bùi Minh Hiếu - 105006582", size=8)
     P("Nguyễn Huy Hoàng Việt - 104992509     Vũ Bá Hiển - 104995634", size=8)
+    report.link_line("Demonstration video:", "https://youtu.be/j6G3C0v6YX0", size=9, space_after=2)
+    report.link_line("Source code repository:", "https://github.com/odmiefnf/COS30082-GROUP-PROJECT-HN02", size=9, space_after=4)
     H("Abstract")
     P(f"We developed an attendance prototype that combines face verification, passive liveness detection and facial expression classification. Identity encoders were trained with classification and triplet objectives, first as compact CNNs from scratch and then as partially fine-tuned ImageNet ResNet-18 networks, and compared on the original 8,805 verification pairs. Fine-tuning raised validation AUC from {cc['auc']:.3f} and {ct['auc']:.3f} to {rc['auc']:.3f} and {rt['auc']:.3f}, and an additional ArcFace margin objective reached {ra['auc']:.3f}. The ArcFace encoder accepts {ra['tpr']:.2%} of same identity pairs at {ra['fpr']:.2%} pair FPR, against {rc['tpr']:.2%} for ResNet-18 classification and {ct['tpr']:.2%} for the earliest application model, and supplies the application's embeddings.")
     P(f"Liveness uses a partially fine-tuned MobileNetV3 trained on LCC FASD plus our own webcam recordings. On held-out webcam sessions it accepted {attack_new} of {attack_total} phone photo and video crops and passed {live_new[0]} of {live_new[1]} genuine crops; its LCC FASD ACER is {ap['ACER']:.2%}, against {lc['ACER']:.2%} without webcam data. A fine-tuned MobileNetV3 expression model reached {en['accuracy']:.2%} accuracy and macro F1 {en['macro_f1']:.4f} on filtered FER2013 PrivateTest, up from {eo['accuracy']:.2%} and {eo['macro_f1']:.4f}. Identity validation contains training pixel duplicates and the webcam evidence comes from one person, room and day, so these results do not establish deployment accuracy or security.")
